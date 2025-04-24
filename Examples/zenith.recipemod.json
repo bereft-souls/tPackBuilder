@@ -1,0 +1,16 @@
+{
+  "Criteria": "All",
+
+  "Conditions": {
+    "CreatesResult": {
+      "Item": "Terraria/Zenith"
+    }
+  },
+
+  "Changes": {
+    "AddIngredient": {
+      "Item": "Terraria/Gel",
+      "Count": 5
+    }
+  }
+}
