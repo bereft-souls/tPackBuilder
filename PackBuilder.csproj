@@ -1,9 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="../common/Mod.targets" />
+	<!-- Import tModLoader mod properties -->
+	<Import Project="..\tModLoader.targets" />
 
-    <ItemGroup>
-        <ProjectReference Include="..\refs\CalamityMod.csproj" />
-    </ItemGroup>
+	<!-- General -->
+	<PropertyGroup>
+		
+	</PropertyGroup>
+	<ItemGroup>
+	  <Reference Include="CalamityMod">
+	    <HintPath>ModRefs\CalamityMod.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+	<!-- References -->
 
 </Project>
