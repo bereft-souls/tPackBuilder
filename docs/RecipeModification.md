@@ -3,7 +3,7 @@ tPackBuilder adds support for dynamically modifying recipes to add, remove, or c
 
 All you need to do is add a `.recipemod.json` file to your mod's folder, add the required data, and tPackBuilder handles the rest!
 
-> Quick link to [avilable conditions/changes](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/Recipes.md#available-conditionschanges) at the bottom.
+> Quick link to [avilable conditions/changes](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/RecipeModification.md#available-conditionschanges) at the bottom.
 
 ## Pre-requisites
 
@@ -25,7 +25,7 @@ You can add multiple `.recipemod.json` files to your mod's folder and each one w
 ***
 ### Walkthrough
 
-> This section is a step-by-step guide to setting up your first recipe modification, and a breakdown of how modifications are formatted. If you want to skip straight to see what options are available, jump to the [documentation](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/Recipes.md#available-conditionschanges) at the bottom of this file.
+> This section is a step-by-step guide to setting up your first recipe modification, and a breakdown of how modifications are formatted. If you want to skip straight to see what options are available, jump to the [documentation](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/RecipeModification.md#available-conditionschanges) at the bottom of this file.
 
 To get started, lets create a modification that adds 5 gel as a requirement to craft the Zenith.
 

@@ -32,6 +32,6 @@ After this, you're pretty much good to go! You have a couple other resources you
 
 Any of your tPackBuilder .json files will go into this folder. Go in game and to the Workshop > Develop Mods tab, then hit "Build + Reload" on your mod to see your changes in game.
 
-Check out the [other docs](https://github.com/bereft-souls/bereft-souls/tree/master/src/PackBuilder/docs) for more info on what you can do with tPackBuilder.
+Check out the [other docs](https://github.com/bereft-souls/tPackBuilder/tree/master/docs) for more info on what you can do with tPackBuilder.
 
 Happy modpacking!
