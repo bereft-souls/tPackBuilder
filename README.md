@@ -26,11 +26,11 @@ Upcoming features:
 
 To learn how to utilize tPackBuilder to build your own modpacks, head on over to the documentation folder!
 
-Click [here](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/Setup.md) for a first-time setup guide!
+Click [here](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/Setup.md) for a first-time setup guide!
 
 > Quick reference:
-> - [Recipe Modification](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/RecipeModification.md)
-> - [Recipe Building](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/RecipeBuilding.md)
-> - [NPC Modification](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/NPCModification.md)
-> - [Item Modification](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/ItemModification.md)
-> - [Projectile Modification](https://github.com/bereft-souls/bereft-souls/blob/master/src/PackBuilder/docs/ProjectileModification.md)
+> - [Recipe Modification](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/RecipeModification.md)
+> - [Recipe Building](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/RecipeBuilding.md)
+> - [NPC Modification](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/NPCModification.md)
+> - [Item Modification](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/ItemModification.md)
+> - [Projectile Modification](https://github.com/bereft-souls/tPackBuilder/blob/master/docs/ProjectileModification.md)
