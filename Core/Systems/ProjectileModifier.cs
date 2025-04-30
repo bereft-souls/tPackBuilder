@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Projectiles;
+using PackBuilder.Core.Utils;
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Terraria;
 using Terraria.ModLoader;
@@ -13,10 +16,20 @@ namespace PackBuilder.Core.Systems
     {
         public static FrozenDictionary<int, List<ProjectileChanges>>? ProjectileModSets = null;
 
-        public override void SetDefaults(Projectile entity)
+        public static void FinalSetDefaults(Projectile entity)
         {
             if (ProjectileModSets?.TryGetValue(entity.type, out var value) ?? false)
                 value.ForEach(c => c.ApplyTo(entity));
+        }
+
+        public class ProjectileSetDefaultsDetour : AutoVoidDetour<Projectile, bool>
+        {
+            public override MethodInfo Method => typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            public override void Detour(Action<Projectile, bool> orig, Projectile arg1, bool arg2)
+            {
+                orig(arg1, arg2);
+                FinalSetDefaults(arg1);
+            }
         }
     }
 

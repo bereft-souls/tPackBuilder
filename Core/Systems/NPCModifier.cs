@@ -2,9 +2,12 @@
 using MonoMod.Cil;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.NPCs;
+using PackBuilder.Core.Utils;
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Terraria;
 using Terraria.ModLoader;
@@ -13,13 +16,7 @@ namespace PackBuilder.Core.Systems
 {
     internal class PackBuilderNPC : GlobalNPC
     {
-        public static FrozenDictionary<int, List<NPCChanges>>? NPCModSets = null;
-
-        public override void SetDefaults(NPC entity)
-        {
-            if (entity.netID >= 0)
-                ApplyChanges(entity, entity.type);
-        }
+        public static FrozenDictionary<int, List<NPCChanges>> NPCModSets = null;
 
         public static void ApplyChanges(NPC npc, int npcId)
         {
@@ -27,15 +24,31 @@ namespace PackBuilder.Core.Systems
                 value.ForEach(c => c.ApplyTo(npc));
         }
 
-        public override void Load()
-        {
-            // Assign npc.netID to it's designated netID during SetDefaults setup.
-            IL_NPC.SetDefaultsFromNetId += IL_NPC_SetDefaultsFromNetId;
+        public override bool InstancePerEntity => true;
+        public int CachedNetId = 0;
 
-            // During SetDefaults this value is reset back to 0. Make sure that is undone.
-            IL_NPC.SetDefaults += IL_NPC_SetDefaults;
+        public class NPCLoaderSetDefaultsDetour : AutoVoidDetour<NPC, bool>
+        {
+            public override MethodInfo Method => typeof(NPCLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            public override void Detour(Action<NPC, bool> orig, NPC arg1, bool arg2)
+            {
+                // Run normal SetDefaults first.
+                orig(arg1, arg2);
+
+                // If a netID is used to summon an NPC, we cache that netID during setup
+                // inside our GlobalNPC. The netID is reset during setup and IL editing
+                // it to not reset can cause issues, so caching it externally is generally the better option.
+                if (!arg1.TryGetGlobalNPC<PackBuilderNPC>(out var packNPC))
+                    return;
+
+                // If an NPC is summoned via netID, we apply changes inside of the
+                // IL edit. We don't need to apply them twice.
+                if (packNPC.CachedNetId >= 0)
+                    ApplyChanges(arg1, arg1.type);
+            }
         }
 
+        public override void Load() => IL_NPC.SetDefaultsFromNetId += IL_NPC_SetDefaultsFromNetId;
         private static void IL_NPC_SetDefaultsFromNetId(ILContext il)
         {
             try
@@ -47,25 +60,33 @@ namespace PackBuilder.Core.Systems
                 var setDefaultsMethod = typeof(NPC).GetMethod("SetDefaults", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)!;
                 cursor.GotoNext(i => i.MatchCall(setDefaultsMethod));
 
-                // After the NPC is initialized, we want to immediately assign netID.
+                // After the NPC is initialized, we want to immediately cache netID.
                 // This allows us to differentiate between netID specific NPCs for NPC modifications.
                 cursor.Index++;
+                
                 cursor.Emit(OpCodes.Ldarg_0); // Push the NPC to the stack
                 cursor.Emit(OpCodes.Ldarg_1); // Push the designated net ID to the stack
 
-                var netIdField = typeof(NPC).GetField("netID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)!;
-                cursor.Emit(OpCodes.Stfld, netIdField); // Assign the NPCs netID field. Pops both of our pushed values.
+                // Assign the cached netID field. Pops both of our pushed values.
+                cursor.EmitDelegate<Action<NPC, int>>((npc, netID) =>
+                {
+                    if (!npc.TryGetGlobalNPC(out PackBuilderNPC result))
+                        return;
 
+                    result.CachedNetId = netID;
+                });
 
                 // Then we need to make sure that our ApplyChanges method is called before difficulty scaling.
-                // This is the entire reason we need this il edit.
+                // This is the bigger reason we need this il edit.
 
                 // Navigate to the next instruction that assigns the NPC's netID.
+                var netIdField = typeof(NPC).GetField("netID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)!;
                 cursor.GotoNext(i => i.MatchStfld(netIdField));
 
                 // After this assigning, call our apply changes method.
                 // This allows users to specify different changes for NPCs that share a 'type' but have difference netID's (ie. slimes)
                 cursor.Index++;
+
                 cursor.Emit(OpCodes.Ldarg_0); // Push the NPC to the stack
                 cursor.Emit(OpCodes.Ldarg_1); // Push the designated net ID to the stack
 
@@ -77,33 +98,10 @@ namespace PackBuilder.Core.Systems
                 MonoModHooks.DumpIL(ModContent.GetInstance<PackBuilder>(), il);
             }
         }
-
-        private static void IL_NPC_SetDefaults(ILContext il)
-        {
-            try
-            {
-                var cursor = new ILCursor(il);
-
-                // Navigate to the first instance of setting netID.
-                var netIdField = typeof(NPC).GetField("netID", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)!;
-                cursor.GotoNext(i => i.MatchStfld(netIdField));
-
-                // Move back 2 instructions and remove the next 3 instructions.
-                // This prevents the method from overriding the netID field with 0.
-                // The default value of this field is 0 regardless so it does not matter.
-                cursor.Index -= 2;
-                cursor.RemoveRange(3);
-            }
-            catch
-            {
-                MonoModHooks.DumpIL(ModContent.GetInstance<PackBuilder>(), il);
-            }
-        }
     }
 
     internal class NPCModifier : ModSystem
     {
-
         public override void PostSetupContent()
         {
             // Collects ALL .npcmod.json files from all mods into a list.

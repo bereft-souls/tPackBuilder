@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Items;
+using PackBuilder.Core.Utils;
+using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Terraria;
 using Terraria.ModLoader;
@@ -11,12 +14,23 @@ namespace PackBuilder.Core.Systems
 {
     internal class PackBuilderItem : GlobalItem
     {
-        public static FrozenDictionary<int, List<ItemChanges>>? ItemModSets = null;
+        public static FrozenDictionary<int, List<ItemChanges>> ItemModSets = null;
 
-        public override void SetDefaults(Item entity)
+        public static void FinalSetDefaults(Item entity)
         {
             if (ItemModSets?.TryGetValue(entity.type, out var value) ?? false)
                 value.ForEach(c => c.ApplyTo(entity));
+        }
+
+        public class ItemLoaderSetDefaultsDetour : AutoVoidDetour<Item, bool>
+        {
+            public override MethodInfo Method => typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            public override void Detour(Action<Item, bool> orig, Item arg1, bool arg2)
+            {
+                // Run normal SetDefaults first.
+                orig(arg1, arg2);
+                FinalSetDefaults(arg1);
+            }
         }
     }
 
