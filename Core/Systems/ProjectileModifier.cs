@@ -27,6 +27,7 @@ namespace PackBuilder.Core.Systems
 
     internal class ProjectileModifier : ModSystem
     {
+        public delegate void ProjectileLoader_SetDefaults(Projectile projectile, bool createModProjectile = false);
         public static void FinalSetDefaults(ProjectileLoader_SetDefaults orig, Projectile entity, bool createModProjectile)
         {
             orig(entity, createModProjectile);
@@ -80,13 +81,10 @@ namespace PackBuilder.Core.Systems
             ProjectileModSets = factorySets.ToFrozenDictionary();
         }
 
-        public delegate void ProjectileLoader_SetDefaults(Projectile projectile, bool createModProjectile = false);
-        public static Hook ProjectileLoaderHook = null;
-
         public override void Load()
         {
             var method = typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            ProjectileLoaderHook = new(method, FinalSetDefaults);
+            MonoModHooks.Add(method, FinalSetDefaults);
         }
     }
 }

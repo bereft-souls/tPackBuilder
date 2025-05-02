@@ -1,9 +1,7 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.NPCs;
-using PackBuilder.Core.Utils;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -31,6 +29,7 @@ namespace PackBuilder.Core.Systems
 
     internal class NPCModifier : ModSystem
     {
+        public delegate void NPCLoader_SetDefaults(NPC npc, bool createModNPC = false);
         public static void FinalSetDefaults(NPCLoader_SetDefaults orig, NPC npc, bool createModNPC)
         {
             // Run normal SetDefaults first.
@@ -95,15 +94,12 @@ namespace PackBuilder.Core.Systems
             PackBuilderNPC.NPCModSets = factorySets.ToFrozenDictionary();
         }
 
-        public static Hook NPCLoaderHook = null;
-        public delegate void NPCLoader_SetDefaults(NPC npc, bool createModNPC = false);
-
         public override void Load()
         {
             IL_NPC.SetDefaultsFromNetId += IL_NPC_SetDefaultsFromNetId;
 
             var method = typeof(NPCLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            NPCLoaderHook = new(method, FinalSetDefaults);
+            MonoModHooks.Add(method, FinalSetDefaults);
         }
 
         private static void IL_NPC_SetDefaultsFromNetId(ILContext il)

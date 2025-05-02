@@ -25,6 +25,7 @@ namespace PackBuilder.Core.Systems
 
     internal class ItemModifier : ModSystem
     {
+        public delegate void ItemLoader_SetDefaults(Item item, bool createModItem = true);
         public static void FinalSetDefaults(ItemLoader_SetDefaults orig, Item item, bool createModItem)
         {
             orig(item, createModItem);
@@ -78,13 +79,10 @@ namespace PackBuilder.Core.Systems
             PackBuilderItem.ItemModSets = factorySets.ToFrozenDictionary();
         }
 
-        public delegate void ItemLoader_SetDefaults(Item item, bool createModItem = true);
-        public static Hook ItemLoaderHook = null;
-
         public override void Load()
         {
             var method = typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            ItemLoaderHook = new(method, FinalSetDefaults);
+            MonoModHooks.Add(method, FinalSetDefaults);
         }
     }
 }
