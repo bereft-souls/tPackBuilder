@@ -1,4 +1,6 @@
-﻿using MonoMod.RuntimeDetour;
+﻿using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Items;
 using System;
@@ -8,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Terraria;
+using Terraria.GameContent.Items;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
@@ -25,11 +28,24 @@ namespace PackBuilder.Core.Systems
 
     internal class ItemModifier : ModSystem
     {
-        public delegate void ItemLoader_SetDefaults(Item item, bool createModItem = true);
-        public static void FinalSetDefaults(ItemLoader_SetDefaults orig, Item item, bool createModItem)
+        // We IL edit the SetDefaults() method to apply our changes AFTER all other
+        // mods have already had their SetDefaults methods called.
+        public static void SetDefaultsILEdit(ILContext il)
         {
-            orig(item, createModItem);
-            PackBuilderItem.ApplyChanges(item);
+            ILCursor cursor = new(il);
+
+            // Move directly after the call to ItemLoader.SetDefaults().
+            var itemLoader_SetDefaults = typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic, [typeof(Item), typeof(bool)]);
+
+            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(itemLoader_SetDefaults)))
+                throw new Exception("Unable to locate ItemLoader_SetDefaults in IL edit!");
+
+            // Add a call to PackBuilderItem.ApplyChanges() using the item
+            // that SetDefaults() is being called on.
+            var packBuilderItem_ApplyChanges = typeof(PackBuilderItem).GetMethod("ApplyChanges", BindingFlags.Static | BindingFlags.Public, [typeof(Item)]);
+
+            cursor.Emit(OpCodes.Ldarg_0);
+            cursor.Emit(OpCodes.Call, packBuilderItem_ApplyChanges);
         }
 
         public override void PostSetupContent()
@@ -81,8 +97,8 @@ namespace PackBuilder.Core.Systems
 
         public override void Load()
         {
-            var method = typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            MonoModHooks.Add(method, FinalSetDefaults);
+            var method = typeof(Item).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public, [typeof(int), typeof(bool), typeof(ItemVariant)]);
+            MonoModHooks.Modify(method, SetDefaultsILEdit);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using MonoMod.RuntimeDetour;
+﻿using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Projectiles;
 using PackBuilder.Core.Utils;
@@ -9,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Terraria;
+using Terraria.GameContent.Items;
 using Terraria.ModLoader;
 using static PackBuilder.Core.Systems.PackBuilderProjectile;
 
@@ -27,11 +30,24 @@ namespace PackBuilder.Core.Systems
 
     internal class ProjectileModifier : ModSystem
     {
-        public delegate void ProjectileLoader_SetDefaults(Projectile projectile, bool createModProjectile = false);
-        public static void FinalSetDefaults(ProjectileLoader_SetDefaults orig, Projectile entity, bool createModProjectile)
+        // We IL edit the SetDefaults() method to apply our changes AFTER all other
+        // mods have already had their SetDefaults methods called.
+        public static void SetDefaultsILEdit(ILContext il)
         {
-            orig(entity, createModProjectile);
-            ApplyChanges(entity);
+            ILCursor cursor = new(il);
+
+            // Move directly after the call to ItemLoader.SetDefaults().
+            var projectileLoader_SetDefaults = typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic, [typeof(Projectile), typeof(bool)]);
+
+            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(projectileLoader_SetDefaults)))
+                throw new Exception("Unable to locate ItemLoader_SetDefaults in IL edit!");
+
+            // Add a call to PackBuilderItem.ApplyChanges() using the item
+            // that SetDefaults() is being called on.
+            var packBuilderProjectile_ApplyChanges = typeof(PackBuilderProjectile).GetMethod("ApplyChanges", BindingFlags.Static | BindingFlags.Public, [typeof(Projectile)]);
+
+            cursor.Emit(OpCodes.Ldarg_0);
+            cursor.Emit(OpCodes.Call, packBuilderProjectile_ApplyChanges);
         }
 
         public override void PostSetupContent()
@@ -83,8 +99,21 @@ namespace PackBuilder.Core.Systems
 
         public override void Load()
         {
-            var method = typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            MonoModHooks.Add(method, FinalSetDefaults);
+            // First we attempt to apply our changes within the actual SetDefaults()
+            // method. This is expected to not do anything. We do this in the event of aggressive
+            // inlining which could cause Projectile.SetDefaults_End() to be inlined, after which
+            // our call would no longer go through.
+            try
+            {
+                var projectile_SetDefaults = typeof(Projectile).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public, [typeof(int)]);
+                MonoModHooks.Modify(projectile_SetDefaults, SetDefaultsILEdit);
+            }
+
+            catch
+            {
+                var projectile_SetDefaults_End = typeof(Projectile).GetMethod("SetDefaults_End", BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int)]);
+                MonoModHooks.Modify(projectile_SetDefaults_End, SetDefaultsILEdit);
+            }
         }
     }
 }
