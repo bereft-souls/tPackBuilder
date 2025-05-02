@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using Terraria;
 using Terraria.ModLoader;
+using static PackBuilder.Core.Systems.PackBuilderProjectile;
 
 namespace PackBuilder.Core.Systems
 {
@@ -17,26 +18,21 @@ namespace PackBuilder.Core.Systems
     {
         public static FrozenDictionary<int, List<ProjectileChanges>> ProjectileModSets = null;
 
-        public static void FinalSetDefaults(ProjectileLoader_SetDefaults orig, Projectile entity, bool createModProjectile)
+        public static void ApplyChanges(Projectile projectile)
         {
-            orig(entity, createModProjectile);
-
-            if (ProjectileModSets?.TryGetValue(entity.type, out var value) ?? false)
-                value.ForEach(c => c.ApplyTo(entity));
-        }
-
-        public delegate void ProjectileLoader_SetDefaults(Projectile projectile, bool createModProjectile = false);
-        public static Hook ProjectileLoaderHook = null;
-
-        public override void Load()
-        {
-            var method = typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            ProjectileLoaderHook = new(method, FinalSetDefaults);
+            if (ProjectileModSets?.TryGetValue(projectile.type, out var value) ?? false)
+                value.ForEach(c => c.ApplyTo(projectile));
         }
     }
 
     internal class ProjectileModifier : ModSystem
     {
+        public static void FinalSetDefaults(ProjectileLoader_SetDefaults orig, Projectile entity, bool createModProjectile)
+        {
+            orig(entity, createModProjectile);
+            ApplyChanges(entity);
+        }
+
         public override void PostSetupContent()
         {
             // Collects ALL .projectilemod.json files from all mods into a list.
@@ -81,7 +77,16 @@ namespace PackBuilder.Core.Systems
             }
 
             // Setup the factory for fast access to projectile lookup.
-            PackBuilderProjectile.ProjectileModSets = factorySets.ToFrozenDictionary();
+            ProjectileModSets = factorySets.ToFrozenDictionary();
+        }
+
+        public delegate void ProjectileLoader_SetDefaults(Projectile projectile, bool createModProjectile = false);
+        public static Hook ProjectileLoaderHook = null;
+
+        public override void Load()
+        {
+            var method = typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            ProjectileLoaderHook = new(method, FinalSetDefaults);
         }
     }
 }

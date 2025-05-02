@@ -1,7 +1,6 @@
 ﻿using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Items;
-using PackBuilder.Core.Utils;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -17,26 +16,21 @@ namespace PackBuilder.Core.Systems
     {
         public static FrozenDictionary<int, List<ItemChanges>> ItemModSets = null;
 
-        public static void FinalSetDefaults(ItemLoader_SetDefaults orig, Item item, bool createModItem)
+        public static void ApplyChanges(Item item)
         {
-            orig(item, createModItem);
-
             if (ItemModSets?.TryGetValue(item.type, out var value) ?? false)
                 value.ForEach(c => c.ApplyTo(item));
-        }
-
-        public delegate void ItemLoader_SetDefaults(Item item, bool createModItem = true);
-        public static Hook ItemLoaderHook = null;
-
-        public override void Load()
-        {
-            var method = typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            ItemLoaderHook = new(method, FinalSetDefaults);
         }
     }
 
     internal class ItemModifier : ModSystem
     {
+        public static void FinalSetDefaults(ItemLoader_SetDefaults orig, Item item, bool createModItem)
+        {
+            orig(item, createModItem);
+            PackBuilderItem.ApplyChanges(item);
+        }
+
         public override void PostSetupContent()
         {
             // Collects ALL .itemmod.json files from all mods into a list.
@@ -48,7 +42,7 @@ namespace PackBuilder.Core.Systems
             foreach (Mod mod in ModLoader.Mods)
             {
                 // An array of all .itemmod.json files from this specific mod.
-                var files = (mod.GetFileNames() ?? []).Where(s => s.EndsWith(".itemmod.json", System.StringComparison.OrdinalIgnoreCase));
+                var files = (mod.GetFileNames() ?? []).Where(s => s.EndsWith(".itemmod.json", StringComparison.OrdinalIgnoreCase));
 
                 // Adds the byte contents of each file to the list.
                 foreach (var file in files)
@@ -82,6 +76,15 @@ namespace PackBuilder.Core.Systems
 
             // Setup the factory for fast access to item lookup.
             PackBuilderItem.ItemModSets = factorySets.ToFrozenDictionary();
+        }
+
+        public delegate void ItemLoader_SetDefaults(Item item, bool createModItem = true);
+        public static Hook ItemLoaderHook = null;
+
+        public override void Load()
+        {
+            var method = typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            ItemLoaderHook = new(method, FinalSetDefaults);
         }
     }
 }
