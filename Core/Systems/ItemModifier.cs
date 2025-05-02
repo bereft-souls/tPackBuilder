@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MonoMod.RuntimeDetour;
+using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Items;
 using PackBuilder.Core.Utils;
 using System;
@@ -16,21 +17,21 @@ namespace PackBuilder.Core.Systems
     {
         public static FrozenDictionary<int, List<ItemChanges>> ItemModSets = null;
 
-        public static void FinalSetDefaults(Item entity)
+        public static void FinalSetDefaults(ItemLoader_SetDefaults orig, Item item, bool createModItem)
         {
-            if (ItemModSets?.TryGetValue(entity.type, out var value) ?? false)
-                value.ForEach(c => c.ApplyTo(entity));
+            orig(item, createModItem);
+
+            if (ItemModSets?.TryGetValue(item.type, out var value) ?? false)
+                value.ForEach(c => c.ApplyTo(item));
         }
 
-        public class ItemLoaderSetDefaultsDetour : AutoVoidDetour<Item, bool>
+        public delegate void ItemLoader_SetDefaults(Item item, bool createModItem = true);
+        public static Hook ItemLoaderHook = null;
+
+        public override void Load()
         {
-            public override MethodInfo Method => typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            public override void Detour(Action<Item, bool> orig, Item arg1, bool arg2)
-            {
-                // Run normal SetDefaults first.
-                orig(arg1, arg2);
-                FinalSetDefaults(arg1);
-            }
+            var method = typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            ItemLoaderHook = new(method, FinalSetDefaults);
         }
     }
 

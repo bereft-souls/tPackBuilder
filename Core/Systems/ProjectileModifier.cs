@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MonoMod.RuntimeDetour;
+using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Projectiles;
 using PackBuilder.Core.Utils;
 using System;
@@ -14,22 +15,23 @@ namespace PackBuilder.Core.Systems
 {
     internal class PackBuilderProjectile : GlobalProjectile
     {
-        public static FrozenDictionary<int, List<ProjectileChanges>>? ProjectileModSets = null;
+        public static FrozenDictionary<int, List<ProjectileChanges>> ProjectileModSets = null;
 
-        public static void FinalSetDefaults(Projectile entity)
+        public static void FinalSetDefaults(ProjectileLoader_SetDefaults orig, Projectile entity, bool createModProjectile)
         {
+            orig(entity, createModProjectile);
+
             if (ProjectileModSets?.TryGetValue(entity.type, out var value) ?? false)
                 value.ForEach(c => c.ApplyTo(entity));
         }
 
-        public class ProjectileSetDefaultsDetour : AutoVoidDetour<Projectile, bool>
+        public delegate void ProjectileLoader_SetDefaults(Projectile projectile, bool createModProjectile = false);
+        public static Hook ProjectileLoaderHook = null;
+
+        public override void Load()
         {
-            public override MethodInfo Method => typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            public override void Detour(Action<Projectile, bool> orig, Projectile arg1, bool arg2)
-            {
-                orig(arg1, arg2);
-                FinalSetDefaults(arg1);
-            }
+            var method = typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            ProjectileLoaderHook = new(method, FinalSetDefaults);
         }
     }
 

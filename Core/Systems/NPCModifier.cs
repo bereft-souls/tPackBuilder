@@ -1,5 +1,6 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.NPCs;
 using PackBuilder.Core.Utils;
@@ -24,31 +25,37 @@ namespace PackBuilder.Core.Systems
                 value.ForEach(c => c.ApplyTo(npc));
         }
 
+        public static void FinalSetDefaults(NPCLoader_SetDefaults orig, NPC npc, bool createModNPC)
+        {
+            // Run normal SetDefaults first.
+            orig(npc, createModNPC);
+
+            // If a netID is used to summon an NPC, we cache that netID during setup
+            // inside our GlobalNPC. The netID is reset during setup and IL editing
+            // it to not reset can cause issues, so caching it externally is generally the better option.
+            if (!npc.TryGetGlobalNPC<PackBuilderNPC>(out var packNPC))
+                return;
+
+            // If an NPC is summoned via netID, we apply changes inside of the
+            // IL edit. We don't need to apply them twice.
+            if (packNPC.CachedNetId >= 0)
+                ApplyChanges(npc, npc.type);
+        }
+
         public override bool InstancePerEntity => true;
         public int CachedNetId = 0;
 
-        public class NPCLoaderSetDefaultsDetour : AutoVoidDetour<NPC, bool>
+        public static Hook NPCLoaderHook = null;
+        public delegate void NPCLoader_SetDefaults(NPC npc, bool createModNPC = false);
+
+        public override void Load()
         {
-            public override MethodInfo Method => typeof(NPCLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
-            public override void Detour(Action<NPC, bool> orig, NPC arg1, bool arg2)
-            {
-                // Run normal SetDefaults first.
-                orig(arg1, arg2);
+            IL_NPC.SetDefaultsFromNetId += IL_NPC_SetDefaultsFromNetId;
 
-                // If a netID is used to summon an NPC, we cache that netID during setup
-                // inside our GlobalNPC. The netID is reset during setup and IL editing
-                // it to not reset can cause issues, so caching it externally is generally the better option.
-                if (!arg1.TryGetGlobalNPC<PackBuilderNPC>(out var packNPC))
-                    return;
-
-                // If an NPC is summoned via netID, we apply changes inside of the
-                // IL edit. We don't need to apply them twice.
-                if (packNPC.CachedNetId >= 0)
-                    ApplyChanges(arg1, arg1.type);
-            }
+            var method = typeof(NPCLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic);
+            NPCLoaderHook = new(method, FinalSetDefaults);
         }
 
-        public override void Load() => IL_NPC.SetDefaultsFromNetId += IL_NPC_SetDefaultsFromNetId;
         private static void IL_NPC_SetDefaultsFromNetId(ILContext il)
         {
             try
