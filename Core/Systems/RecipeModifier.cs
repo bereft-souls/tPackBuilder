@@ -14,7 +14,7 @@ namespace PackBuilder.Core.Systems
         public override void PostAddRecipes()
         {
             // Collects ALL .recipemod.json files from all mods into a list.
-            Dictionary<string, byte[]> jsonEntries = [];
+            List<(string, Mod, byte[])> jsonEntries = [];
 
             foreach (Mod mod in ModLoader.Mods)
             {
@@ -23,15 +23,15 @@ namespace PackBuilder.Core.Systems
 
                 // Adds the byte contents of each file to the list.
                 foreach (var file in files)
-                    jsonEntries.Add(file, mod.GetFileBytes(file));
+                    jsonEntries.Add((file, mod, mod.GetFileBytes(file)));
             }
 
-            foreach (var jsonEntry in jsonEntries)
+            foreach (var (file, mod, data) in jsonEntries)
             {
-                PackBuilder.LoadingFile = jsonEntry.Key;
+                PackBuilder.LoadingFile = file;
 
                 // Convert the raw bytes into raw text.
-                string rawJson = Encoding.Default.GetString(jsonEntry.Value);
+                string rawJson = Encoding.Default.GetString(data);
 
                 // Decode the json into a recipe mod.
                 RecipeMod recipeMod = JsonConvert.DeserializeObject<RecipeMod>(rawJson, PackBuilder.JsonSettings)!;
@@ -40,7 +40,7 @@ namespace PackBuilder.Core.Systems
                     throw new NoConditionsException();
 
                 // Apply the recipe mod.
-                recipeMod.Apply();
+                recipeMod.Apply(mod);
 
                 PackBuilder.LoadingFile = null;
             }

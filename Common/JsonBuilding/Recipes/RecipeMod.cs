@@ -1,4 +1,5 @@
 ﻿using Terraria;
+using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Recipes
 {
@@ -18,10 +19,14 @@ namespace PackBuilder.Common.JsonBuilding.Recipes
         /// <summary>
         /// Tests conditions and applies this <see cref="RecipeMod"/> to every loaded <see cref="Recipe"/>.
         /// </summary>
-        public void Apply()
+        public void Apply(Mod sourceMod)
         {
             foreach (var recipe in Main.recipe)
             {
+                // Do not apply recipe mods to recipes added by the same mod pack.
+                if (recipe.Mod == sourceMod)
+                    continue;
+
                 // 'applies' will be true in any of the following cases:
                 //      - There are no specified conditions.
                 //      - The specified criteria is "all" and ALL specified conditions are met.
