@@ -1,9 +1,7 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Projectiles;
-using PackBuilder.Core.Utils;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -11,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Terraria;
-using Terraria.GameContent.Items;
 using Terraria.ModLoader;
 using static PackBuilder.Core.Systems.PackBuilderProjectile;
 
@@ -23,8 +20,14 @@ namespace PackBuilder.Core.Systems
 
         public static void ApplyChanges(Projectile projectile)
         {
+            float width = projectile.width / projectile.scale;
+            float height = projectile.height / projectile.scale;
+
             if (ProjectileModSets?.TryGetValue(projectile.type, out var value) ?? false)
                 value.ForEach(c => c.ApplyTo(projectile));
+
+            projectile.width = (int)(width * projectile.scale);
+            projectile.height = (int)(height * projectile.scale);
         }
     }
 
@@ -37,9 +40,9 @@ namespace PackBuilder.Core.Systems
             ILCursor cursor = new(il);
 
             // Move directly after the call to ItemLoader.SetDefaults().
-            var projectileLoader_SetDefaults = typeof(ProjectileLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic, [typeof(Projectile), typeof(bool)]);
+            var projectile_SetDefaults_End = typeof(Projectile).GetMethod("SetDefaults_End", BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int)]);
 
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(projectileLoader_SetDefaults)))
+            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(projectile_SetDefaults_End)))
                 throw new Exception("Unable to locate ItemLoader_SetDefaults in IL edit!");
 
             // Add a call to PackBuilderItem.ApplyChanges() using the item
@@ -103,17 +106,8 @@ namespace PackBuilder.Core.Systems
             // method. This is expected to not do anything. We do this in the event of aggressive
             // inlining which could cause Projectile.SetDefaults_End() to be inlined, after which
             // our call would no longer go through.
-            try
-            {
-                var projectile_SetDefaults = typeof(Projectile).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public, [typeof(int)]);
-                MonoModHooks.Modify(projectile_SetDefaults, SetDefaultsILEdit);
-            }
-
-            catch
-            {
-                var projectile_SetDefaults_End = typeof(Projectile).GetMethod("SetDefaults_End", BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int)]);
-                MonoModHooks.Modify(projectile_SetDefaults_End, SetDefaultsILEdit);
-            }
+            var projectile_SetDefaults = typeof(Projectile).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public, [typeof(int)]);
+            MonoModHooks.Modify(projectile_SetDefaults, SetDefaultsILEdit);
         }
     }
 }

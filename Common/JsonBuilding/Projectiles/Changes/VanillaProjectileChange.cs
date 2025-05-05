@@ -13,8 +13,8 @@ namespace PackBuilder.Common.JsonBuilding.Projectiles.Changes
         public void ApplyTo(Projectile projectile)
         {
             this.Damage.ApplyTo(ref projectile.damage);
-            this.Piercing.ApplyTo(ref projectile.maxPenetrate);
-            projectile.penetrate = projectile.maxPenetrate;
+            this.Piercing.ApplyTo(ref projectile.penetrate);
+            projectile.maxPenetrate = projectile.penetrate;
             this.Scale.ApplyTo(ref projectile.scale);
 
             if (projectile.usesLocalNPCImmunity)
