@@ -33,19 +33,20 @@ namespace PackBuilder.Core.Systems
 
     internal class ProjectileModifier : ModSystem
     {
-        // We IL edit the SetDefaults() method to apply our changes AFTER all other
-        // mods have already had their SetDefaults methods called.
+        // Ensure our "SetDefaults" is applied AFTER all other mods'.
         public static void SetDefaultsILEdit(ILContext il)
         {
             ILCursor cursor = new(il);
 
-            // Move directly after the call to ItemLoader.SetDefaults().
+            // Move directly after the call to Projectile.SetDefaults_End().
+            // This is a sort of cheap get-around that tMod uses to evade a compilation
+            // bug on Mac development environments.
             var projectile_SetDefaults_End = typeof(Projectile).GetMethod("SetDefaults_End", BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int)]);
 
             if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(projectile_SetDefaults_End)))
-                throw new Exception("Unable to locate ItemLoader_SetDefaults in IL edit!");
+                throw new Exception("Unable to locate Projectile_SetDefaults_End in IL edit!");
 
-            // Add a call to PackBuilderItem.ApplyChanges() using the item
+            // Add a call to PackBuilderProjectile.ApplyChanges() using the projectile
             // that SetDefaults() is being called on.
             var packBuilderProjectile_ApplyChanges = typeof(PackBuilderProjectile).GetMethod("ApplyChanges", BindingFlags.Static | BindingFlags.Public, [typeof(Projectile)]);
 
@@ -102,10 +103,6 @@ namespace PackBuilder.Core.Systems
 
         public override void Load()
         {
-            // First we attempt to apply our changes within the actual SetDefaults()
-            // method. This is expected to not do anything. We do this in the event of aggressive
-            // inlining which could cause Projectile.SetDefaults_End() to be inlined, after which
-            // our call would no longer go through.
             var projectile_SetDefaults = typeof(Projectile).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public, [typeof(int)]);
             MonoModHooks.Modify(projectile_SetDefaults, SetDefaultsILEdit);
         }

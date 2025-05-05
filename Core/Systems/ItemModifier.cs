@@ -28,8 +28,7 @@ namespace PackBuilder.Core.Systems
 
     internal class ItemModifier : ModSystem
     {
-        // We IL edit the SetDefaults() method to apply our changes AFTER all other
-        // mods have already had their SetDefaults methods called.
+        // Ensure our "SetDefaults" is applied AFTER all other mods'.
         public static void SetDefaultsILEdit(ILContext il)
         {
             ILCursor cursor = new(il);

@@ -1,17 +1,33 @@
-﻿using Newtonsoft.Json;
+﻿using MonoMod.Cil;
+using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Recipes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
     internal class RecipeModifier : ModSystem
     {
+        // Ensure our recipe changes are applied after all other mods'.
+        public static void SetupRecipesILEdit(ILContext il)
+        {
+            ILCursor cursor = new(il);
+
+            var recipeLoader_PostAddRecipes = typeof(RecipeLoader).GetMethod("PostAddRecipes", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic, []);
+
+            if (!cursor.TryGotoNext(MoveType.After, c => c.MatchCall(recipeLoader_PostAddRecipes)))
+                throw new Exception("Unable to find RecipeLoader_PostAddRecipes call!");
+
+            var modifyRecipes = typeof(RecipeModifier).GetMethod(nameof(ModifyRecipes), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, []);
+            cursor.EmitCall(modifyRecipes);
+        }
+
         // Changes all of the loaded recipes based on provided criteria from Json files.
-        public override void PostAddRecipes()
+        public static void ModifyRecipes()
         {
             // Collects ALL .recipemod.json files from all mods into a list.
             List<(string, Mod, byte[])> jsonEntries = [];
@@ -44,6 +60,12 @@ namespace PackBuilder.Core.Systems
 
                 PackBuilder.LoadingFile = null;
             }
+        }
+
+        public override void Load()
+        {
+            var recipe_SetupRecipes = typeof(Recipe).GetMethod(nameof(Recipe.SetupRecipes), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, []);
+            MonoModHooks.Modify(recipe_SetupRecipes, SetupRecipesILEdit);
         }
     }
 }

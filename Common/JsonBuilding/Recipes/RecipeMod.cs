@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using System;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Recipes
@@ -21,24 +22,39 @@ namespace PackBuilder.Common.JsonBuilding.Recipes
         /// </summary>
         public void Apply(Mod sourceMod)
         {
-            foreach (var recipe in Main.recipe)
+            var recipeLoader_CurrentMod = typeof(RecipeLoader).GetProperty("CurrentMod", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+
+            try
             {
-                // Do not apply recipe mods to recipes added by the same mod pack.
-                if (recipe.Mod == sourceMod)
-                    continue;
+                recipeLoader_CurrentMod.SetValue(null, sourceMod);
 
-                // 'applies' will be true in any of the following cases:
-                //      - There are no specified conditions.
-                //      - The specified criteria is "all" and ALL specified conditions are met.
-                //      - The specified criteria is "any" and ANY single specified condition is met.
-                bool applies = Conditions.AppliesTo(recipe, Criteria);
+                foreach (var recipe in Main.recipe)
+                {
+                    // Do not apply recipe mods to recipes added by the same mod pack.
+                    if (recipe.Mod == sourceMod)
+                        continue;
+                    // 'applies' will be true in any of the following cases:
+                    //      - There are no specified conditions.
+                    //      - The specified criteria is "all" and ALL specified conditions are met.
+                    //      - The specified criteria is "any" and ANY single specified condition is met.
+                    bool applies = Conditions.AppliesTo(recipe, Criteria);
 
-                // If this mod does not apply to a given recipe, move to the next.
-                if (!applies)
-                    continue;
+                    // If this mod does not apply to a given recipe, move to the next.
+                    if (!applies)
+                        continue;
 
-                // Apply this recipe mod's changes.
-                Changes.ApplyTo(recipe);
+                    // Apply this recipe mod's changes.
+                    Changes.ApplyTo(recipe);
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.Data["mod"] = sourceMod.Name;
+                throw;
+            }
+            finally
+            {
+                recipeLoader_CurrentMod.SetValue(null, null);
             }
         }
     }

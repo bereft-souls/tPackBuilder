@@ -29,53 +29,6 @@ namespace PackBuilder.Core.Systems
 
     internal class NPCModifier : ModSystem
     {
-        public override void PostSetupContent()
-        {
-            // Collects ALL .npcmod.json files from all mods into a list.
-            List<(string, byte[])> jsonEntries = [];
-
-            // Collects the loaded NPC mods to pass to the set factory initialization.
-            Dictionary<int, List<NPCChanges>> factorySets = [];
-
-            foreach (Mod mod in ModLoader.Mods)
-            {
-                // An array of all .npcmod.json files from this specific mod.
-                var files = (mod.GetFileNames() ?? []).Where(s => s.EndsWith(".npcmod.json", System.StringComparison.OrdinalIgnoreCase));
-
-                // Adds the byte contents of each file to the list.
-                foreach (var file in files)
-                    jsonEntries.Add((file, mod.GetFileBytes(file)));
-            }
-
-            foreach (var (file, data) in jsonEntries)
-            {
-                PackBuilder.LoadingFile = file;
-
-                // Convert the raw bytes into raw text.
-                string rawJson = Encoding.UTF8.GetString(data);
-
-                // Decode the json into an NPC mod.
-                NPCMod npcMod = JsonConvert.DeserializeObject<NPCMod>(rawJson, PackBuilder.JsonSettings)!;
-
-                if (npcMod.NPCs.Count == 0)
-                    throw new NoNPCsException();
-
-                // Get the NPC mod ready for factory initialization.
-                foreach (string npc in npcMod.NPCs)
-                {
-                    int npcType = GetNPC(npc);
-
-                    factorySets.TryAdd(npcType, []);
-                    factorySets[npcType].Add(npcMod.Changes);
-                }
-
-                PackBuilder.LoadingFile = null;
-            }
-
-            // Setup the factory for fast access to NPC lookup.
-            PackBuilderNPC.NPCModSets = factorySets.ToFrozenDictionary();
-        }
-
         // This ensures an NPC's netID is cached and used for
         // NPC mods when it is spawned using one.
         private static void SetDefaultsFromNetIdILEdit(ILContext il)
@@ -128,8 +81,7 @@ namespace PackBuilder.Core.Systems
             }
         }
 
-        // This ensures our changes are applied after all
-        // other SetDefaults() calls from other mods.
+        // Ensure we apply our "SetDefaults" AFTER all other mods'.
         private static void SetDefaultsILEdit(ILContext il)
         {
             ILCursor cursor = new(il);
@@ -154,6 +106,53 @@ namespace PackBuilder.Core.Systems
                 if (packNPC.CachedNetId >= 0)
                     PackBuilderNPC.ApplyChanges(npc, npc.type);
             });
+        }
+
+        public override void PostSetupContent()
+        {
+            // Collects ALL .npcmod.json files from all mods into a list.
+            List<(string, byte[])> jsonEntries = [];
+
+            // Collects the loaded NPC mods to pass to the set factory initialization.
+            Dictionary<int, List<NPCChanges>> factorySets = [];
+
+            foreach (Mod mod in ModLoader.Mods)
+            {
+                // An array of all .npcmod.json files from this specific mod.
+                var files = (mod.GetFileNames() ?? []).Where(s => s.EndsWith(".npcmod.json", System.StringComparison.OrdinalIgnoreCase));
+
+                // Adds the byte contents of each file to the list.
+                foreach (var file in files)
+                    jsonEntries.Add((file, mod.GetFileBytes(file)));
+            }
+
+            foreach (var (file, data) in jsonEntries)
+            {
+                PackBuilder.LoadingFile = file;
+
+                // Convert the raw bytes into raw text.
+                string rawJson = Encoding.UTF8.GetString(data);
+
+                // Decode the json into an NPC mod.
+                NPCMod npcMod = JsonConvert.DeserializeObject<NPCMod>(rawJson, PackBuilder.JsonSettings)!;
+
+                if (npcMod.NPCs.Count == 0)
+                    throw new NoNPCsException();
+
+                // Get the NPC mod ready for factory initialization.
+                foreach (string npc in npcMod.NPCs)
+                {
+                    int npcType = GetNPC(npc);
+
+                    factorySets.TryAdd(npcType, []);
+                    factorySets[npcType].Add(npcMod.Changes);
+                }
+
+                PackBuilder.LoadingFile = null;
+            }
+
+            // Setup the factory for fast access to NPC lookup.
+            PackBuilderNPC.NPCModSets = factorySets.ToFrozenDictionary();
         }
 
         public override void Load()
