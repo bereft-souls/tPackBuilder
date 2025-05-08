@@ -13,12 +13,28 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
+    [Autoload(false)]
+    [LateLoad]
     internal class PackBuilderNPC : GlobalNPC
     {
         public static FrozenDictionary<int, List<NPCChanges>> NPCModSets = null;
 
         public override bool InstancePerEntity => true;
         public int CachedNetId = 0;
+
+        public override void SetDefaults(NPC entity)
+        {
+            // If a netID is used to summon an NPC, we cache that netID during setup
+            // inside our GlobalNPC. The netID is reset during setup and IL editing
+            // it to not reset can cause issues, so caching it externally is generally the better option.
+            if (!entity.TryGetGlobalNPC<PackBuilderNPC>(out var packNPC))
+                return;
+
+            // If an NPC is summoned via netID, we apply changes inside of the
+            // IL edit. We don't need to apply them twice.
+            if (packNPC.CachedNetId >= 0)
+                ApplyChanges(entity, entity.type);
+        }
 
         public static void ApplyChanges(NPC npc, int npcId)
         {
@@ -52,7 +68,7 @@ namespace PackBuilder.Core.Systems
                 // Assign the cached netID field. Pops both of our pushed values.
                 cursor.EmitDelegate<Action<NPC, int>>((npc, netID) =>
                 {
-                    if (!npc.TryGetGlobalNPC(out PackBuilderNPC result))
+                    if (!ModSorter.LateTypesLoaded || !npc.TryGetGlobalNPC(out PackBuilderNPC result))
                         return;
 
                     result.CachedNetId = netID;
@@ -79,33 +95,6 @@ namespace PackBuilder.Core.Systems
             {
                 MonoModHooks.DumpIL(ModContent.GetInstance<PackBuilder>(), il);
             }
-        }
-
-        // Ensure we apply our "SetDefaults" AFTER all other mods'.
-        private static void SetDefaultsILEdit(ILContext il)
-        {
-            ILCursor cursor = new(il);
-
-            // Move directly after the call to NPCLoader.SetDefaults().
-            var npcLoader_SetDefaults = typeof(NPCLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic, [typeof(NPC), typeof(bool)]);
-
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(npcLoader_SetDefaults)))
-                throw new Exception("Unable to locate NPCLoader_SetDefaults in IL edit!");
-
-            cursor.Emit(OpCodes.Ldarg_0); // Push the NPC onto the stack
-            cursor.EmitDelegate((NPC npc) =>
-            {
-                // If a netID is used to summon an NPC, we cache that netID during setup
-                // inside our GlobalNPC. The netID is reset during setup and IL editing
-                // it to not reset can cause issues, so caching it externally is generally the better option.
-                if (!npc.TryGetGlobalNPC<PackBuilderNPC>(out var packNPC))
-                    return;
-
-                // If an NPC is summoned via netID, we apply changes inside of the
-                // IL edit. We don't need to apply them twice.
-                if (packNPC.CachedNetId >= 0)
-                    PackBuilderNPC.ApplyChanges(npc, npc.type);
-            });
         }
 
         public override void PostSetupContent()
@@ -161,9 +150,6 @@ namespace PackBuilder.Core.Systems
             // based on that netID in the same method) for NPCs spawned using
             // a netID (negative number).
             IL_NPC.SetDefaultsFromNetId += SetDefaultsFromNetIdILEdit;
-
-            var method = typeof(NPC).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public);
-            MonoModHooks.Modify(method, SetDefaultsILEdit);
         }
     }
 }

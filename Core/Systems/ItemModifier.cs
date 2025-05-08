@@ -15,9 +15,13 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
+    [Autoload(false)]
+    [LateLoad]
     internal class PackBuilderItem : GlobalItem
     {
         public static FrozenDictionary<int, List<ItemChanges>> ItemModSets = null;
+
+        public override void SetDefaults(Item entity) => ApplyChanges(entity);
 
         public static void ApplyChanges(Item item)
         {
@@ -28,25 +32,6 @@ namespace PackBuilder.Core.Systems
 
     internal class ItemModifier : ModSystem
     {
-        // Ensure our "SetDefaults" is applied AFTER all other mods'.
-        public static void SetDefaultsILEdit(ILContext il)
-        {
-            ILCursor cursor = new(il);
-
-            // Move directly after the call to ItemLoader.SetDefaults().
-            var itemLoader_SetDefaults = typeof(ItemLoader).GetMethod("SetDefaults", BindingFlags.Static | BindingFlags.NonPublic, [typeof(Item), typeof(bool)]);
-
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(itemLoader_SetDefaults)))
-                throw new Exception("Unable to locate ItemLoader_SetDefaults in IL edit!");
-
-            // Add a call to PackBuilderItem.ApplyChanges() using the item
-            // that SetDefaults() is being called on.
-            var packBuilderItem_ApplyChanges = typeof(PackBuilderItem).GetMethod("ApplyChanges", BindingFlags.Static | BindingFlags.Public, [typeof(Item)]);
-
-            cursor.Emit(OpCodes.Ldarg_0);
-            cursor.Emit(OpCodes.Call, packBuilderItem_ApplyChanges);
-        }
-
         public override void PostSetupContent()
         {
             // Collects ALL .itemmod.json files from all mods into a list.
@@ -92,12 +77,6 @@ namespace PackBuilder.Core.Systems
 
             // Setup the factory for fast access to item lookup.
             PackBuilderItem.ItemModSets = factorySets.ToFrozenDictionary();
-        }
-
-        public override void Load()
-        {
-            var method = typeof(Item).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public, [typeof(int), typeof(bool), typeof(ItemVariant)]);
-            MonoModHooks.Modify(method, SetDefaultsILEdit);
         }
     }
 }

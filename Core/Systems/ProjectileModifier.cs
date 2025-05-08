@@ -14,46 +14,23 @@ using static PackBuilder.Core.Systems.PackBuilderProjectile;
 
 namespace PackBuilder.Core.Systems
 {
+    [Autoload(false)]
+    [LateLoad]
     internal class PackBuilderProjectile : GlobalProjectile
     {
         public static FrozenDictionary<int, List<ProjectileChanges>> ProjectileModSets = null;
 
+        public override void SetDefaults(Projectile entity) => ApplyChanges(entity);
+
         public static void ApplyChanges(Projectile projectile)
         {
-            float width = projectile.width / projectile.scale;
-            float height = projectile.height / projectile.scale;
-
             if (ProjectileModSets?.TryGetValue(projectile.type, out var value) ?? false)
                 value.ForEach(c => c.ApplyTo(projectile));
-
-            projectile.width = (int)(width * projectile.scale);
-            projectile.height = (int)(height * projectile.scale);
         }
     }
 
     internal class ProjectileModifier : ModSystem
     {
-        // Ensure our "SetDefaults" is applied AFTER all other mods'.
-        public static void SetDefaultsILEdit(ILContext il)
-        {
-            ILCursor cursor = new(il);
-
-            // Move directly after the call to Projectile.SetDefaults_End().
-            // This is a sort of cheap get-around that tMod uses to evade a compilation
-            // bug on Mac development environments.
-            var projectile_SetDefaults_End = typeof(Projectile).GetMethod("SetDefaults_End", BindingFlags.Instance | BindingFlags.NonPublic, [typeof(int)]);
-
-            if (!cursor.TryGotoNext(MoveType.After, i => i.MatchCall(projectile_SetDefaults_End)))
-                throw new Exception("Unable to locate Projectile_SetDefaults_End in IL edit!");
-
-            // Add a call to PackBuilderProjectile.ApplyChanges() using the projectile
-            // that SetDefaults() is being called on.
-            var packBuilderProjectile_ApplyChanges = typeof(PackBuilderProjectile).GetMethod("ApplyChanges", BindingFlags.Static | BindingFlags.Public, [typeof(Projectile)]);
-
-            cursor.Emit(OpCodes.Ldarg_0);
-            cursor.Emit(OpCodes.Call, packBuilderProjectile_ApplyChanges);
-        }
-
         public override void PostSetupContent()
         {
             // Collects ALL .projectilemod.json files from all mods into a list.
@@ -99,12 +76,6 @@ namespace PackBuilder.Core.Systems
 
             // Setup the factory for fast access to projectile lookup.
             ProjectileModSets = factorySets.ToFrozenDictionary();
-        }
-
-        public override void Load()
-        {
-            var projectile_SetDefaults = typeof(Projectile).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public, [typeof(int)]);
-            MonoModHooks.Modify(projectile_SetDefaults, SetDefaultsILEdit);
         }
     }
 }

@@ -10,6 +10,8 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
+    [Autoload(false)]
+    [LateLoad]
     internal class RecipeModifier : ModSystem
     {
         // Ensure our recipe changes are applied after all other mods'.
@@ -64,8 +66,8 @@ namespace PackBuilder.Core.Systems
 
         public override void Load()
         {
-            var recipe_SetupRecipes = typeof(Recipe).GetMethod(nameof(Recipe.SetupRecipes), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, []);
-            MonoModHooks.Modify(recipe_SetupRecipes, SetupRecipesILEdit);
+            //var recipe_SetupRecipes = typeof(Recipe).GetMethod(nameof(Recipe.SetupRecipes), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, []);
+            //MonoModHooks.Modify(recipe_SetupRecipes, SetupRecipesILEdit);
         }
     }
 }
