@@ -26,6 +26,7 @@ namespace PackBuilder.Core.Systems
         {
             var modContent_ResizeArrays = typeof(ModContent).GetMethod("ResizeArrays", BindingFlags.Static | BindingFlags.NonPublic, [typeof(bool)]);
             MonoModHooks.Add(modContent_ResizeArrays, SortModsThenResize);
+            LateTypesLoaded = false;
         }
 
         public void SortModsThenResize(Action<bool> orig, bool unloading = false)
