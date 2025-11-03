@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using PackBuilder.Common.Project.IO;
 using Terraria.ModLoader;
 
@@ -12,7 +13,74 @@ namespace PackBuilder.Common.Project.ManifestFormats;
 /// </summary>
 internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
 {
-    void IBuildManifestFormat.Serialize(BuildManifest manifest, IModSource source) { }
+    void IBuildManifestFormat.Serialize(BuildManifest manifest, IModSource source)
+    {
+        var sb = new StringBuilder();
+
+        if (manifest.AssemblyReferences.Count > 0)
+        {
+            WriteList(sb, "dllReferences", manifest.AssemblyReferences);
+        }
+
+        if (manifest.StrongModReferences.Count > 0)
+        {
+            WriteList(sb, "modReferences", manifest.StrongModReferences);
+        }
+
+        if (manifest.WeakModReferences.Count > 0)
+        {
+            WriteList(sb, "weakReferences", manifest.WeakModReferences);
+        }
+
+        if (manifest.ModsToSortBefore.Count > 0)
+        {
+            WriteList(sb, "sortBefore", manifest.ModsToSortBefore);
+        }
+
+        if (manifest.ModsToSortAfter.Count > 0)
+        {
+            WriteList(sb, "sortAfter", manifest.ModsToSortAfter);
+        }
+
+        sb.AppendLine($"version = {manifest.Version}");
+
+        if (!string.IsNullOrWhiteSpace(manifest.Author))
+        {
+            sb.AppendLine($"author = {manifest.Author}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(manifest.DisplayName))
+        {
+            sb.AppendLine($"displayName = {manifest.DisplayName}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(manifest.HomepageUrl))
+        {
+            sb.AppendLine($"homepage = {manifest.HomepageUrl}");
+        }
+
+        if (manifest.IgnoredBuildPaths.Count > 0)
+        {
+            WriteList(sb, "buildIgnore", manifest.IgnoredBuildPaths);
+        }
+
+        sb.AppendLine($"side = {manifest.Side}");
+
+        var dir = source.GetDirectory().FullName;
+        File.WriteAllText(Path.Combine(dir, "build.txt"), sb.ToString());
+
+        if (!string.IsNullOrWhiteSpace(manifest.Description))
+        {
+            File.WriteAllText(Path.Combine(dir, "description.txt"), manifest.Description);
+        }
+
+        return;
+
+        static void WriteList<T>(StringBuilder sb, string property, IEnumerable<T> values)
+        {
+            sb.AppendLine($"{property} = {string.Join(',', values)}");
+        }
+    }
 
     BuildManifest? IBuildManifestFormat.Deserialize(IModSource source)
     {
