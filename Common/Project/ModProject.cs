@@ -1,4 +1,6 @@
-﻿namespace PackBuilder.Common.Project;
+﻿using PackBuilder.Common.Project.IO;
+
+namespace PackBuilder.Common.Project;
 
 /// <summary>
 ///     Represents a mod project, containing metadata about a mod.

@@ -1,4 +1,6 @@
-﻿namespace PackBuilder.Common.Project.ManifestFormats;
+﻿using PackBuilder.Common.Project.IO;
+
+namespace PackBuilder.Common.Project.ManifestFormats;
 
 /// <summary>
 ///     Implements the <c>build.txt</c> format.

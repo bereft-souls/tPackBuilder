@@ -1,19 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<!-- Import tModLoader mod properties -->
-	<Import Project="..\tModLoader.targets" />
+    <Import Project="..\tModLoader.targets"/>
 
-	<!-- General -->
-	<PropertyGroup>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <Reference Include="CalamityMod">
-	    <HintPath>ModRefs\CalamityMod.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
+    <ItemGroup>
+        <Reference Include="ModRefs\**\*"/>
+    </ItemGroup>
 
-	<!-- References -->
+    <ItemGroup>
+        <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Publicize Include="tModLoader" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false"/>
+    </ItemGroup>
 
 </Project>

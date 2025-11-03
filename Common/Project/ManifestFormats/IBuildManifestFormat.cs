@@ -1,4 +1,6 @@
-﻿namespace PackBuilder.Common.Project.ManifestFormats;
+﻿using PackBuilder.Common.Project.IO;
+
+namespace PackBuilder.Common.Project.ManifestFormats;
 
 // TODO: See about providing file names and auto-detection.
 
