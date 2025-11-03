@@ -108,8 +108,8 @@ internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
             if (split.Length != 2)
                 continue;
 
-            var property = split[0];
-            var value = split[1];
+            var property = split[0].Trim();
+            var value = split[1].Trim();
             if (value.Length == 0)
                 continue;
 
