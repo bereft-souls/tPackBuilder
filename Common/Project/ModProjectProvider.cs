@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,19 @@ namespace PackBuilder.Common.Project;
 /// </summary>
 public static class ModProjectProvider
 {
+    public static IEnumerable<ModProjectView> ModSourcesViews
+    {
+        get
+        {
+            var modSources = ModCompile.FindModSources();
+            foreach (var modSource in modSources)
+            {
+                if (TryGetFromDirectory(modSource, out var project))
+                    yield return new ModProjectView(project);
+            }
+        }
+    }
+
     public static bool TryGetFromModSources(
         string modName,
         [NotNullWhen(returnValue: true)] out ModProject? project
