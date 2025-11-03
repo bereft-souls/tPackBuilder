@@ -5,8 +5,9 @@
 
 	<!-- General -->
 	<PropertyGroup>
-		
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
+
 	<ItemGroup>
 	  <Reference Include="CalamityMod">
 	    <HintPath>ModRefs\CalamityMod.dll</HintPath>
