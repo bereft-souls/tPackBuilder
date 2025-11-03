@@ -16,6 +16,8 @@ public sealed class ModProject(
 {
     private bool disposed;
 
+    internal BuildManifest Manifest => manifest;
+
     /// <summary>
     ///     Immutable view to relevant project properties.
     /// </summary>
