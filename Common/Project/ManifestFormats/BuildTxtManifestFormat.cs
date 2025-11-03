@@ -1,4 +1,9 @@
-﻿using PackBuilder.Common.Project.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using PackBuilder.Common.Project.IO;
+using Terraria.ModLoader;
 
 namespace PackBuilder.Common.Project.ManifestFormats;
 
@@ -7,11 +12,155 @@ namespace PackBuilder.Common.Project.ManifestFormats;
 /// </summary>
 internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
 {
-    void IBuildManifestFormat.Serialize(BuildManifest manifest, IModSource source)
-    {
-    }
+    void IBuildManifestFormat.Serialize(BuildManifest manifest, IModSource source) { }
 
     BuildManifest? IBuildManifestFormat.Deserialize(IModSource source)
     {
+        var dir = source.GetDirectory();
+        var buildTxtPath = Path.Combine(dir.FullName, "build.txt");
+        var descriptionPath = Path.Combine(dir.FullName, "description.txt");
+
+        if (!File.Exists(buildTxtPath))
+        {
+            return null;
+        }
+
+        var manifest = new BuildManifest();
+        if (File.Exists(descriptionPath))
+        {
+            manifest.Description = File.ReadAllText(descriptionPath);
+        }
+
+        foreach (var line in File.ReadAllLines(buildTxtPath))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            var split = line.Split('=', 2);
+            if (split.Length != 2)
+                continue;
+
+            var property = split[0];
+            var value = split[1];
+            if (value.Length == 0)
+                continue;
+
+            switch (property)
+            {
+                case "dllReferences":
+                    manifest.AssemblyReferences.AddRange(ReadList(value));
+                    break;
+
+                case "modReferences":
+                    var strongRefs = new List<BuildManifest.ModReference>();
+                    foreach (var modRefVal in ReadList(value))
+                    {
+                        if (BuildManifest.ModReference.TryParse(modRefVal, out var modRef))
+                            strongRefs.Add(modRef);
+                    }
+
+                    manifest.StrongModReferences.AddRange(strongRefs);
+                    break;
+
+                case "weakReferences":
+                    var weakRefs = new List<BuildManifest.ModReference>();
+                    foreach (var modRefVal in ReadList(value))
+                    {
+                        if (BuildManifest.ModReference.TryParse(modRefVal, out var modRef))
+                            weakRefs.Add(modRef);
+                    }
+
+                    manifest.WeakModReferences.AddRange(weakRefs);
+                    break;
+
+                case "sortBefore":
+                    manifest.ModsToSortBefore.AddRange(ReadList(value));
+                    break;
+
+                case "sortAfter":
+                    manifest.ModsToSortAfter.AddRange(ReadList(value));
+                    break;
+
+                case "author":
+                    manifest.Author = value;
+                    break;
+
+                case "version":
+                    if (Version.TryParse(value, out var modVersion))
+                    {
+                        manifest.Version = modVersion;
+                    }
+
+                    break;
+
+                case "displayName":
+                    manifest.DisplayName = value;
+                    break;
+
+                case "homepage":
+                    manifest.HomepageUrl = value;
+                    break;
+
+                case "noCompile":
+                    manifest.NoCompile = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+                    break;
+
+                case "playableOnPreview":
+                    manifest.PlayableOnPreview = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+                    break;
+
+                case "translationMod":
+                    manifest.TranslationMod = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+                    break;
+
+                case "hideCode":
+                    manifest.HideCode = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+                    break;
+
+                case "hideResources":
+                    manifest.HideResources = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+                    break;
+
+                case "includeSource":
+                    manifest.IncludeSource = string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
+                    break;
+
+                case "buildIgnore":
+                    manifest.IgnoredBuildPaths.AddRange(
+                        value.Split(',')
+                             .Select(
+                                  x => x.Trim()
+                                        .Replace('\\', Path.DirectorySeparatorChar)
+                                        .Replace('/', Path.DirectorySeparatorChar)
+                              )
+                             .Where(x => x.Length > 0)
+                    );
+                    break;
+
+                case "side":
+                    if (Enum.TryParse<ModSide>(value, out var modSide))
+                    {
+                        manifest.Side = modSide;
+                    }
+
+                    break;
+            }
+        }
+
+        // All of these tasks are covered during actual building so are low
+        // priority:
+        // TODO: Check for duplicate mod/weak references.
+        // TODO: Check for duplicate dllReferences/modReferences.
+        // TODO: Add mod/weakReferences that are not sortBefore to sortAfter.
+
+        // TODO: Should we format description values or leave it as raw text to
+        //       potentially let the user edit?
+
+        return manifest;
+
+        static IEnumerable<string> ReadList(string value)
+        {
+            return value.Split(',').Select(x => x.Trim()).Where(x => x.Length > 0);
+        }
     }
 }
