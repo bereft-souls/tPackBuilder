@@ -122,7 +122,7 @@ public sealed class FileGraph : IDisposable
 
         foreach (var file in Directory.GetFiles(path))
         {
-            var ext = GetComplicatedExtension(path, allowedExtensions).ToLowerInvariant();
+            var ext = GetComplicatedExtension(file, allowedExtensions).ToLowerInvariant();
 
             // 0 means no whitelist, all are allowed.
             if (allowedExtensions.Count == 0 || allowedExtensions.Contains(ext))
