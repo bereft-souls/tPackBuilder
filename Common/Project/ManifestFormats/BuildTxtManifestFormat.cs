@@ -52,10 +52,10 @@ internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
                     break;
 
                 case "modReferences":
-                    var strongRefs = new List<BuildManifest.ModReference>();
+                    var strongRefs = new List<ModReference>();
                     foreach (var modRefVal in ReadList(value))
                     {
-                        if (BuildManifest.ModReference.TryParse(modRefVal, out var modRef))
+                        if (ModReference.TryParse(modRefVal, out var modRef))
                             strongRefs.Add(modRef);
                     }
 
@@ -63,10 +63,10 @@ internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
                     break;
 
                 case "weakReferences":
-                    var weakRefs = new List<BuildManifest.ModReference>();
+                    var weakRefs = new List<ModReference>();
                     foreach (var modRefVal in ReadList(value))
                     {
-                        if (BuildManifest.ModReference.TryParse(modRefVal, out var modRef))
+                        if (ModReference.TryParse(modRefVal, out var modRef))
                             weakRefs.Add(modRef);
                     }
 
