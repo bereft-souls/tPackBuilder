@@ -7,6 +7,22 @@ using Terraria.ModLoader.Core;
 namespace PackBuilder.Common.Project;
 
 /// <summary>
+///     An immutable view into a mod project.
+/// </summary>
+public readonly struct ModProjectView(ModProject project)
+{
+    /// <summary>
+    ///     Immutable view to relevant project properties.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">
+    ///     The project has been deleted or disposed of.
+    /// </exception>
+    public ModProperties Properties => project.Disposed
+        ? throw new ObjectDisposedException("Cannot get properties of disposed project")
+        : new ModProperties(project.Manifest);
+}
+
+/// <summary>
 ///     Represents a mod project, containing metadata about a mod.
 /// </summary>
 public sealed class ModProject(
@@ -14,24 +30,14 @@ public sealed class ModProject(
     BuildManifest manifest
 ) : IDisposable
 {
-    private bool disposed;
+    public bool Disposed { get; private set; }
 
-    internal BuildManifest Manifest => manifest;
-
-    /// <summary>
-    ///     Immutable view to relevant project properties.
-    /// </summary>
-    /// <exception cref="ObjectDisposedException">
-    ///     The project has been deleted or disposed of.
-    /// </exception>
-    public ModProperties Properties => disposed
-        ? throw new ObjectDisposedException("Cannot get properties of disposed project")
-        : new ModProperties(manifest);
+    public BuildManifest Manifest => manifest;
 
     // TODO: Logging and what-not?
     public async Task<bool> Build()
     {
-        if (disposed)
+        if (Disposed)
         {
             throw new ObjectDisposedException("Cannot build a disposed project");
         }
@@ -77,6 +83,6 @@ public sealed class ModProject(
 
     public void Dispose()
     {
-        disposed = true;
+        Disposed = true;
     }
 }
