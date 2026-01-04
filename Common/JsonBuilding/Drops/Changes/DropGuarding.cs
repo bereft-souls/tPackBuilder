@@ -129,6 +129,14 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
                 }
             }
 
+            if (guard.Failed)
+            {
+                retVal = new ItemDropAttemptResult
+                {
+                    State = ItemDropAttemptResultState.DoesntFillConditions,
+                };
+            }
+
             /*
             if (guard.DidEvaluate.HasValue && !guard.DidEvaluate.Value)
             {
