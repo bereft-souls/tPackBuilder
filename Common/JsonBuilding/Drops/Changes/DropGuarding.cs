@@ -121,7 +121,7 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
             {
                 if (WrappedRule is INestedItemDropRule nested)
                 {
-                    retVal = nested.TryDroppingItem(info, Main.ItemDropSolver.ResolveRule);
+                    retVal = nested.TryDroppingItem(info, ResolveRule);
                 }
                 else
                 {
@@ -159,6 +159,37 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
     }
 
     protected abstract ItemDropGuard CreateDropGuard();
+
+    // Reimplementation of Main.ItemDropSolver that's more keen to respect our
+    // guard value.
+    private static ItemDropAttemptResult ResolveRule(
+        IItemDropRule rule,
+        DropAttemptInfo info
+    )
+    {
+        if (!rule.CanDrop(info))
+        {
+            var result = new ItemDropAttemptResult
+            {
+                State = ItemDropAttemptResultState.DoesntFillConditions,
+            };
+
+            Main.ItemDropSolver.ResolveRuleChains(rule, info, result);
+            return result;
+        }
+        else
+        {
+            var result = rule is INestedItemDropRule nestedRule ? nestedRule.TryDroppingItem(info, ResolveRule) : rule.TryDroppingItem(info);
+            if (ItemDropGuardSystem.GuardStack.TryPeek(out var guard) && guard.CanRun)
+            {
+                // TODO: Better state?
+                result.State = ItemDropAttemptResultState.DoesntFillConditions;
+            }
+
+            Main.ItemDropSolver.ResolveRuleChains(rule, info, result);
+            return result;
+        }
+    }
 }
 
 internal sealed class ItemDropGuardSystem : ModSystem
