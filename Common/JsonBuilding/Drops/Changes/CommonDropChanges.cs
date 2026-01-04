@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
@@ -9,185 +7,9 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
-internal sealed class ItemDropGuardSystem : ModSystem
+internal sealed class RemovedItemDropGuard(int itemId) : ItemDropGuard
 {
-    public static Stack<IItemDropGuard> GuardStack { get; } = [];
-
-    public override void Load()
-    {
-        base.Load();
-
-        On_Item.NewItem_Inner += NewItem_Inner_ApplyRestrictions;
-    }
-
-    private static int NewItem_Inner_ApplyRestrictions(
-        On_Item.orig_NewItem_Inner orig,
-        IEntitySource source,
-        int x,
-        int y,
-        int width,
-        int height,
-        Item itemToClone,
-        int type,
-        int stack,
-        bool noBroadcast,
-        int pfix,
-        bool noGrabDelay,
-        bool reverseLookup
-    )
-    {
-        if (!GuardStack.TryPeek(out var guard))
-        {
-            return orig(
-                source,
-                x,
-                y,
-                width,
-                height,
-                itemToClone,
-                type,
-                stack,
-                noBroadcast,
-                pfix,
-                noGrabDelay,
-                reverseLookup
-            );
-        }
-
-        if (guard.Tries++ > 1000)
-        {
-            guard.Continue = false;
-            guard.Failed = true;
-            return Main.maxItems;
-        }
-
-        var result = guard.AllowItemDrop(
-            source,
-            x,
-            y,
-            width,
-            height,
-            itemToClone,
-            type,
-            stack,
-            noBroadcast,
-            pfix,
-            noGrabDelay,
-            reverseLookup
-        );
-
-        switch (result)
-        {
-            case ItemDropGuardKind.Success:
-                guard.Continue = false;
-                return orig(
-                    source,
-                    x,
-                    y,
-                    width,
-                    height,
-                    itemToClone,
-                    type,
-                    stack,
-                    noBroadcast,
-                    pfix,
-                    noGrabDelay,
-                    reverseLookup
-                );
-
-            case ItemDropGuardKind.Reroll:
-                guard.Continue = true;
-                return Main.maxItems;
-
-            case ItemDropGuardKind.Cancel:
-                guard.Continue = false;
-                return Main.maxItems;
-
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
-}
-
-internal sealed class ItemDropStackGuard : IDisposable
-{
-    public IItemDropGuard Guard { get; }
-
-    public bool Continue => Guard.Continue;
-
-    public bool Failed => Guard.Failed;
-
-    public int Tries => Guard.Tries;
-
-    public ItemDropStackGuard(IItemDropGuard guard)
-    {
-        Guard = guard;
-
-        ItemDropGuardSystem.GuardStack.Push(Guard);
-    }
-
-    public void Dispose()
-    {
-        var poppedGuard = ItemDropGuardSystem.GuardStack.Pop();
-        {
-            Debug.Assert(poppedGuard == Guard);
-        }
-    }
-}
-
-internal enum ItemDropGuardKind
-{
-    // Allow the item to spawn.
-    Success,
-
-    // Deny the item spawning and force parent code to re-run.
-    Reroll,
-
-    // Cancel the item spawning at all.
-    Cancel,
-}
-
-internal interface IItemDropGuard
-{
-    bool Continue { get; set; }
-
-    bool Failed { get; set; }
-
-    int Tries { get; set; }
-
-    ItemDropGuardKind AllowItemDrop(
-        IEntitySource source,
-        int x,
-        int y,
-        int width,
-        int height,
-        Item? itemToClone,
-        int type,
-        int stack,
-        bool noBroadcast,
-        int prefix,
-        bool noGrabDelay,
-        bool reverseLookup
-    );
-}
-
-internal static class ItemDropGuardExtensions
-{
-    public static ItemDropStackGuard Scope(this IItemDropGuard guard)
-    {
-        return new ItemDropStackGuard(guard);
-    }
-}
-
-internal sealed class RemovedItemDropGuard(int itemId) : IItemDropGuard
-{
-    bool IItemDropGuard.Continue { get; set; } = true;
-
-    bool IItemDropGuard.Failed { get; set; } = false;
-
-    int IItemDropGuard.Tries { get; set; } = 0;
-
-    ItemDropGuardKind IItemDropGuard.AllowItemDrop(
+    public override ItemDropGuardKind AllowItemDrop(
         IEntitySource source,
         int x,
         int y,
@@ -291,9 +113,10 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
             State = ItemDropAttemptResultState.DidNotRunCode,
         };
 
-        using (var guard = new RemovedItemDropGuard(removedItem).Scope())
+        var guard = new RemovedItemDropGuard(removedItem);
+        using (guard.Scope())
         {
-            while (guard.Continue)
+            while (guard.UpdateAndContinue())
             {
                 retVal = base.TryDroppingItem(info);
             }
