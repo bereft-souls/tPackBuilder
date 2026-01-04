@@ -1,5 +1,6 @@
 {
     "NPC": "Terraria/Plantera",
+    "Item": "Terraria/PlanteraBossBag",
   
     "Changes": {
         "RemoveDrop": {
