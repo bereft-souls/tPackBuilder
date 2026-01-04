@@ -10,9 +10,56 @@ namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
 internal static class DropHelpers
 {
-    public static int ProcessItemId(string itemId)
+    public static int ParseItemId(string itemId)
     {
         return GetItem(itemId);
+    }
+
+    public static (int min, int max) ParseAmount(string amount)
+    {
+        if (int.TryParse(amount, out var numAmount))
+        {
+            return (numAmount, numAmount);
+        }
+
+        var parts = amount.Split('-', 2);
+
+        var min = 0;
+        var max = 1;
+
+        if (int.TryParse(parts[0], out var numMin))
+        {
+            min = numMin;
+        }
+
+        if (int.TryParse(parts[1], out var numMax))
+        {
+            max = numMax;
+        }
+
+        if (min < 0)
+        {
+            min = 0;
+        }
+
+        if (max < 1)
+        {
+            max = 1;
+        }
+
+        if (min > max)
+        {
+            min = max;
+        }
+
+        return (min, max);
+    }
+
+    public static float ParseChance(string chance)
+    {
+        return float.TryParse(chance, out var numChance)
+            ? Math.Clamp(numChance, 0f, 1f)
+            : 1f;
     }
 
     public static List<DropRateInfo> GetAllDropInfo(IItemDropRule dropRule)
@@ -249,18 +296,80 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
 }
 
 internal sealed record AddDrop(
-    List<Condition> Conditions,
     string Item
 ) : IDropChange
 {
-    public void ApplyTo(ILoot loot) { }
+    private sealed class MoreCommonDrop(
+        int itemId,
+        float dropChance,
+        int minItems,
+        int maxItems
+    ) : IItemDropRule
+    {
+        public List<IItemDropRuleChainAttempt> ChainedRules { get; } = [];
+
+        public bool CanDrop(DropAttemptInfo info)
+        {
+            return true;
+        }
+
+        public void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo)
+        {
+            var relativeChance = dropChance * ratesInfo.parentDroprateChance;
+            {
+                drops.Add(new DropRateInfo(itemId, minItems, maxItems, relativeChance, ratesInfo.conditions));
+            }
+
+            Chains.ReportDroprates(ChainedRules, relativeChance, drops, ratesInfo);
+        }
+
+        public ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info)
+        {
+            if (!(info.player.RollLuck(1000000) / 1000000f < dropChance))
+            {
+                return new ItemDropAttemptResult
+                {
+                    State = ItemDropAttemptResultState.FailedRandomRoll,
+                };
+            }
+
+            CommonCode.DropItem(info, itemId, info.rng.Next(minItems, maxItems + 1));
+            return new ItemDropAttemptResult
+            {
+                State = ItemDropAttemptResultState.Success,
+            };
+        }
+    }
+
+    private int ItemId => DropHelpers.ParseItemId(Item);
+
+    public List<string> Conditions { get; set; } = [];
+
+    public string Amount { get; set; } = "1";
+
+    public string Chance { get; set; } = "1.00";
+
+    public void ApplyTo(ILoot loot)
+    {
+        var (min, max) = DropHelpers.ParseAmount(Amount);
+
+        // TODO: Add support for conditions... sigh
+        loot.Add(
+            new MoreCommonDrop(
+                ItemId,
+                DropHelpers.ParseChance(Chance),
+                min,
+                max
+            )
+        );
+    }
 }
 
 internal sealed record RemoveDrop(
     string Item
 ) : IDropChange
 {
-    private int ItemId => DropHelpers.ProcessItemId(Item);
+    private int ItemId => DropHelpers.ParseItemId(Item);
 
     public void ApplyTo(ILoot loot)
     {
