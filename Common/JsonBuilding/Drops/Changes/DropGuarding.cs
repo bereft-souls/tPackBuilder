@@ -34,6 +34,13 @@ internal abstract class ItemDropGuard
     {
         if (DidEvaluate.HasValue)
         {
+            if (!DidEvaluate.Value)
+            {
+                CanRun = false;
+                Failed = true;
+                return false;
+            }
+
             Tries++;
         }
 
@@ -86,40 +93,58 @@ internal sealed class ItemDropStackGuard : IDisposable
 
 internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDropRule
 {
-    public virtual List<IItemDropRuleChainAttempt> ChainedRules => wrappedRule.ChainedRules;
+    public virtual List<IItemDropRuleChainAttempt> ChainedRules => WrappedRule.ChainedRules;
+
+    protected IItemDropRule WrappedRule { get; } = wrappedRule;
 
     public virtual bool CanDrop(DropAttemptInfo info)
     {
-        return wrappedRule.CanDrop(info);
+        return WrappedRule.CanDrop(info);
     }
 
     public virtual void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo)
     {
-        wrappedRule.ReportDroprates(drops, ratesInfo);
+        WrappedRule.ReportDroprates(drops, ratesInfo);
     }
 
     public virtual ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info)
     {
         var retVal = new ItemDropAttemptResult
         {
-            State = ItemDropAttemptResultState.DidNotRunCode,
+            State = ItemDropAttemptResultState.Success,
         };
 
         var guard = CreateDropGuard();
         using (guard.Scope())
         {
-            while (guard.UpdateAndContinue())
+            while (retVal.State == ItemDropAttemptResultState.Success && guard.UpdateAndContinue())
             {
-                retVal = wrappedRule.TryDroppingItem(info);
+                if (WrappedRule is INestedItemDropRule nested)
+                {
+                    retVal = nested.TryDroppingItem(info, Main.ItemDropSolver.ResolveRule);
+                }
+                else
+                {
+                    retVal = WrappedRule.TryDroppingItem(info);
+                }
             }
 
-            if (guard.Failed)
+            /*
+            if (guard.DidEvaluate.HasValue && !guard.DidEvaluate.Value)
+            {
+                retVal = new ItemDropAttemptResult
+                {
+                    State = ItemDropAttemptResultState.Success,
+                };
+            }
+            else if (guard.Failed)
             {
                 retVal = new ItemDropAttemptResult
                 {
                     State = ItemDropAttemptResultState.DoesntFillConditions,
                 };
             }
+            */
         }
 
         return retVal;
@@ -173,6 +198,7 @@ internal sealed class ItemDropGuardSystem : ModSystem
             );
         }
 
+        guard.DidEvaluate = true;
         var result = guard.AllowItemDrop(
             source,
             x,

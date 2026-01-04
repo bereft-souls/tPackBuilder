@@ -160,7 +160,7 @@ internal sealed class RemovedItemDropGuard(int itemId) : ItemDropGuard
         bool reverseLookup
     )
     {
-        return type != itemId ? ItemDropGuardKind.Reroll : ItemDropGuardKind.Success;
+        return type == itemId ? ItemDropGuardKind.Reroll : ItemDropGuardKind.Success;
     }
 }
 
@@ -173,15 +173,15 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
         var ownRates = new List<DropRateInfo>();
         var chainedRates = new List<DropRateInfo>();
 
-        var chainedRules = wrappedRule.ChainedRules.ToList();
+        var chainedRules = WrappedRule.ChainedRules.ToList();
         try
         {
-            wrappedRule.ChainedRules.Clear();
-            wrappedRule.ReportDroprates(ownRates, ratesInfo);
+            WrappedRule.ChainedRules.Clear();
+            WrappedRule.ReportDroprates(ownRates, ratesInfo);
         }
         finally
         {
-            wrappedRule.ChainedRules.AddRange(chainedRules);
+            WrappedRule.ChainedRules.AddRange(chainedRules);
         }
 
         Chains.ReportDroprates(chainedRules, 1f, chainedRates, ratesInfo);
