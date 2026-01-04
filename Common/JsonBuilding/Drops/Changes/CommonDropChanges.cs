@@ -110,7 +110,7 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
     {
         var retVal = new ItemDropAttemptResult
         {
-            State = ItemDropAttemptResultState.DidNotRunCode,
+            State = ItemDropAttemptResultState.Success,
         };
 
         var guard = new RemovedItemDropGuard(removedItem);
