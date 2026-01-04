@@ -82,5 +82,5 @@ namespace PackBuilder
     { }
 
     public class NoDropScopeException()
-        : HideStackTraceException("Must specify  1 or more NPCs for a drop modification OR specify that the drop effects global drop rates!");
+        : HideStackTraceException("Must specify an least one NPC or item or mark the changes as global for a drop modification!");
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using PackBuilder.Common.JsonBuilding.Drops.Changes;
-using Terraria.GameContent.ItemDropRules;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops;

@@ -17,7 +17,7 @@ internal sealed class DropModifierNpc : GlobalNPC
     {
         base.ModifyGlobalLoot(globalLoot);
 
-        foreach (var change in DropModifier.GlobalDropChanges)
+        foreach (var change in DropModifier.GlobalNpcDropChanges)
         {
             change.ApplyTo(globalLoot);
         }
@@ -39,11 +39,35 @@ internal sealed class DropModifierNpc : GlobalNPC
     }
 }
 
+[Autoload(false)]
+[LateLoad]
+internal sealed class DropModifierItem : GlobalItem
+{
+    public override void ModifyItemLoot(Item item, ItemLoot itemLoot)
+    {
+        base.ModifyItemLoot(item, itemLoot);
+
+        if (!DropModifier.PerItemDropChanges.TryGetValue(item.netID, out var changes))
+        {
+            return;
+        }
+
+        foreach (var change in changes)
+        {
+            change.ApplyTo(itemLoot);
+        }
+    }
+}
+
 internal sealed class DropModifier : ModSystem
 {
     public static Dictionary<int, List<DropChanges>> PerNpcDropChanges { get; } = [];
 
-    public static List<DropChanges> GlobalDropChanges { get; } = [];
+    public static Dictionary<int, List<DropChanges>> PerItemDropChanges { get; } = [];
+
+    public static List<DropChanges> GlobalNpcDropChanges { get; } = [];
+
+    // public static List<DropChanges> GlobalItemDropChanges { get; } = [];
 
     public override void PostSetupContent()
     {
@@ -75,26 +99,31 @@ internal sealed class DropModifier : ModSystem
 
             foreach (var scope in dropMod.NPCs)
             {
-                List<DropChanges> changes;
-                if (scope.Equals("global", StringComparison.OrdinalIgnoreCase))
-                {
-                    changes = GlobalDropChanges;
-                }
-                else
-                {
-                    var npcType = GetNPC(scope);
+                var npcType = GetNPC(scope);
 
-                    if (PerNpcDropChanges.TryGetValue(npcType, out var scopedChanges))
-                    {
-                        changes = scopedChanges;
-                    }
-                    else
-                    {
-                        changes = PerNpcDropChanges[npcType] = [];
-                    }
+                if (!PerNpcDropChanges.TryGetValue(npcType, out var changes))
+                {
+                    changes = PerNpcDropChanges[npcType] = [];
                 }
 
                 changes.Add(dropMod.Changes);
+            }
+
+            foreach (var scope in dropMod.Items)
+            {
+                var itemType = GetItem(scope);
+
+                if (!PerItemDropChanges.TryGetValue(itemType, out var changes))
+                {
+                    changes = PerItemDropChanges[itemType] = [];
+                }
+
+                changes.Add(dropMod.Changes);
+            }
+
+            if (dropMod.AllNPCs)
+            {
+                GlobalNpcDropChanges.Add(dropMod.Changes);
             }
 
             PackBuilder.LoadingFile = null;
