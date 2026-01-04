@@ -1,0 +1,18 @@
+{
+    "NPC": "Terraria/Plantera",
+    "Item": "Terraria/PlanteraBossBag",
+  
+    "Changes": {
+        "RemoveDrop": {
+            "Item": "Terraria/GrenadeLauncher"
+        },
+        "AddDrop": {
+            "Item": "Terraria/Gel",
+            "Amount": "10-15",
+            "Chance": "0.5"
+        },
+        "AddDrop": {
+            "Item": "Terraria/IronPickaxe"
+        }
+    }
+}
