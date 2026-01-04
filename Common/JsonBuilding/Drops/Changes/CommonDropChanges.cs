@@ -168,40 +168,59 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
 {
     public override void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo)
     {
-        base.ReportDroprates(drops, ratesInfo);
+        // base.ReportDroprates(drops, ratesInfo);
 
-        var total = drops.Sum(x => x.dropRate);
+        var ownRates = new List<DropRateInfo>();
+        var chainedRates = new List<DropRateInfo>();
+
+        var chainedRules = wrappedRule.ChainedRules.ToList();
+        try
+        {
+            wrappedRule.ChainedRules.Clear();
+            wrappedRule.ReportDroprates(ownRates, ratesInfo);
+        }
+        finally
+        {
+            wrappedRule.ChainedRules.AddRange(chainedRules);
+        }
+
+        Chains.ReportDroprates(chainedRules, 1f, chainedRates, ratesInfo);
+
+        var total = ownRates.Sum(x => x.dropRate);
 
         var removed = 0f;
-        for (var i = 0; i < drops.Count; i++)
+        for (var i = 0; i < ownRates.Count; i++)
         {
-            var drop = drops[i];
+            var drop = ownRates[i];
             if (drop.itemId != removedItem)
             {
                 continue;
             }
 
             removed += drop.dropRate;
-            drops.RemoveAt(i);
+            ownRates.RemoveAt(i);
         }
 
         var newTotal = total - removed;
         if (newTotal <= 0f)
         {
             // TODO: !?
-            drops.Clear();
+            ownRates.Clear();
             return;
         }
 
         var scale = total / newTotal;
-        for (var i = 0; i < drops.Count; i++)
+        for (var i = 0; i < ownRates.Count; i++)
         {
-            var drop = drops[i];
+            var drop = ownRates[i];
             {
                 drop.dropRate *= scale;
             }
-            drops[i] = drop;
+            ownRates[i] = drop;
         }
+        
+        drops.AddRange(ownRates);
+        drops.AddRange(chainedRates);
     }
 
     protected override ItemDropGuard CreateDropGuard()
