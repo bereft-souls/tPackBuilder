@@ -80,4 +80,7 @@ namespace PackBuilder
     public class NoResultException() :
         HideStackTraceException("Must specify a result for a recipe building!")
     { }
+
+    public class NoDropScopeException()
+        : HideStackTraceException("Must specify  1 or more NPCs for a drop modification OR specify that the drop effects global drop rates!");
 }

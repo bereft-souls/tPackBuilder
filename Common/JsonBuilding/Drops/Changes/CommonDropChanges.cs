@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
@@ -9,27 +10,18 @@ internal sealed record AddDrop(
     int ItemId
 ) : IDropChange
 {
-    public void Apply(List<IItemDropRule> dropRules)
-    {
-        throw new System.NotImplementedException();
-    }
+    public void ApplyTo(ILoot loot) { }
 }
 
 internal sealed record RemoveDrop(
     int ItemId
 ) : IDropChange
 {
-    public void Apply(List<IItemDropRule> dropRules)
-    {
-        
-    }
+    public void ApplyTo(ILoot loot) { }
 }
 
 internal sealed record ModifyDrop(
 ) : IDropChange
 {
-    public void Apply(List<IItemDropRule> dropRules)
-    {
-        throw new System.NotImplementedException();
-    }
+    public void ApplyTo(ILoot loot) { }
 }
