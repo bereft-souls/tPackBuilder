@@ -55,19 +55,19 @@ internal abstract class ItemDropGuard
         return CanRun;
     }
 
-    public abstract ItemDropGuardKind AllowItemDrop(
-        IEntitySource source,
-        int x,
-        int y,
-        int width,
-        int height,
-        Item? itemToClone,
-        int type,
-        int stack,
-        bool noBroadcast,
-        int prefix,
-        bool noGrabDelay,
-        bool reverseLookup
+    public abstract ItemDropGuardKind ModifyItemDrop(
+        ref IEntitySource source,
+        ref int x,
+        ref int y,
+        ref int width,
+        ref int height,
+        ref Item? itemToClone,
+        ref int type,
+        ref int stack,
+        ref bool noBroadcast,
+        ref int prefix,
+        ref bool noGrabDelay,
+        ref bool reverseLookup
     );
 }
 
@@ -210,7 +210,7 @@ internal sealed class ItemDropGuardSystem : ModSystem
         int y,
         int width,
         int height,
-        Item itemToClone,
+        Item? itemToClone,
         int type,
         int stack,
         bool noBroadcast,
@@ -238,19 +238,19 @@ internal sealed class ItemDropGuardSystem : ModSystem
         }
 
         guard.DidEvaluate = true;
-        var result = guard.AllowItemDrop(
-            source,
-            x,
-            y,
-            width,
-            height,
-            itemToClone,
-            type,
-            stack,
-            noBroadcast,
-            pfix,
-            noGrabDelay,
-            reverseLookup
+        var result = guard.ModifyItemDrop(
+            ref source,
+            ref x,
+            ref y,
+            ref width,
+            ref height,
+            ref itemToClone,
+            ref type,
+            ref stack,
+            ref noBroadcast,
+            ref pfix,
+            ref noGrabDelay,
+            ref reverseLookup
         );
 
         switch (result)

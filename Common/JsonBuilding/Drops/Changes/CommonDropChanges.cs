@@ -224,19 +224,19 @@ internal sealed class ChainedRuleLootProvider(List<IItemDropRuleChainAttempt> ch
 
 internal sealed class RemovedItemDropGuard(int itemId) : ItemDropGuard
 {
-    public override ItemDropGuardKind AllowItemDrop(
-        IEntitySource source,
-        int x,
-        int y,
-        int width,
-        int height,
-        Item? itemToClone,
-        int type,
-        int stack,
-        bool noBroadcast,
-        int prefix,
-        bool noGrabDelay,
-        bool reverseLookup
+    public override ItemDropGuardKind ModifyItemDrop(
+        ref IEntitySource source,
+        ref int x,
+        ref int y,
+        ref int width,
+        ref int height,
+        ref Item? itemToClone,
+        ref int type,
+        ref int stack,
+        ref bool noBroadcast,
+        ref int prefix,
+        ref bool noGrabDelay,
+        ref bool reverseLookup
     )
     {
         return type == itemId ? ItemDropGuardKind.Reroll : ItemDropGuardKind.Success;
