@@ -15,11 +15,43 @@ internal static class DropHelpers
         return GetItem(itemId);
     }
 
-    public static List<DropRateInfo> GetDropInfo(IItemDropRule dropRule)
+    public static List<DropRateInfo> GetAllDropInfo(IItemDropRule dropRule)
     {
         var drops = new List<DropRateInfo>();
         {
             dropRule.ReportDroprates(drops, new DropRateInfoChainFeed(1f));
+        }
+
+        return drops;
+    }
+
+    public static List<DropRateInfo> GetSelfDropInfo(IItemDropRule dropRule)
+    {
+        var chainedRules = dropRule.ChainedRules.ToList();
+        {
+            dropRule.ChainedRules.Clear();
+        }
+
+        try
+        {
+            var drops = new List<DropRateInfo>();
+            {
+                dropRule.ReportDroprates(drops, new DropRateInfoChainFeed(1f));
+            }
+
+            return drops;
+        }
+        finally
+        {
+            dropRule.ChainedRules.AddRange(chainedRules);
+        }
+    }
+
+    public static List<DropRateInfo> GetChainDropInfo(IItemDropRule dropRule)
+    {
+        var drops = new List<DropRateInfo>();
+        {
+            Chains.ReportDroprates(dropRule.ChainedRules, 1f, drops, new DropRateInfoChainFeed(1f));
         }
 
         return drops;
@@ -170,21 +202,8 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
     {
         // base.ReportDroprates(drops, ratesInfo);
 
-        var ownRates = new List<DropRateInfo>();
-        var chainedRates = new List<DropRateInfo>();
-
-        var chainedRules = WrappedRule.ChainedRules.ToList();
-        try
-        {
-            WrappedRule.ChainedRules.Clear();
-            WrappedRule.ReportDroprates(ownRates, ratesInfo);
-        }
-        finally
-        {
-            WrappedRule.ChainedRules.AddRange(chainedRules);
-        }
-
-        Chains.ReportDroprates(chainedRules, 1f, chainedRates, ratesInfo);
+        var ownRates = DropHelpers.GetSelfDropInfo(WrappedRule);
+        var chainedRates = DropHelpers.GetChainDropInfo(WrappedRule);
 
         var total = ownRates.Sum(x => x.dropRate);
 
@@ -218,7 +237,7 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
             }
             ownRates[i] = drop;
         }
-        
+
         drops.AddRange(ownRates);
         drops.AddRange(chainedRates);
     }
@@ -245,16 +264,6 @@ internal sealed record RemoveDrop(
 
     public void ApplyTo(ILoot loot)
     {
-        // Remove every rule that solely produces the drop we want to remove.
-        loot.RemoveWhere(
-            rule =>
-            {
-                var rates = DropHelpers.GetDropInfo(rule);
-
-                return rates.All(x => x.itemId == ItemId);
-            }
-        );
-
         RecursivelyModifyPartialDropRules(loot);
     }
 
@@ -264,7 +273,22 @@ internal sealed record RemoveDrop(
         {
             RecursivelyModifyPartialDropRules(new ChainedRuleLootProvider(rule.ChainedRules));
 
-            var rates = DropHelpers.GetDropInfo(rule);
+            var rates = DropHelpers.GetSelfDropInfo(rule);
+            if (rates.Count == 0)
+            {
+                continue;
+            }
+
+            // Remove the entire rule if it solely contains the item we want.
+            // TODO: Do we *always* want to remove the rule when there are
+            //       unchecked chained rules..?
+            if (rates.All(x => x.itemId == ItemId))
+            {
+                lootProvider.Remove(rule);
+                continue;
+            }
+
+            // Skip it if there's nothing we want...
             if (rates.All(x => x.itemId != ItemId))
             {
                 continue;
