@@ -22,7 +22,7 @@ internal enum ItemDropGuardKind
 
 internal abstract class ItemDropGuard
 {
-    public bool CanRun { get; set; }
+    public bool CanRun { get; set; } = true;
 
     public bool Failed { get; set; }
 
@@ -102,7 +102,7 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
     {
         var retVal = new ItemDropAttemptResult
         {
-            State = ItemDropAttemptResultState.Success,
+            State = ItemDropAttemptResultState.DidNotRunCode,
         };
 
         var guard = CreateDropGuard();
