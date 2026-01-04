@@ -9,6 +9,8 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems;
 
+[Autoload(false)]
+[LateLoad]
 internal sealed class DropModifierNpc : GlobalNPC
 {
     public override void ModifyGlobalLoot(GlobalLoot globalLoot)

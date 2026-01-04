@@ -1,0 +1,9 @@
+{
+    "NPC": "Terraria/Plantera",
+  
+    "Changes": {
+        "RemoveDrop":  {
+            "Item": "Terraria/GrenadeLauncher"
+        }
+    }
+}
