@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
@@ -81,6 +82,50 @@ internal sealed class ItemDropStackGuard : IDisposable
             Debug.Assert(poppedGuard == Guard);
         }
     }
+}
+
+internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDropRule
+{
+    public virtual List<IItemDropRuleChainAttempt> ChainedRules => wrappedRule.ChainedRules;
+
+    public virtual bool CanDrop(DropAttemptInfo info)
+    {
+        return wrappedRule.CanDrop(info);
+    }
+
+    public virtual void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo)
+    {
+        wrappedRule.ReportDroprates(drops, ratesInfo);
+    }
+
+    public virtual ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info)
+    {
+        var retVal = new ItemDropAttemptResult
+        {
+            State = ItemDropAttemptResultState.Success,
+        };
+
+        var guard = CreateDropGuard();
+        using (guard.Scope())
+        {
+            while (guard.UpdateAndContinue())
+            {
+                retVal = wrappedRule.TryDroppingItem(info);
+            }
+
+            if (guard.Failed)
+            {
+                retVal = new ItemDropAttemptResult
+                {
+                    State = ItemDropAttemptResultState.DoesntFillConditions,
+                };
+            }
+        }
+
+        return retVal;
+    }
+
+    protected abstract ItemDropGuard CreateDropGuard();
 }
 
 internal sealed class ItemDropGuardSystem : ModSystem

@@ -46,26 +46,6 @@ internal static class DropHelpers
     }
 }
 
-internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDropRule
-{
-    public virtual List<IItemDropRuleChainAttempt> ChainedRules => wrappedRule.ChainedRules;
-
-    public virtual bool CanDrop(DropAttemptInfo info)
-    {
-        return wrappedRule.CanDrop(info);
-    }
-
-    public virtual void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo)
-    {
-        wrappedRule.ReportDroprates(drops, ratesInfo);
-    }
-
-    public virtual ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info)
-    {
-        return wrappedRule.TryDroppingItem(info);
-    }
-}
-
 internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedItem) : WrappedItemDropRule(wrappedRule)
 {
     public override void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo)
@@ -106,31 +86,9 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
         }
     }
 
-    public override ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info)
+    protected override ItemDropGuard CreateDropGuard()
     {
-        var retVal = new ItemDropAttemptResult
-        {
-            State = ItemDropAttemptResultState.Success,
-        };
-
-        var guard = new RemovedItemDropGuard(removedItem);
-        using (guard.Scope())
-        {
-            while (guard.UpdateAndContinue())
-            {
-                retVal = base.TryDroppingItem(info);
-            }
-
-            if (guard.Failed)
-            {
-                retVal = new ItemDropAttemptResult
-                {
-                    State = ItemDropAttemptResultState.DoesntFillConditions,
-                };
-            }
-        }
-
-        return retVal;
+        return new RemovedItemDropGuard(removedItem);
     }
 }
 
