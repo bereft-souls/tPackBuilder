@@ -156,7 +156,7 @@ public readonly struct ValueModifier(ValueModifierKind kind, float value) : IEqu
         _ => throw new IndexOutOfRangeException($"Invalid ValueModifierKind: {this.Kind}")
     };
 
-    public override string ToString() => "ValueModifier[{kind},{value}]";
+    public override string ToString() => $"ValueModifier[{kind},{value}]";
     public bool Equals(ValueModifier other) => this.Kind == other.Kind && this.Value.Equals(other.Value);
     public override bool Equals(object? obj) => obj is ValueModifier other && this.Equals(other);
     public override int GetHashCode() => HashCode.Combine((int)this.Kind, this.Value);
