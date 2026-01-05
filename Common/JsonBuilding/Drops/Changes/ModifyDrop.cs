@@ -5,8 +5,14 @@ using PackBuilder.Common.JsonBuilding.DataStructures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.Utilities;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
+
+internal readonly record struct ModifiedChance(
+    float Original,
+    float New
+);
 
 internal sealed record ModifyDrop(
     string Item
@@ -59,9 +65,68 @@ internal sealed record ModifyDrop(
     }
 }
 
-internal sealed class ModifyItemDropGuard(int itemId, ValueModifier amount, ValueModifier chance) : ItemDropGuard
+internal sealed class ModifyItemDropGuard : ItemDropGuard
 {
-    public bool DesiredItem { get; set; }
+    private enum RollKind
+    {
+        // Default behavior, accept the item if it comes.
+        RollOnce,
+
+        // Unfavorable behavior; if the item is rolled, roll a chance to keep
+        // the item or discard it.
+        RollLessThanOnce,
+
+        // Favorable behavior; if the item is not rolled, keep requesting a
+        // reroll to try and force it out.
+        RollMoreThanOnce,
+    }
+
+    private readonly int itemId;
+    private readonly ValueModifier amount;
+    private readonly UnifiedRandom rng;
+
+    private readonly RollKind rollKind;
+    private float rollValue;
+
+    private bool failedRoll = false;
+
+    public ModifyItemDropGuard(
+        int itemId,
+        ValueModifier amount,
+        ModifiedChance? chance,
+        UnifiedRandom rng
+    )
+    {
+        this.itemId = itemId;
+        this.amount = amount;
+        this.rng = rng;
+
+        if (!chance.HasValue)
+        {
+            rollKind = RollKind.RollOnce;
+            rollValue = 0f;
+            return;
+        }
+
+        var rollsContinuous = MathF.Log(1f - chance.Value.New) / MathF.Log(1f - chance.Value.Original);
+        if (Math.Abs(rollsContinuous - 1f) < 0.01f)
+        {
+            rollKind = RollKind.RollOnce;
+            rollValue = 0f;
+            return;
+        }
+
+        if (rollsContinuous < 1f)
+        {
+            rollKind = RollKind.RollLessThanOnce;
+            rollValue = rollsContinuous;
+        }
+        else
+        {
+            rollKind = RollKind.RollMoreThanOnce;
+            rollValue = rollsContinuous - 1f;
+        }
+    }
 
     public override ItemDropGuardKind ModifyItemDrop(
         ref IEntitySource source,
@@ -78,19 +143,73 @@ internal sealed class ModifyItemDropGuard(int itemId, ValueModifier amount, Valu
         ref bool reverseLookup
     )
     {
-        DesiredItem = type == itemId;
+        var desiredItem = type == itemId;
+        if (desiredItem && failedRoll)
+        {
+            return ItemDropGuardKind.Reroll;
+        }
 
-        if (DesiredItem)
+        if (desiredItem)
         {
             stack = (int)amount.Apply(stack);
         }
 
-        return ItemDropGuardKind.Success;
+        switch (rollKind)
+        {
+            case RollKind.RollOnce:
+                return ItemDropGuardKind.Success;
+
+            case RollKind.RollLessThanOnce:
+            {
+                if (!desiredItem || rng.NextFloat() < rollValue)
+                {
+                    return ItemDropGuardKind.Success;
+                }
+
+                failedRoll = true;
+                return ItemDropGuardKind.Reroll;
+            }
+
+            case RollKind.RollMoreThanOnce:
+            {
+                if (desiredItem)
+                {
+                    return ItemDropGuardKind.Success;
+                }
+
+                if (rollValue > 1f)
+                {
+                    rollValue -= 1f;
+                    return ItemDropGuardKind.Reroll;
+                }
+
+                var remainingRoll = rollValue;
+                rollValue = 0f;
+
+                if (rng.NextFloat() < remainingRoll)
+                {
+                    return ItemDropGuardKind.Reroll;
+                }
+
+                failedRoll = true;
+                return ItemDropGuardKind.Success;
+            }
+
+            default:
+                throw new ArgumentException();
+        }
     }
 }
 
-internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, ValueModifier amount, ValueModifier chance) : WrappedItemDropRule(wrappedRule)
+internal sealed class ModifyItemDropRule(
+    IItemDropRule wrappedRule,
+    int itemId,
+    ValueModifier amount,
+    ValueModifier chance
+) : WrappedItemDropRule(wrappedRule)
 {
+    private ModifiedChance? CalculatedChance { get; set; }
+
     public override void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo)
     {
         // base.ReportDroprates(drops, ratesInfo);
@@ -120,7 +239,7 @@ internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, 
 
         var newTargetSum = 0f;
 
-        for (int i = ownRates.Count - 1; i >= 0; i--)
+        for (var i = ownRates.Count - 1; i >= 0; i--)
         {
             var drop = ownRates[i];
 
@@ -130,6 +249,11 @@ internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, 
             }
 
             var newRate = chance.Apply(drop.dropRate);
+
+            // TODO: How to account for multiple of the same item in a single
+            //       rule?  Probably doesn't matter too much..?
+            CalculatedChance = new ModifiedChance(drop.dropRate, newRate);
+
             if (newRate <= 0f)
             {
                 ownRates.RemoveAt(i);
@@ -179,8 +303,8 @@ internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, 
         drops.AddRange(chainedRates);
     }
 
-    protected override ItemDropGuard CreateDropGuard()
+    protected override ItemDropGuard CreateDropGuard(DropAttemptInfo info)
     {
-        return new ModifyItemDropGuard(itemId, amount, chance);
+        return new ModifyItemDropGuard(itemId, amount, CalculatedChance, info.rng);
     }
 }

@@ -121,7 +121,7 @@ internal sealed class RemoveItemDropRule(IItemDropRule wrappedRule, int removedI
         drops.AddRange(chainedRates);
     }
 
-    protected override ItemDropGuard CreateDropGuard()
+    protected override ItemDropGuard CreateDropGuard(DropAttemptInfo info)
     {
         return new RemovedItemDropGuard(removedItem);
     }

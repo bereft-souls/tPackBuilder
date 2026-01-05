@@ -114,7 +114,7 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
             State = ItemDropAttemptResultState.Success,
         };
 
-        var guard = CreateDropGuard();
+        var guard = CreateDropGuard(info);
         using (guard.Scope())
         {
             while (retVal.State == ItemDropAttemptResultState.Success && guard.UpdateAndContinue())
@@ -158,7 +158,7 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
         return retVal;
     }
 
-    protected abstract ItemDropGuard CreateDropGuard();
+    protected abstract ItemDropGuard CreateDropGuard(DropAttemptInfo info);
 
     // Reimplementation of Main.ItemDropSolver that's more keen to respect our
     // guard value.
