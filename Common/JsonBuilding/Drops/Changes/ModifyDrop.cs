@@ -96,43 +96,54 @@ internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, 
 
         var total = 0f;
         var targetSum = 0f;
-        var deltaTotal = 0f;
 
         for (var i = 0; i < ownRates.Count; i++)
         {
             var drop = ownRates[i];
-            {
-                total += drop.dropRate;
-            }
+            total += drop.dropRate;
 
             if (drop.itemId == itemId)
             {
                 targetSum += drop.dropRate;
-
-                var rawNew = chance.Apply(drop.dropRate);
-                var newRate = MathF.Max(0f, rawNew);
-                {
-                    deltaTotal += newRate - drop.dropRate;
-                }
             }
         }
 
-        // ?! How did we get here
-        if (targetSum <= 0f)
+        if (targetSum <= 0f || total <= 0f)
         {
             drops.AddRange(ownRates);
             drops.AddRange(chainedRates);
             return;
         }
 
-        var newTargetSum = targetSum + deltaTotal;
+        var newTargetSum = 0f;
+
+        for (var i = 0; i < ownRates.Count; i++)
+        {
+            var drop = ownRates[i];
+
+            if (drop.itemId == itemId)
+            {
+                var scaled = chance.Apply(drop.dropRate);
+                drop.dropRate = MathF.Max(0f, scaled);
+
+                drop.stackMin = (int)amount.Apply(drop.stackMin);
+                drop.stackMax = (int)amount.Apply(drop.stackMax);
+
+                newTargetSum += drop.dropRate;
+            }
+
+            ownRates[i] = drop;
+        }
+
+        newTargetSum = MathF.Min(newTargetSum, total);
+        
         var otherSum = total - targetSum;
         var newOtherSum = total - newTargetSum;
 
-        if (otherSum <= 0f || newOtherSum < 0f)
+        if (otherSum <= 0f)
         {
-            // TODO: !?
-            ownRates.Clear();
+            drops.AddRange(ownRates);
+            drops.AddRange(chainedRates);
             return;
         }
 
@@ -141,17 +152,7 @@ internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, 
         {
             var drop = ownRates[i];
 
-            if (drop.itemId == itemId)
-            {
-                var rawNew = chance.Apply(drop.dropRate);
-                {
-                    drop.dropRate = MathF.Max(0f, rawNew);
-                }
-
-                drop.stackMin = (int)amount.Apply(drop.stackMin);
-                drop.stackMax = (int)amount.Apply(drop.stackMax);
-            }
-            else
+            if (drop.itemId != itemId)
             {
                 drop.dropRate *= scaleOthers;
             }
