@@ -299,7 +299,9 @@ internal sealed class ModifyItemDropRule(
             ownRates[i] = drop;
         }
 
-        drops.AddRange(ownRates);
+        // Filter out 0% drops that may be generated if a drop mod makes a drop
+        // a guaranteed chance.
+        drops.AddRange(ownRates.Where(x => x.dropRate > 0f));
         drops.AddRange(chainedRates);
     }
 
