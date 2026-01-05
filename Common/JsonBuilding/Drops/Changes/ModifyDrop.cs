@@ -61,6 +61,8 @@ internal sealed record ModifyDrop(
 
 internal sealed class ModifyItemDropGuard(int itemId, ValueModifier amount, ValueModifier chance) : ItemDropGuard
 {
+    public bool DesiredItem { get; set; }
+
     public override ItemDropGuardKind ModifyItemDrop(
         ref IEntitySource source,
         ref int x,
@@ -76,7 +78,9 @@ internal sealed class ModifyItemDropGuard(int itemId, ValueModifier amount, Valu
         ref bool reverseLookup
     )
     {
-        if (type == itemId)
+        DesiredItem = type == itemId;
+
+        if (DesiredItem)
         {
             stack = (int)amount.Apply(stack);
         }
@@ -97,9 +101,8 @@ internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, 
         var total = 0f;
         var targetSum = 0f;
 
-        for (var i = 0; i < ownRates.Count; i++)
+        foreach (var drop in ownRates)
         {
-            var drop = ownRates[i];
             total += drop.dropRate;
 
             if (drop.itemId == itemId)
@@ -117,26 +120,38 @@ internal sealed class ModifyItemDropRule(IItemDropRule wrappedRule, int itemId, 
 
         var newTargetSum = 0f;
 
-        for (var i = 0; i < ownRates.Count; i++)
+        for (int i = ownRates.Count - 1; i >= 0; i--)
         {
             var drop = ownRates[i];
 
-            if (drop.itemId == itemId)
+            if (drop.itemId != itemId)
             {
-                var scaled = chance.Apply(drop.dropRate);
-                drop.dropRate = MathF.Max(0f, scaled);
-
-                drop.stackMin = (int)amount.Apply(drop.stackMin);
-                drop.stackMax = (int)amount.Apply(drop.stackMax);
-
-                newTargetSum += drop.dropRate;
+                continue;
             }
 
+            var newRate = chance.Apply(drop.dropRate);
+            if (newRate <= 0f)
+            {
+                ownRates.RemoveAt(i);
+                continue;
+            }
+
+            drop.dropRate = newRate;
+            drop.stackMin = (int)amount.Apply(drop.stackMin);
+            drop.stackMax = (int)amount.Apply(drop.stackMax);
+
+            newTargetSum += drop.dropRate;
             ownRates[i] = drop;
         }
 
+        if (ownRates.Count == 0)
+        {
+            drops.AddRange(chainedRates);
+            return;
+        }
+
         newTargetSum = MathF.Min(newTargetSum, total);
-        
+
         var otherSum = total - targetSum;
         var newOtherSum = total - newTargetSum;
 
