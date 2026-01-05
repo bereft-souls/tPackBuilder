@@ -23,5 +23,4 @@ internal sealed class DropMod
     // public bool AllItems { get; set; } = false;
 
     public required DropChanges Changes { get; set; }
-    
 }

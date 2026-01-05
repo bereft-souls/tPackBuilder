@@ -55,19 +55,19 @@ internal abstract class ItemDropGuard
         return CanRun;
     }
 
-    public abstract ItemDropGuardKind AllowItemDrop(
-        IEntitySource source,
-        int x,
-        int y,
-        int width,
-        int height,
-        Item? itemToClone,
-        int type,
-        int stack,
-        bool noBroadcast,
-        int prefix,
-        bool noGrabDelay,
-        bool reverseLookup
+    public abstract ItemDropGuardKind ModifyItemDrop(
+        ref IEntitySource source,
+        ref int x,
+        ref int y,
+        ref int width,
+        ref int height,
+        ref Item? itemToClone,
+        ref int type,
+        ref int stack,
+        ref bool noBroadcast,
+        ref int prefix,
+        ref bool noGrabDelay,
+        ref bool reverseLookup
     );
 }
 
@@ -114,7 +114,7 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
             State = ItemDropAttemptResultState.Success,
         };
 
-        var guard = CreateDropGuard();
+        var guard = CreateDropGuard(info);
         using (guard.Scope())
         {
             while (retVal.State == ItemDropAttemptResultState.Success && guard.UpdateAndContinue())
@@ -158,7 +158,7 @@ internal abstract class WrappedItemDropRule(IItemDropRule wrappedRule) : IItemDr
         return retVal;
     }
 
-    protected abstract ItemDropGuard CreateDropGuard();
+    protected abstract ItemDropGuard CreateDropGuard(DropAttemptInfo info);
 
     // Reimplementation of Main.ItemDropSolver that's more keen to respect our
     // guard value.
@@ -210,7 +210,7 @@ internal sealed class ItemDropGuardSystem : ModSystem
         int y,
         int width,
         int height,
-        Item itemToClone,
+        Item? itemToClone,
         int type,
         int stack,
         bool noBroadcast,
@@ -219,7 +219,7 @@ internal sealed class ItemDropGuardSystem : ModSystem
         bool reverseLookup
     )
     {
-        if (!GuardStack.TryPeek(out var guard))
+        if (GuardStack.Count == 0)
         {
             return orig(
                 source,
@@ -237,8 +237,49 @@ internal sealed class ItemDropGuardSystem : ModSystem
             );
         }
 
-        guard.DidEvaluate = true;
-        var result = guard.AllowItemDrop(
+        foreach (var guard in GuardStack)
+        {
+            if (!guard.CanRun)
+            {
+                continue;
+            }
+
+            guard.DidEvaluate = true;
+            var result = guard.ModifyItemDrop(
+                ref source,
+                ref x,
+                ref y,
+                ref width,
+                ref height,
+                ref itemToClone,
+                ref type,
+                ref stack,
+                ref noBroadcast,
+                ref pfix,
+                ref noGrabDelay,
+                ref reverseLookup
+            );
+
+            switch (result)
+            {
+                case ItemDropGuardKind.Success:
+                    guard.CanRun = false;
+                    continue;
+
+                case ItemDropGuardKind.Reroll:
+                    guard.CanRun = true;
+                    return Main.maxItems;
+
+                case ItemDropGuardKind.Cancel:
+                    guard.CanRun = false;
+                    return Main.maxItems;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        return orig(
             source,
             x,
             y,
@@ -252,37 +293,6 @@ internal sealed class ItemDropGuardSystem : ModSystem
             noGrabDelay,
             reverseLookup
         );
-
-        switch (result)
-        {
-            case ItemDropGuardKind.Success:
-                guard.CanRun = false;
-                return orig(
-                    source,
-                    x,
-                    y,
-                    width,
-                    height,
-                    itemToClone,
-                    type,
-                    stack,
-                    noBroadcast,
-                    pfix,
-                    noGrabDelay,
-                    reverseLookup
-                );
-
-            case ItemDropGuardKind.Reroll:
-                guard.CanRun = true;
-                return Main.maxItems;
-
-            case ItemDropGuardKind.Cancel:
-                guard.CanRun = false;
-                return Main.maxItems;
-
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
     }
 }
 

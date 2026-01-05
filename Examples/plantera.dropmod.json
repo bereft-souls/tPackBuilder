@@ -13,6 +13,14 @@
         },
         "AddDrop": {
             "Item": "Terraria/IronPickaxe"
+        },
+        "ModifyDrop": {
+            "Item": "Terraria/VenusMagnum",
+            "Chance": "x3.5"
+        },
+        "ModifyDrop": {
+            "Item": "Terraria/NettleBurst",
+            "Amount": "+4"
         }
     }
 }
