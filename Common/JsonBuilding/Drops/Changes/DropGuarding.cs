@@ -219,7 +219,7 @@ internal sealed class ItemDropGuardSystem : ModSystem
         bool reverseLookup
     )
     {
-        if (!GuardStack.TryPeek(out var guard))
+        if (GuardStack.Count == 0)
         {
             return orig(
                 source,
@@ -237,52 +237,62 @@ internal sealed class ItemDropGuardSystem : ModSystem
             );
         }
 
-        guard.DidEvaluate = true;
-        var result = guard.ModifyItemDrop(
-            ref source,
-            ref x,
-            ref y,
-            ref width,
-            ref height,
-            ref itemToClone,
-            ref type,
-            ref stack,
-            ref noBroadcast,
-            ref pfix,
-            ref noGrabDelay,
-            ref reverseLookup
-        );
-
-        switch (result)
+        foreach (var guard in GuardStack)
         {
-            case ItemDropGuardKind.Success:
-                guard.CanRun = false;
-                return orig(
-                    source,
-                    x,
-                    y,
-                    width,
-                    height,
-                    itemToClone,
-                    type,
-                    stack,
-                    noBroadcast,
-                    pfix,
-                    noGrabDelay,
-                    reverseLookup
-                );
+            if (!guard.CanRun)
+            {
+                continue;
+            }
 
-            case ItemDropGuardKind.Reroll:
-                guard.CanRun = true;
-                return Main.maxItems;
+            guard.DidEvaluate = true;
+            var result = guard.ModifyItemDrop(
+                ref source,
+                ref x,
+                ref y,
+                ref width,
+                ref height,
+                ref itemToClone,
+                ref type,
+                ref stack,
+                ref noBroadcast,
+                ref pfix,
+                ref noGrabDelay,
+                ref reverseLookup
+            );
 
-            case ItemDropGuardKind.Cancel:
-                guard.CanRun = false;
-                return Main.maxItems;
+            switch (result)
+            {
+                case ItemDropGuardKind.Success:
+                    guard.CanRun = false;
+                    continue;
 
-            default:
-                throw new ArgumentOutOfRangeException();
+                case ItemDropGuardKind.Reroll:
+                    guard.CanRun = true;
+                    return Main.maxItems;
+
+                case ItemDropGuardKind.Cancel:
+                    guard.CanRun = false;
+                    return Main.maxItems;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
+
+        return orig(
+            source,
+            x,
+            y,
+            width,
+            height,
+            itemToClone,
+            type,
+            stack,
+            noBroadcast,
+            pfix,
+            noGrabDelay,
+            reverseLookup
+        );
     }
 }
 

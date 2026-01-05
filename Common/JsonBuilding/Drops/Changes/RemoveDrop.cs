@@ -19,11 +19,11 @@ internal sealed record RemoveDrop(
 
     private void RecursivelyModifyPartialDropRules(IIterableLoot lootProvider)
     {
-        for (var i = 0; i < lootProvider.Count; i++)
+        for (int i = lootProvider.Count - 1; i >= 0; i--)
         {
-            var rule = lootProvider[i];
+            RecursivelyModifyPartialDropRules(new ChainedRuleLootProvider(lootProvider[i].ChainedRules));
 
-            RecursivelyModifyPartialDropRules(new ChainedRuleLootProvider(rule.ChainedRules));
+            var rule = lootProvider[i];
 
             var rates = DropHelpers.GetSelfDropInfo(rule);
             if (rates.Count == 0)
