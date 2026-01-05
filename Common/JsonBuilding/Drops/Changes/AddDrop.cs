@@ -58,7 +58,7 @@ internal sealed record AddDrop(
 
     public string Chance { get; set; } = "1.00";
 
-    public void ApplyTo(ILoot loot)
+    public void ApplyTo(IIterableLoot loot)
     {
         var (min, max) = DropHelpers.ParseAmount(Amount);
 

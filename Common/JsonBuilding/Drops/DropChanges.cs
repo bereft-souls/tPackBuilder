@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using PackBuilder.Common.JsonBuilding.Drops.Changes;
-using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops;
 
@@ -12,18 +11,18 @@ internal sealed class DropChanges
     {
         set => Changes.Add(value);
     }
-    
+
     public RemoveDrop RemoveDrop
     {
         set => Changes.Add(value);
     }
-    
+
     public ModifyDrop ModifyDrop
     {
         set => Changes.Add(value);
     }
 
-    public void ApplyTo(ILoot loot)
+    public void ApplyTo(IIterableLoot loot)
     {
         foreach (var change in Changes)
         {

@@ -6,36 +6,139 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
-internal sealed class ListLootProvider(List<IItemDropRule> loot) : ILoot
+internal interface IIterableLoot
 {
-    public List<IItemDropRule> Get(bool includeGlobalDrops = true)
+    int Count { get; }
+
+    IItemDropRule this[int index] { get; }
+
+    void Add(
+        IItemDropRule entry
+    );
+
+    void Replace(
+        IItemDropRule oldRule,
+        IItemDropRule newRule
+    );
+
+    void Remove(
+        IItemDropRule entry
+    );
+
+    void RemoveWhere(
+        Predicate<IItemDropRule> predicate
+    );
+}
+
+internal abstract class AbstractIterableListLoot : IIterableLoot
+{
+    public int Count => GetListReference().Count;
+
+    public IItemDropRule this[int index] => GetListReference()[index];
+
+    public void Add(
+        IItemDropRule entry
+    )
     {
-        return loot.ToList();
+        GetListReference().Add(entry);
     }
 
-    public IItemDropRule Add(IItemDropRule entry)
+    public void Replace(
+        IItemDropRule oldRule,
+        IItemDropRule newRule
+    )
     {
-        loot.Add(entry);
-        return entry;
+        var idx = GetListReference().IndexOf(oldRule);
+        if (idx == -1)
+        {
+            return;
+        }
+
+        GetListReference()[idx] = newRule;
     }
 
-    public IItemDropRule Remove(IItemDropRule entry)
+    public void Remove(
+        IItemDropRule entry
+    )
     {
-        loot.Remove(entry);
-        return entry;
+        GetListReference().Remove(entry);
     }
 
-    public void RemoveWhere(Predicate<IItemDropRule> predicate, bool includeGlobalDrops = true)
+    public void RemoveWhere(
+        Predicate<IItemDropRule> predicate
+    )
     {
-        loot.RemoveAll(predicate);
+        GetListReference().RemoveAll(predicate);
+    }
+
+    protected abstract List<IItemDropRule> GetListReference();
+}
+
+internal sealed class IterableGlobalLoot(GlobalLoot loot) : AbstractIterableListLoot
+{
+    protected override List<IItemDropRule> GetListReference()
+    {
+        return loot.itemDropDatabase._globalEntries;
     }
 }
 
-internal sealed class ChainedRuleLootProvider(List<IItemDropRuleChainAttempt> chainedRules) : ILoot
+internal sealed class IterableNpcLoot(NPCLoot loot) : AbstractIterableListLoot
+{
+    protected override List<IItemDropRule> GetListReference()
+    {
+        if (!loot.itemDropDatabase._entriesByNpcNetId.TryGetValue(loot.npcNetId, out var list))
+        {
+            loot.itemDropDatabase._entriesByNpcNetId[loot.npcNetId] = list = [];
+        }
+
+        return list;
+    }
+}
+
+internal sealed class IterableItemLoot(ItemLoot loot) : AbstractIterableListLoot
+{
+    protected override List<IItemDropRule> GetListReference()
+    {
+        if (!loot.itemDropDatabase._entriesByItemId.TryGetValue(loot.itemType, out var list))
+        {
+            loot.itemDropDatabase._entriesByItemId[loot.itemType] = list = [];
+        }
+
+        return list;
+    }
+}
+
+internal sealed class IterableListLoot(List<IItemDropRule> loot) : AbstractIterableListLoot
+{
+    protected override List<IItemDropRule> GetListReference()
+    {
+        return loot;
+    }
+}
+
+internal sealed class ChainedRuleLootProvider(List<IItemDropRuleChainAttempt> chainedRules) : IIterableLoot
 {
     private sealed class WrappedDropRuleChainAttempt : IItemDropRuleChainAttempt
     {
-        public IItemDropRule RuleToChain { get; }
+        // Private setter to allow stacking these wrapped instances.
+        public IItemDropRule RuleToChain
+        {
+            get => wrapped.RuleToChain;
+
+            // ReSharper disable once PropertyCanBeMadeInitOnly.Local
+            private set
+            {
+                // TODO: Account for explicit interface implementations.
+                if (wrapped.GetType().GetProperty(nameof(RuleToChain)) is { SetMethod: { } set })
+                {
+                    set.Invoke(wrapped, [value]);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Attempted to set RuleToChain property of IItemDropRuleChainAttempt that does not have a setter: {GetType().FullName}");
+                }
+            }
+        }
 
         private readonly IItemDropRuleChainAttempt wrapped;
 
@@ -43,12 +146,6 @@ internal sealed class ChainedRuleLootProvider(List<IItemDropRuleChainAttempt> ch
         {
             this.wrapped = wrapped;
             RuleToChain = newRule;
-
-            // TODO: Account for explicit interface implementations.
-            if (wrapped.GetType().GetProperty(nameof(RuleToChain)) is { SetMethod: { } set })
-            {
-                set.Invoke(wrapped, [newRule]);
-            }
         }
 
         public bool CanChainIntoRule(ItemDropAttemptResult parentResult)
@@ -69,46 +166,49 @@ internal sealed class ChainedRuleLootProvider(List<IItemDropRuleChainAttempt> ch
     private readonly Dictionary<IItemDropRule, IItemDropRuleChainAttempt> reverseMap =
         chainedRules.ToDictionary(x => x.RuleToChain, x => x);
 
-    public List<IItemDropRule> Get(bool includeGlobalDrops = true)
+    public int Count => chainedRules.Count;
+
+    public IItemDropRule this[int index] => chainedRules[index].RuleToChain;
+
+    public void Add(IItemDropRule entry)
     {
-        return reverseMap.Keys.ToList();
+        throw new InvalidOperationException("Cannot directly add a drop rule to a chained rule loot provider; use Replace");
     }
 
-    public IItemDropRule Add(IItemDropRule entry)
-    {
-        throw new InvalidOperationException("Cannot add a drop rule to a wrapped collection of rule chain attempts");
-    }
-
-    public IItemDropRule Replace(IItemDropRule oldRule, IItemDropRule newRule)
+    public void Replace(
+        IItemDropRule oldRule,
+        IItemDropRule newRule
+    )
     {
         if (!reverseMap.TryGetValue(oldRule, out var attempt))
         {
-            return newRule;
+            return;
         }
 
-        Remove(oldRule);
+        var idx = chainedRules.IndexOf(attempt);
+        if (idx == -1)
+        {
+            return;
+        }
 
         var newAttempt = new WrappedDropRuleChainAttempt(attempt, newRule);
         {
-            chainedRules.Add(newAttempt);
+            chainedRules[idx] = newAttempt;
             reverseMap[newRule] = newAttempt;
         }
-
-        return newRule;
     }
 
-    public IItemDropRule Remove(IItemDropRule entry)
+    public void Remove(IItemDropRule entry)
     {
         if (!reverseMap.Remove(entry, out var attempt))
         {
-            return entry;
+            return;
         }
 
         chainedRules.Remove(attempt);
-        return entry;
     }
 
-    public void RemoveWhere(Predicate<IItemDropRule> predicate, bool includeGlobalDrops = true)
+    public void RemoveWhere(Predicate<IItemDropRule> predicate)
     {
         var entriesToRemove = reverseMap.Keys.Where(x => predicate(x)).ToArray();
         if (entriesToRemove.Length == 0)

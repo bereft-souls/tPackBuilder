@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Drops;
+using PackBuilder.Common.JsonBuilding.Drops.Changes;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -19,7 +20,7 @@ internal sealed class DropModifierNpc : GlobalNPC
 
         foreach (var change in DropModifier.GlobalNpcDropChanges)
         {
-            change.ApplyTo(globalLoot);
+            change.ApplyTo(new IterableGlobalLoot(globalLoot));
         }
     }
 
@@ -34,7 +35,7 @@ internal sealed class DropModifierNpc : GlobalNPC
 
         foreach (var change in changes)
         {
-            change.ApplyTo(npcLoot);
+            change.ApplyTo(new IterableNpcLoot(npcLoot));
         }
     }
 }
@@ -54,7 +55,7 @@ internal sealed class DropModifierItem : GlobalItem
 
         foreach (var change in changes)
         {
-            change.ApplyTo(itemLoot);
+            change.ApplyTo(new IterableItemLoot(itemLoot));
         }
     }
 }

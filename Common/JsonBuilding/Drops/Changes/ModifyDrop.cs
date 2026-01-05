@@ -5,7 +5,6 @@ using PackBuilder.Common.JsonBuilding.DataStructures;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.ItemDropRules;
-using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
@@ -19,15 +18,17 @@ internal sealed record ModifyDrop(
 
     public ValueModifier Chance { get; set; } = ValueModifier.NoOperation;
 
-    public void ApplyTo(ILoot loot)
+    public void ApplyTo(IIterableLoot loot)
     {
         RecursivelyModifyPartialDropRules(loot);
     }
 
-    private void RecursivelyModifyPartialDropRules(ILoot lootProvider)
+    private void RecursivelyModifyPartialDropRules(IIterableLoot lootProvider)
     {
-        foreach (var rule in lootProvider.Get())
+        for (var i = 0; i < lootProvider.Count; i++)
         {
+            var rule = lootProvider[i];
+
             RecursivelyModifyPartialDropRules(new ChainedRuleLootProvider(rule.ChainedRules));
 
             var rates = DropHelpers.GetSelfDropInfo(rule);
@@ -51,14 +52,8 @@ internal sealed record ModifyDrop(
             }
 
             var newRule = new ModifyItemDropRule(rule, ItemId, Amount, Chance);
-            if (lootProvider is ChainedRuleLootProvider chainedRuleLootProvider)
             {
-                chainedRuleLootProvider.Replace(rule, newRule);
-            }
-            else
-            {
-                lootProvider.Remove(rule);
-                lootProvider.Add(newRule);
+                lootProvider.Replace(rule, newRule);
             }
         }
     }
