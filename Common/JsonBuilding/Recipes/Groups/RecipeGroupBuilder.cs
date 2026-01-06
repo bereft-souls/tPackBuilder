@@ -18,7 +18,7 @@ namespace PackBuilder.Common.JsonBuilding.Recipes.Groups
         public void Build()
         {
             int[] items = Items.Select(GetItem).ToArray();
-            RecipeGroup.RegisterGroup(Name, new RecipeGroup(() => Language.GetTextValue(LocalizationKey), items));
+            RecipeGroup.RegisterGroup(Name, new RecipeGroup(() => Language.GetOrRegister(LocalizationKey).Value, items));
         }
     }
 }
