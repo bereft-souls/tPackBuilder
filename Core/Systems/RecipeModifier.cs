@@ -1,11 +1,9 @@
-﻿using MonoMod.Cil;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.Recipes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Terraria;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems

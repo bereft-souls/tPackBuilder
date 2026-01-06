@@ -1,6 +1,6 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.JsonBuilding.Recipes.Generation
+namespace PackBuilder.Common.JsonBuilding.Recipes.Generation.Properties
 {
     internal class RecipeGroupIngredient
     {

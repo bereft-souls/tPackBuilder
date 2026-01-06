@@ -81,6 +81,11 @@ namespace PackBuilder
         HideStackTraceException("Must specify a result for a recipe building!")
     { }
 
+    // When a drop mod has no NPCs and is not global.
     public class NoDropScopeException()
         : HideStackTraceException("Must specify an least one NPC or item or mark the changes as global for a drop modification!");
+
+    // When a recipe group mod specifies no changes.
+    public class NoGroupChangesException()
+        : HideStackTraceException("No changes to the recipe group were specified!");
 }

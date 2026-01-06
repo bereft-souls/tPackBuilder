@@ -1,5 +1,4 @@
-﻿using MonoMod.Cil;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using Terraria.ModLoader;
@@ -46,7 +45,7 @@ namespace PackBuilder.Core.Systems
 
                 // Re-set our mod as "loading."
                 // This allows us to load our types tagged with LateLoadAttribute even after mod
-                // loading has techinically "finished", which ensure all hooks from these types are run last.
+                // loading has techinically "finished", which ensures all hooks from these types are run last.
                 var mod_Loading = typeof(Mod).GetField("loading", BindingFlags.Instance | BindingFlags.NonPublic);
                 mod_Loading.SetValue(Mod, true);
 

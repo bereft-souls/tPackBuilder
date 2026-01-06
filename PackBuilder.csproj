@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\tModLoader.targets"/>
+    <Import Project="..\tModLoader.targets" />
 
     <PropertyGroup>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="ModRefs\**\*"/>
+        <Reference Include="ModRefs\**\*" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Publicize Include="tModLoader" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false"/>
+        <Publicize Include="tModLoader" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false" />
     </ItemGroup>
 
 </Project>

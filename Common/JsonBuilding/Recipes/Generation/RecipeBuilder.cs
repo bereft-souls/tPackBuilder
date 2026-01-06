@@ -1,8 +1,8 @@
-﻿using PackBuilder.Common.JsonBuilding.Recipes.Generation;
+﻿using PackBuilder.Common.JsonBuilding.Recipes.Generation.Properties;
 using System.Collections.Generic;
 using Terraria.ModLoader;
 
-namespace PackBuilder.Common.JsonBuilding.Recipes
+namespace PackBuilder.Common.JsonBuilding.Recipes.Generation
 {
     internal class RecipeBuilder
     {

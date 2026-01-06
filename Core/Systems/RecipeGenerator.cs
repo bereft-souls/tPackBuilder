@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using PackBuilder.Common.JsonBuilding.Recipes;
+using PackBuilder.Common.JsonBuilding.Recipes.Generation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
