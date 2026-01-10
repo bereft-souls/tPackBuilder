@@ -16,7 +16,8 @@ internal sealed class ResizablePanelButton : UIElement
 
     private static readonly Asset<Texture2D> asset = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/DraggablePanelCorner");
 
-    private Vector2? offset;
+    private bool isDragging;
+    private Vector2? lastMouse;
 
     public ResizablePanelButton()
     {
@@ -38,16 +39,18 @@ internal sealed class ResizablePanelButton : UIElement
     {
         base.Update(gameTime);
 
-        if (ContainsPoint(Main.MouseScreen))
+        var mouseCurrent = Main.MouseScreen;
+        if (ContainsPoint(mouseCurrent))
         {
             Main.LocalPlayer.mouseInterface = true;
         }
 
-        if (offset.HasValue)
+        if (lastMouse.HasValue)
         {
-            var delta = Main.MouseScreen - offset.Value;
-            UpdateDimensions(delta);
+            ApplyDimensionsDelta(lastMouse.Value - mouseCurrent);
         }
+
+        lastMouse = isDragging ? mouseCurrent : null;
 
         EnsureConstrainedDimensions();
     }
@@ -71,8 +74,7 @@ internal sealed class ResizablePanelButton : UIElement
         var deltaWidth = realWidth - clampedWidth;
         var deltaHeight = realHeight - clampedHeight;
 
-        Parent.Width.Pixels -= deltaWidth;
-        Parent.Height.Pixels -= deltaHeight;
+        ApplyDimensionsDelta(new Vector2(deltaWidth, deltaHeight));
 
         Recalculate();
     }
@@ -81,22 +83,17 @@ internal sealed class ResizablePanelButton : UIElement
     {
         base.LeftMouseDown(evt);
 
-        if (evt.Target == this)
-        {
-            ResizeBegin(evt);
-        }
+        isDragging = true;
     }
 
     public override void LeftMouseUp(UIMouseEvent evt)
     {
         base.LeftMouseUp(evt);
 
-        if (evt.Target == this)
-        {
-            ResizeEnd(evt);
-        }
+        isDragging = false;
     }
 
+    /*
     private void ResizeBegin(UIMouseEvent evt)
     {
         offset = new Vector2(evt.MousePosition.X - Left.Pixels, evt.MousePosition.Y - Top.Pixels);
@@ -112,14 +109,15 @@ internal sealed class ResizablePanelButton : UIElement
         var delta = evt.MousePosition - offset.Value;
         offset = null;
 
-        UpdateDimensions(delta);
+        ApplyDimensionsDelta(delta);
     }
+    */
 
-    private void UpdateDimensions(Vector2 delta)
+    private void ApplyDimensionsDelta(Vector2 delta)
     {
-        Parent.Width.Set(Parent.Width.Pixels + delta.X, Parent.Width.Percent);
-        Parent.Height.Set(Parent.Height.Pixels + delta.Y, Parent.Height.Percent);
-
-        EnsureConstrainedDimensions();
+        Parent.Width.Pixels -= delta.X;
+        Parent.Height.Pixels -= delta.Y;
+        Parent.Left.Pixels -= delta.X * Parent.HAlign;
+        Parent.Top.Pixels -= delta.Y * Parent.VAlign;
     }
 }
