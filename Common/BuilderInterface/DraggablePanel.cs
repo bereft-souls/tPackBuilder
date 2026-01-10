@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
@@ -9,6 +10,8 @@ namespace PackBuilder.Common.BuilderInterface;
 internal class DraggablePanel : UIPanel
 {
     private Vector2? offset;
+
+    public HashSet<UIElement> ClickThroughElements { get; } = [];
 
     public override void Update(GameTime gameTime)
     {
@@ -47,7 +50,7 @@ internal class DraggablePanel : UIPanel
     {
         base.LeftMouseDown(evt);
 
-        if (evt.Target == this)
+        if (IsTarget(evt.Target))
         {
             DragBegin(evt);
         }
@@ -57,7 +60,7 @@ internal class DraggablePanel : UIPanel
     {
         base.LeftMouseUp(evt);
 
-        if (evt.Target == this)
+        if (IsTarget(evt.Target))
         {
             DragEnd(evt);
         }
@@ -87,5 +90,10 @@ internal class DraggablePanel : UIPanel
         Top.Set(delta.Y, Top.Percent);
 
         Recalculate();
+    }
+
+    private bool IsTarget(UIElement e)
+    {
+        return e == this || ClickThroughElements.Contains(e);
     }
 }

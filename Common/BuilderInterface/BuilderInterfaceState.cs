@@ -1,4 +1,5 @@
-﻿using Terraria.UI;
+﻿using PackBuilder.Common.BuilderInterface.Windows;
+using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface;
 
@@ -8,21 +9,21 @@ namespace PackBuilder.Common.BuilderInterface;
 /// </summary>
 internal sealed class BuilderInterfaceState : UIState
 {
-    private DraggablePanel? samplePanel;
+    public ModControlPanelWindow? ModControlPanel { get; private set; }
 
     public override void OnInitialize()
     {
         base.OnInitialize();
 
-        samplePanel = new DraggablePanel();
+        ModControlPanel = new ModControlPanelWindow();
         {
-            samplePanel.Width.Set(400f, 0f);
-            samplePanel.Height.Set(200f, 0f);
-            // samplePanel.Left.Set(0f, 0.5f);
-            // samplePanel.Top.Set(0f, 0.5f);
-            samplePanel.HAlign = 0.5f;
-            samplePanel.VAlign = 0.5f;
+            ModControlPanel.Width.Set(600f, 0f);
+            ModControlPanel.Height.Set(350f, 0f);
+            ModControlPanel.MinWidth.Set(400f, 0f);
+            ModControlPanel.MinHeight.Set(200f, 0f);
+            ModControlPanel.HAlign = 0.5f;
+            ModControlPanel.VAlign = 0.5f;
         }
-        Append(samplePanel);
+        Append(ModControlPanel);
     }
 }

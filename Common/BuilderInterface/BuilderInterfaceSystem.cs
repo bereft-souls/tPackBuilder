@@ -9,6 +9,7 @@ using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface;
 
+[Autoload(Side = ModSide.Client)]
 internal sealed class NewModdersShouldUseDaybreak : ModPlayer
 {
     public override void ProcessTriggers(TriggersSet triggersSet)
@@ -24,11 +25,12 @@ internal sealed class NewModdersShouldUseDaybreak : ModPlayer
     }
 }
 
+[Autoload(Side = ModSide.Client)]
 internal sealed class BuilderInterfaceSystem : ModSystem
 {
     public static UserInterface Interface { get; } = new();
 
-    public static BuilderInterfaceState State { get; } = new();
+    public static BuilderInterfaceState State { get; private set; } = new();
 
     public static ModKeybind? OpenKeybind { get; private set; }
 
@@ -48,7 +50,7 @@ internal sealed class BuilderInterfaceSystem : ModSystem
 
     public static void ShowInterface()
     {
-        Interface.SetState(State);
+        Interface.SetState(State = new BuilderInterfaceState());
     }
 
     public static void HideInterface()
