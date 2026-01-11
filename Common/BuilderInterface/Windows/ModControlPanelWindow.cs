@@ -1,4 +1,6 @@
-﻿using Terraria.UI;
+﻿using PackBuilder.Common.Project;
+using System.Linq;
+using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface.Windows;
 
@@ -23,6 +25,9 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
             containerElement.IgnoresMouseInteraction = true;
         }
         Append(containerElement);
-        // ClickThroughElements.Add(containerElement);
+
+        var projects = ModProjectProvider.ModSourcesViews.ToList();
+        var projectViewThing = new ModNameSelectionGrid(projects);
+        Append(projectViewThing);
     }
 }

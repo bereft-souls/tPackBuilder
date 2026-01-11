@@ -9,7 +9,7 @@ namespace PackBuilder.Common.Project;
 /// <summary>
 ///     An immutable view into a mod project.
 /// </summary>
-public readonly struct ModProjectView(ModProject project)
+public readonly struct ModProjectView(ModProject project) : IEquatable<ModProjectView>, IComparable<ModProjectView>
 {
     /// <summary>
     ///     Immutable view to relevant project properties.
@@ -17,9 +17,31 @@ public readonly struct ModProjectView(ModProject project)
     /// <exception cref="ObjectDisposedException">
     ///     The project has been deleted or disposed of.
     /// </exception>
-    public ModProperties Properties => project.Disposed
+    public ModProperties Properties => Project.Disposed
         ? throw new ObjectDisposedException("Cannot get properties of disposed project")
-        : new ModProperties(project.Manifest);
+        : new ModProperties(Project.Manifest);
+
+    private ModProject Project { get; } = project;
+
+    public bool Equals(ModProjectView other)
+    {
+        return Project.Directory == other.Project.Directory;
+    }
+    
+    public int CompareTo(ModProjectView other)
+    {
+        return string.Compare(Project.Directory, other.Project.Directory, StringComparison.Ordinal);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is ModProjectView other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return Project.GetHashCode();
+    }
 }
 
 /// <summary>
@@ -33,6 +55,8 @@ public sealed class ModProject(
     public bool Disposed { get; private set; }
 
     public BuildManifest Manifest => manifest;
+
+    public string Directory => source.GetDirectory().FullName;
 
     // TODO: Logging and what-not?
     public async Task<bool> Build()
