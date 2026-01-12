@@ -1,5 +1,9 @@
 ﻿using PackBuilder.Common.Project;
 using System.Linq;
+using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
+using Terraria.ModLoader.UI;
+using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface.Windows;
@@ -7,6 +11,9 @@ namespace PackBuilder.Common.BuilderInterface.Windows;
 internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
 {
     private ModNameSelectionGrid? projectViewThing;
+    private ModNameDropDown? modNameDropDown;
+    private UITextPanel<LocalizedText>? editButton;
+    private UITextPanel<LocalizedText>? openButton;
 
     public override void OnInitialize()
     {
@@ -23,10 +30,45 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         {
             containerElement.Width.Set(0f, 1f);
             containerElement.Height.Set(0f, 1f);
-
             containerElement.IgnoresMouseInteraction = true;
         }
         Append(containerElement);
+
+        var topBarContainer = new UIGrid();
+        {
+            topBarContainer.ManualSortMethod = _ => { };
+            topBarContainer.Width.Set(0f, 1f);
+            topBarContainer.Height.Set(40f, 0f);
+            // topBarContainer.IgnoresMouseInteraction = true;
+        }
+        Append(topBarContainer);
+
+        const float regular_button_width = 76f;
+        const float top_bar_padding = 4f;
+        modNameDropDown = new ModNameDropDown();
+        {
+            modNameDropDown.Left.Set(top_bar_padding, 0f);
+            modNameDropDown.Width.Set(-top_bar_padding - ((top_bar_padding + regular_button_width) * 2f), 1f);
+            modNameDropDown.Height.Set(0f, 1f);
+        }
+        topBarContainer.Add(modNameDropDown);
+
+        editButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.PackBuilder.UI.Edit"));
+        {
+            editButton.Width.Set(regular_button_width, 0f);
+            editButton.Height.Set(0f, 1f);
+            editButton.WithFadedMouseOver();
+        }
+        topBarContainer.Add(editButton);
+
+        openButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.PackBuilder.UI.Open"));
+        {
+            openButton.Left.Set(top_bar_padding, 0f);
+            openButton.Width.Set(regular_button_width, 0f);
+            openButton.Height.Set(0f, 1f);
+            openButton.WithFadedMouseOver();
+        }
+        topBarContainer.Add(openButton);
 
         var projects = ModProjectProvider.ModSourcesViews.ToList();
         projectViewThing = new ModNameSelectionGrid(projects);
@@ -47,6 +89,7 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
 
     private void ProjectViewThing_OnClickingOption()
     {
+        CloseModNameGrid();
     }
 
     private void OpenOrCloseModNameGrid(UIMouseEvent evt, UIElement listeningElement)

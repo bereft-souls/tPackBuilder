@@ -9,6 +9,11 @@ using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface;
 
+internal sealed class ModNameDropDown : UIPanel
+{
+    public ModProjectView? SelectedProject { get; private set; }
+}
+
 internal sealed class ModNameSelectionGrid : UIPanel
 {
     private const int default_step_index = -1;
@@ -36,8 +41,9 @@ internal sealed class ModNameSelectionGrid : UIPanel
     {
         var backPanel = new UIPanel();
         {
-            backPanel.Width.Set(0f, 2f / 3f);
+            // backPanel.Width.Set(0f, 2f / 3f);
             // backPanel.Height.Set(num3 * num2 + 5 + 3, 0f);
+            backPanel.Width.Set(0f, 1f);
             backPanel.Height.Set(0f, 1f);
             backPanel.HAlign = 1f;
             backPanel.VAlign = 0f;
@@ -51,7 +57,9 @@ internal sealed class ModNameSelectionGrid : UIPanel
 
         var scrollbar = new UIScrollbar();
         {
-            scrollbar.Height.Set(0f, 1f);
+            const float stupid_padding_to_fix_scrollbar_overflow = 4f;
+            scrollbar.Height.Set(-stupid_padding_to_fix_scrollbar_overflow * 2f, 1f);
+            scrollbar.Top.Set(stupid_padding_to_fix_scrollbar_overflow, 0f);
             scrollbar.HAlign = 1f;
         }
         backPanel.Append(scrollbar);
@@ -71,6 +79,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
             list.Height.Set(0f, 1f);
             list.SetPadding(0f);
             list.SetScrollbar(scrollbar);
+            list.ManualSortMethod = _ => { };
         }
         listContainer.Append(list);
 

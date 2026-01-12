@@ -12,3 +12,8 @@ Configs: {
 ConfigCategory.ClientConfig.Description: ClientConfig
 Keybinds.OpenBuilderInterface.DisplayName: Open Builder Interface
 Stupid: "{0}"
+
+UI: {
+	Edit: Edit
+	Open: Open
+}
