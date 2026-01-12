@@ -11,7 +11,7 @@ namespace PackBuilder.Common.BuilderInterface;
 
 internal sealed class ModNameSelectionGrid : UIPanel
 {
-    private const int default_step_index = 0;
+    private const int default_step_index = -1;
 
     private readonly List<GroupOptionButton<int>> buttonsBySorting = [];
     private int currentSelected = -1;
@@ -34,32 +34,46 @@ internal sealed class ModNameSelectionGrid : UIPanel
 
     private void BuildGrid()
     {
-        const int num = 2;
-        const int num2 = 26 + num;
-        var num3 = 0;
-        for (var i = 0; i < projects.Count; i++)
+        var backPanel = new UIPanel();
         {
-            /*
-            if (!_sorter.Steps[i].HiddenFromSortOptions)
-                num3++;
-                */
-            num3++;
+            backPanel.Width.Set(0f, 2f / 3f);
+            // backPanel.Height.Set(num3 * num2 + 5 + 3, 0f);
+            backPanel.Height.Set(0f, 1f);
+            backPanel.HAlign = 1f;
+            backPanel.VAlign = 0f;
+            backPanel.Left.Set(-118f, 0f);
+            backPanel.Top.Set(0f, 0f);
+            backPanel.BorderColor = new Color(89, 116, 213, 255) * 0.9f;
+            backPanel.BackgroundColor = new Color(73, 94, 171) * 0.9f;
+            backPanel.SetPadding(8f);
         }
+        Append(backPanel);
 
-        var uIPanel = new UIPanel
+        var scrollbar = new UIScrollbar();
         {
-            Width = new StyleDimension(126f, 0f),
-            Height = new StyleDimension(num3 * num2 + 5 + 3, 0f),
-            HAlign = 1f,
-            VAlign = 0f,
-            Left = new StyleDimension(-118f, 0f),
-            Top = new StyleDimension(0f, 0f),
-            BorderColor = new Color(89, 116, 213, 255) * 0.9f,
-            BackgroundColor = new Color(73, 94, 171) * 0.9f,
-        };
+            scrollbar.Height.Set(0f, 1f);
+            scrollbar.HAlign = 1f;
+        }
+        backPanel.Append(scrollbar);
 
-        uIPanel.SetPadding(0f);
-        Append(uIPanel);
+        var listContainer = new UIElement();
+        {
+            var offset = scrollbar.Width.Pixels + 4f;
+            // listContainer.Left.Set(offset, 0f);
+            listContainer.Width.Set(-offset, 1f);
+            listContainer.Height.Set(0f, 1f);
+        }
+        backPanel.Append(listContainer);
+
+        var list = new UIList();
+        {
+            list.Width.Set(0f, 1f);
+            list.Height.Set(0f, 1f);
+            list.SetPadding(0f);
+            list.SetScrollbar(scrollbar);
+        }
+        listContainer.Append(list);
+
         var num4 = 0;
         for (var j = 0; j < projects.Count; j++)
         {
@@ -85,18 +99,18 @@ internal sealed class ModNameSelectionGrid : UIPanel
 
             var project = projects[j];
 
-            var groupOptionButton = new GroupOptionButton<int>(j, Language.GetText("Mods.PackBuilder.Stupid").WithFormatArgs(project.Properties.DisplayName), null, Color.White, null, 0.8f)
+            var groupOptionButton = new GroupOptionButton<int>(j, Language.GetText("Mods.PackBuilder.Stupid").WithFormatArgs(project.InternalName), null, Color.White, null, 0.8f)
             {
-                Width = new StyleDimension(114f, 0f),
-                Height = new StyleDimension(num2 - num, 0f),
+                Width = new StyleDimension(0f, 1f),
+                Height = new StyleDimension(30f, 0f),
                 HAlign = 0.5f,
-                Top = new StyleDimension(5 + num2 * num4, 0f),
+                // Top = new StyleDimension(5 + num2 * num4, 0f),
                 ShowHighlightWhenSelected = false,
             };
 
             groupOptionButton.OnLeftClick += ClickOption;
             // groupOptionButton.SetSnapPoint("SortSteps", num4);
-            uIPanel.Append(groupOptionButton);
+            list.Add(groupOptionButton);
             buttonsBySorting.Add(groupOptionButton);
             num4++;
         }
@@ -141,6 +155,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
         OnClickingOption?.Invoke();
     }
 
+    /*
     public void GetEntriesToShow(
         out int maxEntriesWidth,
         out int maxEntriesHeight,
@@ -151,4 +166,5 @@ internal sealed class ModNameSelectionGrid : UIPanel
         maxEntriesHeight = buttonsBySorting.Count;
         maxEntriesToHave = buttonsBySorting.Count;
     }
+    */
 }

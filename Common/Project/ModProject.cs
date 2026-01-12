@@ -21,6 +21,8 @@ public readonly struct ModProjectView(ModProject project) : IEquatable<ModProjec
         ? throw new ObjectDisposedException("Cannot get properties of disposed project")
         : new ModProperties(Project.Manifest);
 
+    public string InternalName => Project.InternalName;
+
     private ModProject Project { get; } = project;
 
     public bool Equals(ModProjectView other)
@@ -55,6 +57,8 @@ public sealed class ModProject(
     public bool Disposed { get; private set; }
 
     public BuildManifest Manifest => manifest;
+
+    public string InternalName => source.GetDirectory().Name;
 
     public string Directory => source.GetDirectory().FullName;
 

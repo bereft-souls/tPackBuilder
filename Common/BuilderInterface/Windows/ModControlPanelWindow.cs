@@ -6,6 +6,8 @@ namespace PackBuilder.Common.BuilderInterface.Windows;
 
 internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
 {
+    private ModNameSelectionGrid? projectViewThing;
+
     public override void OnInitialize()
     {
         base.OnInitialize();
@@ -27,7 +29,40 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         Append(containerElement);
 
         var projects = ModProjectProvider.ModSourcesViews.ToList();
-        var projectViewThing = new ModNameSelectionGrid(projects);
+        projectViewThing = new ModNameSelectionGrid(projects);
+        {
+            projectViewThing.OnLeftClick += ProjectViewThing_OnLeftClick;
+            projectViewThing.OnClickingOption += ProjectViewThing_OnClickingOption;
+        }
         Append(projectViewThing);
+    }
+
+    private void ProjectViewThing_OnLeftClick(UIMouseEvent evt, UIElement listeningElement)
+    {
+        if (evt.Target == projectViewThing)
+        {
+            CloseModNameGrid();
+        }
+    }
+
+    private void ProjectViewThing_OnClickingOption()
+    {
+    }
+
+    private void OpenOrCloseModNameGrid(UIMouseEvent evt, UIElement listeningElement)
+    {
+        if (projectViewThing?.Parent is not null)
+        {
+            CloseModNameGrid();
+            return;
+        }
+
+        projectViewThing?.Remove();
+        Append(projectViewThing);
+    }
+
+    private void CloseModNameGrid()
+    {
+        projectViewThing?.Remove();
     }
 }

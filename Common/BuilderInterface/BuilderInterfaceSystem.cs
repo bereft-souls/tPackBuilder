@@ -101,7 +101,8 @@ internal sealed class BuilderInterfaceSystem : ModSystem
                         }
 
                         return true;
-                    }
+                    },
+                    InterfaceScaleType.UI
                 )
             );
         }
