@@ -92,16 +92,7 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
     {
         base.Recalculate();
 
-        if (modNameDropDown is not null)
-        {
-            var modNameDims = modNameDropDown.GetDimensions();
-
-            /*
-            projectViewThing?.Width.Set(modNameDims.Width, 0f);
-            projectViewThing?.Height.Set(0f, 1f);
-            */
-        }
-
+        // FIXME: Required to update children's positions properly.
         RecalculateChildren();
     }
 
