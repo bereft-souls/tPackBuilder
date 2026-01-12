@@ -54,8 +54,10 @@ internal sealed class ModNameDropDown : UIPanel
             textSize = ChatManager.GetStringSize(font, value.ToString(), Vector2.One);
             textSize.Y = 16f;
 
+            /*
             MinWidth.Set(textSize.X + PaddingLeft + PaddingRight, 0f);
             MinHeight.Set(textSize.Y + PaddingTop + PaddingBottom, 0f);
+            */
         }
     }
 
@@ -68,6 +70,7 @@ internal sealed class ModNameDropDown : UIPanel
         color = AbsentColor;
 
         SelectedProject = project;
+        OverflowHidden = true;
     }
 
     protected override void DrawSelf(SpriteBatch spriteBatch)

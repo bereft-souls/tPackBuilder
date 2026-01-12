@@ -16,8 +16,7 @@ internal sealed class ResizablePanelButton : UIElement
 
     private static readonly Asset<Texture2D> asset = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/DraggablePanelCorner");
 
-    private bool isDragging;
-    private Vector2? lastMouse;
+    private Vector2? mouseRelativeToTopLeftOfParent;
 
     public ResizablePanelButton()
     {
@@ -45,12 +44,12 @@ internal sealed class ResizablePanelButton : UIElement
             Main.LocalPlayer.mouseInterface = true;
         }
 
-        if (lastMouse.HasValue)
+        if (mouseRelativeToTopLeftOfParent.HasValue)
         {
-            ApplyDimensionsDelta(lastMouse.Value - mouseCurrent);
+            var newPos = Main.MouseScreen - GetDimensions().Position();
+            ApplyDimensionsDelta(mouseRelativeToTopLeftOfParent.Value - newPos);
+            // mouseRelativeToTopLeftOfParent = newPos;
         }
-
-        lastMouse = isDragging ? mouseCurrent : null;
 
         EnsureConstrainedDimensions();
     }
@@ -83,14 +82,14 @@ internal sealed class ResizablePanelButton : UIElement
     {
         base.LeftMouseDown(evt);
 
-        isDragging = true;
+        mouseRelativeToTopLeftOfParent = Main.MouseScreen - GetDimensions().Position();
     }
 
     public override void LeftMouseUp(UIMouseEvent evt)
     {
         base.LeftMouseUp(evt);
 
-        isDragging = false;
+        mouseRelativeToTopLeftOfParent = null;
     }
 
     /*
