@@ -97,6 +97,7 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
             openButton.Width.Set(regular_button_width, 0f);
             openButton.Height.Set(0f, 1f);
             openButton.WithFadedMouseOver();
+            openButton.OnLeftClick += OpenButton_OnLeftClick;
         }
         topBarContainer.Add(openButton);
 
@@ -112,6 +113,16 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
             projectViewThing.Panel?.Top.Pixels = topBarContainer.Height.Pixels + 4f;
         }
         // Append(projectViewThing);
+    }
+
+    private void OpenButton_OnLeftClick(UIMouseEvent evt, UIElement listeningElement)
+    {
+        if (modNameDropDown?.SelectedProject is not { } project)
+        {
+            return;
+        }
+
+        Utils.OpenFolder(project.Directory);
     }
 
     private static ModProjectView? GetProjectFromDirectory(List<ModProjectView> projects, string? source)
