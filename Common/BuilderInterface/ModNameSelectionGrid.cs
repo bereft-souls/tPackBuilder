@@ -94,16 +94,21 @@ internal sealed class ModNameSelectionGrid : UIPanel
     private const int default_step_index = -1;
 
     private readonly List<GroupOptionButton<int>> buttonsBySorting = [];
-    private int currentSelected = -1;
+    private int currentSelected = default_step_index;
     private readonly List<ModProjectView> projects;
 
     public event Action<ModProjectView?>? OnClickingOption;
 
     public UIPanel? Panel { get; private set; }
 
-    public ModNameSelectionGrid(List<ModProjectView> projects)
+    public ModNameSelectionGrid(List<ModProjectView> projects, ModProjectView? selectedProject)
     {
         this.projects = projects;
+
+        if (selectedProject.HasValue)
+        {
+            currentSelected = projects.IndexOf(selectedProject.Value);
+        }
 
         BackgroundColor = new Color(35, 40, 83) * 0.5f;
         BorderColor = new Color(35, 40, 83) * 0.5f;
@@ -169,7 +174,6 @@ internal sealed class ModNameSelectionGrid : UIPanel
                 HAlign = 0.5f,
                 ShowHighlightWhenSelected = false,
             };
-
             groupOptionButton.OnLeftClick += ClickOption;
             list.Add(groupOptionButton);
             buttonsBySorting.Add(groupOptionButton);
@@ -177,7 +181,17 @@ internal sealed class ModNameSelectionGrid : UIPanel
 
         foreach (var item in buttonsBySorting)
         {
-            item.SetCurrentOption(default_step_index);
+            var theSame = currentSelected == item.OptionValue;
+            item.SetCurrentOption(theSame ? currentSelected : default_step_index);
+
+            if (theSame)
+            {
+                item.SetColor(new Color(152, 175, 235), 1f);
+            }
+            else
+            {
+                item.SetColor(Colors.InventoryDefaultColor, 0.7f);
+            }
         }
     }
 
@@ -197,7 +211,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
         foreach (var button in buttonsBySorting)
         {
             var theSame = idx == button.OptionValue;
-            button.SetCurrentOption(theSame ? idx : -1);
+            button.SetCurrentOption(theSame ? idx : default_step_index);
 
             if (theSame)
             {

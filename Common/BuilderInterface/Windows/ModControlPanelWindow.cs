@@ -70,10 +70,11 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         Append(topBarContainer);
 
         var projects = ModProjectProvider.ModSourcesViews.ToList();
+        var selectedProject = GetProjectFromDirectory(projects, cacheData.LastOpenedSource);
 
         const float regular_button_width = 76f;
         const float top_bar_padding = 4f;
-        modNameDropDown = new ModNameDropDown(GetProjectFromDirectory(projects, cacheData.LastOpenedSource));
+        modNameDropDown = new ModNameDropDown(selectedProject);
         {
             modNameDropDown.Left.Set(top_bar_padding, 0f);
             modNameDropDown.Width.Set(-top_bar_padding - ((top_bar_padding + regular_button_width) * 2f), 1f);
@@ -101,7 +102,7 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         }
         topBarContainer.Add(openButton);
 
-        projectViewThing = new ModNameSelectionGrid(projects);
+        projectViewThing = new ModNameSelectionGrid(projects, selectedProject);
         {
             projectViewThing.Width.Set(0f, 1f);
             projectViewThing.Height.Set(0f, 1f);
