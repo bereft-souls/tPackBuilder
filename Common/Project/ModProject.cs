@@ -23,6 +23,8 @@ public readonly struct ModProjectView(ModProject project) : IEquatable<ModProjec
 
     public string InternalName => Project.InternalName;
 
+    internal string Directory => Project.Directory;
+    
     private ModProject Project { get; } = project;
 
     public bool Equals(ModProjectView other)

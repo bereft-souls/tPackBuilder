@@ -22,6 +22,7 @@ internal sealed class ModNameDropDown : UIPanel
     public ModProjectView? SelectedProject
     {
         get;
+
         set
         {
             field = value;
@@ -44,6 +45,7 @@ internal sealed class ModNameDropDown : UIPanel
     public LocalizedText Text
     {
         get;
+
         set
         {
             field = value;
@@ -156,50 +158,26 @@ internal sealed class ModNameSelectionGrid : UIPanel
         }
         listContainer.Append(list);
 
-        var num4 = 0;
-        for (var j = 0; j < projects.Count; j++)
+        for (var i = 0; i < projects.Count; i++)
         {
-            /*
-            if (!bestiarySortStep.HiddenFromSortOptions)
-            {
-                GroupOptionButton<int> groupOptionButton = new GroupOptionButton<int>(j, Language.GetText(bestiarySortStep.GetDisplayNameKey()), null, Color.White, null, 0.8f)
-                {
-                    Width = new StyleDimension(114f, 0f),
-                    Height = new StyleDimension(num2 - num, 0f),
-                    HAlign = 0.5f,
-                    Top = new StyleDimension(5 + num2 * num4, 0f)
-                };
+            var project = projects[i];
 
-                groupOptionButton.ShowHighlightWhenSelected = false;
-                groupOptionButton.OnLeftClick += ClickOption;
-                groupOptionButton.SetSnapPoint("SortSteps", num4);
-                uIPanel.Append(groupOptionButton);
-                _buttonsBySorting.Add(groupOptionButton);
-                num4++;
-            }
-            */
-
-            var project = projects[j];
-
-            var groupOptionButton = new GroupOptionButton<int>(j, Language.GetText("Mods.PackBuilder.Stupid").WithFormatArgs(project.InternalName), null, Color.White, null, 0.8f)
+            var groupOptionButton = new GroupOptionButton<int>(i, Language.GetText("Mods.PackBuilder.Stupid").WithFormatArgs(project.InternalName), null, Color.White, null, 0.8f)
             {
                 Width = new StyleDimension(0f, 1f),
                 Height = new StyleDimension(30f, 0f),
                 HAlign = 0.5f,
-                // Top = new StyleDimension(5 + num2 * num4, 0f),
                 ShowHighlightWhenSelected = false,
             };
 
             groupOptionButton.OnLeftClick += ClickOption;
-            // groupOptionButton.SetSnapPoint("SortSteps", num4);
             list.Add(groupOptionButton);
             buttonsBySorting.Add(groupOptionButton);
-            num4++;
         }
 
         foreach (var item in buttonsBySorting)
         {
-            item.SetCurrentOption(-1);
+            item.SetCurrentOption(default_step_index);
         }
     }
 
@@ -232,21 +210,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
         }
 
         currentSelected = idx;
-        // sorter.SetPrioritizedStepIndex(idx);
 
-        OnClickingOption?.Invoke(idx == -1 ? null : projects[idx]);
+        OnClickingOption?.Invoke(idx == default_step_index ? null : projects[idx]);
     }
-
-    /*
-    public void GetEntriesToShow(
-        out int maxEntriesWidth,
-        out int maxEntriesHeight,
-        out int maxEntriesToHave
-    )
-    {
-        maxEntriesWidth = 1;
-        maxEntriesHeight = buttonsBySorting.Count;
-        maxEntriesToHave = buttonsBySorting.Count;
-    }
-    */
 }

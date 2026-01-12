@@ -1,6 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using PackBuilder.Common.Project;
 using System.Linq;
+using Newtonsoft.Json;
+using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.ModLoader.UI;
@@ -11,14 +15,35 @@ namespace PackBuilder.Common.BuilderInterface.Windows;
 
 internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
 {
+    private static string CachePath => Path.Combine(Main.SavePath, "PackBuilder", "mod_control_panel.json");
+
+    private sealed class CacheData
+    {
+        public string? LastOpenedSource { get; set; }
+    }
+
     private ModNameSelectionGrid? projectViewThing;
     private ModNameDropDown? modNameDropDown;
     private UITextPanel<LocalizedText>? editButton;
     private UITextPanel<LocalizedText>? openButton;
 
+    private CacheData cacheData = new();
+
     public override void OnInitialize()
     {
         base.OnInitialize();
+
+        if (File.Exists(CachePath))
+        {
+            try
+            {
+                cacheData = JsonConvert.DeserializeObject<CacheData>(File.ReadAllText(CachePath)) ?? new CacheData();
+            }
+            catch
+            {
+                cacheData = new CacheData();
+            }
+        }
 
         var resizablePanelButton = new ResizablePanelButton();
         {
@@ -44,9 +69,11 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         }
         Append(topBarContainer);
 
+        var projects = ModProjectProvider.ModSourcesViews.ToList();
+
         const float regular_button_width = 76f;
         const float top_bar_padding = 4f;
-        modNameDropDown = new ModNameDropDown(null);
+        modNameDropDown = new ModNameDropDown(GetProjectFromDirectory(projects, cacheData.LastOpenedSource));
         {
             modNameDropDown.Left.Set(top_bar_padding, 0f);
             modNameDropDown.Width.Set(-top_bar_padding - ((top_bar_padding + regular_button_width) * 2f), 1f);
@@ -73,7 +100,6 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         }
         topBarContainer.Add(openButton);
 
-        var projects = ModProjectProvider.ModSourcesViews.ToList();
         projectViewThing = new ModNameSelectionGrid(projects);
         {
             projectViewThing.Width.Set(0f, 1f);
@@ -86,6 +112,24 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
             projectViewThing.Panel?.Top.Pixels = topBarContainer.Height.Pixels + 4f;
         }
         // Append(projectViewThing);
+    }
+
+    private static ModProjectView? GetProjectFromDirectory(List<ModProjectView> projects, string? source)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+
+        foreach (var project in projects)
+        {
+            if (project.Directory.Equals(source, StringComparison.OrdinalIgnoreCase))
+            {
+                return project;
+            }
+        }
+
+        return null;
     }
 
     public override void Recalculate()
@@ -107,7 +151,18 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
     private void ProjectViewThing_OnClickingOption(ModProjectView? selectedProject)
     {
         modNameDropDown?.SelectedProject = selectedProject;
+        cacheData.LastOpenedSource = selectedProject?.Directory;
         CloseModNameGrid();
+
+        try
+        {
+            Directory.GetParent(CachePath)?.Create();
+            File.WriteAllText(CachePath, JsonConvert.SerializeObject(cacheData));
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     private void OpenOrCloseModNameGrid(UIMouseEvent evt, UIElement listeningElement)
@@ -119,8 +174,6 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         }
 
         projectViewThing?.Remove();
-        {
-        }
         Append(projectViewThing);
     }
 
