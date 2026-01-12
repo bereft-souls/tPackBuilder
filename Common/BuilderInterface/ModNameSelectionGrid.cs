@@ -97,12 +97,12 @@ internal sealed class ModNameSelectionGrid : UIPanel
 
     public event Action<ModProjectView?>? OnClickingOption;
 
+    public UIPanel? Panel { get; private set; }
+
     public ModNameSelectionGrid(List<ModProjectView> projects)
     {
         this.projects = projects;
 
-        Width.Set(0f, 1f);
-        Height.Set(0f, 1f);
         BackgroundColor = new Color(35, 40, 83) * 0.5f;
         BorderColor = new Color(35, 40, 83) * 0.5f;
         IgnoresMouseInteraction = false;
@@ -112,21 +112,21 @@ internal sealed class ModNameSelectionGrid : UIPanel
 
     private void BuildGrid()
     {
-        var backPanel = new UIPanel();
+        Panel = new UIPanel();
         {
             // backPanel.Width.Set(0f, 2f / 3f);
             // backPanel.Height.Set(num3 * num2 + 5 + 3, 0f);
-            backPanel.Width.Set(0f, 1f);
-            backPanel.Height.Set(0f, 1f);
-            backPanel.HAlign = 1f;
-            backPanel.VAlign = 0f;
-            backPanel.Left.Set(-118f, 0f);
-            backPanel.Top.Set(0f, 0f);
-            backPanel.BorderColor = new Color(89, 116, 213, 255) * 0.9f;
-            backPanel.BackgroundColor = new Color(73, 94, 171) * 0.9f;
-            backPanel.SetPadding(8f);
+            Panel.Width.Set(0f, 1f);
+            Panel.Height.Set(0f, 1f);
+            // Panel.HAlign = 1f;
+            // Panel.VAlign = 0f;
+            // Panel.Left.Set(-118f, 0f);
+            // Panel.Top.Set(0f, 0f);
+            Panel.BorderColor = new Color(89, 116, 213, 255) * 0.9f;
+            Panel.BackgroundColor = new Color(73, 94, 171) * 0.9f;
+            Panel.SetPadding(8f);
         }
-        Append(backPanel);
+        Append(Panel);
 
         var scrollbar = new UIScrollbar();
         {
@@ -135,7 +135,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
             scrollbar.Top.Set(stupid_padding_to_fix_scrollbar_overflow, 0f);
             scrollbar.HAlign = 1f;
         }
-        backPanel.Append(scrollbar);
+        Panel.Append(scrollbar);
 
         var listContainer = new UIElement();
         {
@@ -144,7 +144,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
             listContainer.Width.Set(-offset, 1f);
             listContainer.Height.Set(0f, 1f);
         }
-        backPanel.Append(listContainer);
+        Panel.Append(listContainer);
 
         var list = new UIList();
         {

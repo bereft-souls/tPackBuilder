@@ -1,4 +1,5 @@
-﻿using PackBuilder.Common.Project;
+﻿using Microsoft.Xna.Framework;
+using PackBuilder.Common.Project;
 using System.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
@@ -75,10 +76,33 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         var projects = ModProjectProvider.ModSourcesViews.ToList();
         projectViewThing = new ModNameSelectionGrid(projects);
         {
+            projectViewThing.Width.Set(0f, 1f);
+            projectViewThing.Height.Set(0f, 1f);
             projectViewThing.OnLeftClick += ProjectViewThing_OnLeftClick;
             projectViewThing.OnClickingOption += ProjectViewThing_OnClickingOption;
+
+            projectViewThing.Panel?.Width = modNameDropDown.Width;
+            projectViewThing.Panel?.Height.Pixels -= topBarContainer.Height.Pixels + 4f;
+            projectViewThing.Panel?.Top.Pixels = topBarContainer.Height.Pixels + 4f;
         }
-        Append(projectViewThing);
+        // Append(projectViewThing);
+    }
+
+    public override void Recalculate()
+    {
+        base.Recalculate();
+
+        if (modNameDropDown is not null)
+        {
+            var modNameDims = modNameDropDown.GetDimensions();
+
+            /*
+            projectViewThing?.Width.Set(modNameDims.Width, 0f);
+            projectViewThing?.Height.Set(0f, 1f);
+            */
+        }
+
+        RecalculateChildren();
     }
 
     private void ProjectViewThing_OnLeftClick(UIMouseEvent evt, UIElement listeningElement)
@@ -104,6 +128,8 @@ internal sealed class ModControlPanelWindow : AbstractInterfaceWindow
         }
 
         projectViewThing?.Remove();
+        {
+        }
         Append(projectViewThing);
     }
 
