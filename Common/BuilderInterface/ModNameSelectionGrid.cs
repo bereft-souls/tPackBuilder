@@ -1,17 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using PackBuilder.Common.Project;
+using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
+using Terraria.UI.Chat;
 
 namespace PackBuilder.Common.BuilderInterface;
 
 internal sealed class ModNameDropDown : UIPanel
 {
-    public ModProjectView? SelectedProject { get; private set; }
+    private static Color AbsentColor => Color.Gray;
+
+    private static Color PresentColor => Color.White;
+
+    public ModProjectView? SelectedProject
+    {
+        get;
+        set
+        {
+            field = value;
+
+            if (value.HasValue)
+            {
+                Text = Language.GetText("Mods.PackBuilder.Stupid").WithFormatArgs(value.Value.InternalName);
+                color = PresentColor;
+            }
+            else
+            {
+                Text = Language.GetText("Mods.PackBuilder.UI.SelectMod");
+                color = AbsentColor;
+            }
+        }
+    }
+
+    public float TextHAlign { get; set; } = 0f;
+
+    public LocalizedText Text
+    {
+        get;
+        set
+        {
+            field = value;
+
+            var font = FontAssets.MouseText.Value;
+            textSize = ChatManager.GetStringSize(font, value.ToString(), Vector2.One);
+            textSize.Y = 16f;
+
+            MinWidth.Set(textSize.X + PaddingLeft + PaddingRight, 0f);
+            MinHeight.Set(textSize.Y + PaddingTop + PaddingBottom, 0f);
+        }
+    }
+
+    private Vector2 textSize;
+    private Color color;
+
+    public ModNameDropDown(ModProjectView? project)
+    {
+        Text = Language.GetText("Mods.PackBuilder.UI.SelectMod");
+        color = AbsentColor;
+
+        SelectedProject = project;
+    }
+
+    protected override void DrawSelf(SpriteBatch spriteBatch)
+    {
+        base.DrawSelf(spriteBatch);
+
+        DrawText(spriteBatch);
+    }
+
+    private void DrawText(SpriteBatch sb)
+    {
+        var innerDims = GetInnerDimensions();
+        var pos = innerDims.Position();
+        pos.Y -= 2f;
+        pos.X += (innerDims.Width - textSize.X) * TextHAlign;
+
+        var text = Text.ToString();
+        Utils.DrawBorderString(sb, text, pos, color);
+    }
 }
 
 internal sealed class ModNameSelectionGrid : UIPanel
@@ -22,7 +95,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
     private int currentSelected = -1;
     private readonly List<ModProjectView> projects;
 
-    public event Action? OnClickingOption;
+    public event Action<ModProjectView?>? OnClickingOption;
 
     public ModNameSelectionGrid(List<ModProjectView> projects)
     {
@@ -161,7 +234,7 @@ internal sealed class ModNameSelectionGrid : UIPanel
         currentSelected = idx;
         // sorter.SetPrioritizedStepIndex(idx);
 
-        OnClickingOption?.Invoke();
+        OnClickingOption?.Invoke(idx == -1 ? null : projects[idx]);
     }
 
     /*

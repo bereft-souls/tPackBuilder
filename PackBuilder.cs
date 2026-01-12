@@ -30,9 +30,9 @@ namespace PackBuilder
                     var error = new JsonReadingException(ex.ErrorContext.Error);
 
                     PropertyInfo property = typeof(ErrorContext).GetProperty("Error", BindingFlags.Public | BindingFlags.Instance)!;
-                    FieldInfo field = property.GetBackingField();
+                    FieldInfo @field = property.GetBackingField();
 
-                    field.SetValue(ex.ErrorContext, error);
+                    @field.SetValue(ex.ErrorContext, error);
                     throw error;
                 }
             };
