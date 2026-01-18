@@ -1,11 +1,11 @@
-﻿using PackBuilder.Common.JsonBuilding.Items;
+﻿using PackBuilder.Common.ModBuilding.Items;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
-    internal class ItemModifier : ModSystem
+    public class ItemModifier : ModSystem
     {
         public static Dictionary<int, List<ItemChanges>> ItemModSets { get; } = [];
 

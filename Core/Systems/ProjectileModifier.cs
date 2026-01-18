@@ -1,4 +1,4 @@
-﻿using PackBuilder.Common.JsonBuilding.Projectiles;
+﻿using PackBuilder.Common.ModBuilding.Projectiles;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;

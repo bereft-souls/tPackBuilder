@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using PackBuilder.Common.JsonBuilding.NPCs;
+using PackBuilder.Common.ModBuilding.NPCs;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
