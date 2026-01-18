@@ -1,5 +1,4 @@
-﻿using PackBuilder.Common.JsonBuilding.DataStructures;
-using Terraria;
+﻿using Terraria;
 
 namespace PackBuilder.Common.JsonBuilding.Projectiles.Changes
 {
