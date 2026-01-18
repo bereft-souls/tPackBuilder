@@ -1,1 +1,20 @@
+Configs: {
+	ClientConfig: {
+		DisplayName: Client Config
 
+		DeveloperMode: {
+			Label: Developer Mode
+			Tooltip: ""
+		}
+	}
+}
+
+ConfigCategory.ClientConfig.Description: ClientConfig
+Keybinds.OpenBuilderInterface.DisplayName: Open Builder Interface
+Stupid: "{0}"
+
+UI: {
+	Edit: Edit
+	Open: Open
+	SelectMod: Select a mod...
+}
