@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Recipes.Generation
 {
-    internal class RecipeBuilder
+    internal class RecipeBuilder : PackBuilderType
     {
         public List<RecipeIngredient> Ingredients = [];
         public List<RecipeGroupIngredient> Groups = [];
@@ -18,9 +18,11 @@ namespace PackBuilder.Common.JsonBuilding.Recipes.Generation
 
         public RecipeGroupIngredient GroupIngredient { set => Groups.Add(value); }
 
-        public void Build(Mod sourceMod)
+        public override string? LoadingMethod => nameof(ModSystem.AddRecipes);
+
+        public override void Load(Mod mod)
         {
-            var recipe = NewRecipe(sourceMod);
+            var recipe = NewRecipe(mod);
 
             Result.AddTo(recipe);
 

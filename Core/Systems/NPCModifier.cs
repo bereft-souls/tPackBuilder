@@ -1,50 +1,26 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Newtonsoft.Json;
 using PackBuilder.Common.JsonBuilding.NPCs;
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using Terraria;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
-    [Autoload(false)]
-    [LateLoad]
-    internal class PackBuilderNPC : GlobalNPC
-    {
-        public static FrozenDictionary<int, List<NPCChanges>> NPCModSets = null;
-
-        public override bool InstancePerEntity => true;
-        public int CachedNetId = 0;
-
-        public override void SetDefaults(NPC entity)
-        {
-            // If a netID is used to summon an NPC, we cache that netID during setup
-            // inside our GlobalNPC. The netID is reset during setup and IL editing
-            // it to not reset can cause issues, so caching it externally is generally the better option.
-            if (!entity.TryGetGlobalNPC<PackBuilderNPC>(out var packNPC))
-                return;
-
-            // If an NPC is summoned via netID, we apply changes inside of the
-            // IL edit. We don't need to apply them twice.
-            if (packNPC.CachedNetId >= 0)
-                ApplyChanges(entity, entity.type);
-        }
-
-        public static void ApplyChanges(NPC npc, int npcId)
-        {
-            if (NPCModSets?.TryGetValue(npcId, out var value) ?? false)
-                value.ForEach(c => c.ApplyTo(npc));
-        }
-    }
-
     internal class NPCModifier : ModSystem
     {
+        public static Dictionary<int, List<NPCChanges>> NPCModSets { get; } = [];
+
+        public override void Load()
+        {
+            // We need to cache the netID (and, subsequently, apply our changes
+            // based on that netID in the same method) for NPCs spawned using
+            // a netID (negative number).
+            IL_NPC.SetDefaultsFromNetId += SetDefaultsFromNetIdILEdit;
+        }
+
         // This ensures an NPC's netID is cached and used for
         // NPC mods when it is spawned using one.
         private static void SetDefaultsFromNetIdILEdit(ILContext il)
@@ -97,59 +73,32 @@ namespace PackBuilder.Core.Systems
             }
         }
 
-        public override void PostSetupContent()
+        [Autoload(false)]
+        [LateLoad]
+        internal class PackBuilderNPC : GlobalNPC
         {
-            // Collects ALL .npcmod.json files from all mods into a list.
-            List<(string, byte[])> jsonEntries = [];
+            public override bool InstancePerEntity => true;
+            public int CachedNetId = 0;
 
-            // Collects the loaded NPC mods to pass to the set factory initialization.
-            Dictionary<int, List<NPCChanges>> factorySets = [];
-
-            foreach (Mod mod in ModLoader.Mods)
+            public override void SetDefaults(NPC entity)
             {
-                // An array of all .npcmod.json files from this specific mod.
-                var files = (mod.GetFileNames() ?? []).Where(s => s.EndsWith(".npcmod.json", System.StringComparison.OrdinalIgnoreCase));
+                // If a netID is used to summon an NPC, we cache that netID during setup
+                // inside our GlobalNPC. The netID is reset during setup and IL editing
+                // it to not reset can cause issues, so caching it externally is generally the better option.
+                if (!entity.TryGetGlobalNPC<PackBuilderNPC>(out var packNPC))
+                    return;
 
-                // Adds the byte contents of each file to the list.
-                foreach (var file in files)
-                    jsonEntries.Add((file, mod.GetFileBytes(file)));
+                // If an NPC is summoned via netID, we apply changes inside of the
+                // IL edit. We don't need to apply them twice.
+                if (packNPC.CachedNetId >= 0)
+                    ApplyChanges(entity, entity.type);
             }
 
-            foreach (var (file, data) in jsonEntries)
+            public static void ApplyChanges(NPC npc, int npcId)
             {
-                PackBuilder.LoadingFile = file;
-
-                // Convert the raw bytes into raw text.
-                string rawJson = Encoding.UTF8.GetString(data);
-
-                // Decode the json into an NPC mod.
-                NPCMod npcMod = JsonConvert.DeserializeObject<NPCMod>(rawJson, PackBuilder.JsonSettings)!;
-
-                if (npcMod.NPCs.Count == 0)
-                    throw new NoNPCsException();
-
-                // Get the NPC mod ready for factory initialization.
-                foreach (string npc in npcMod.NPCs)
-                {
-                    int npcType = GetNPC(npc);
-
-                    factorySets.TryAdd(npcType, []);
-                    factorySets[npcType].Add(npcMod.Changes);
-                }
-
-                PackBuilder.LoadingFile = null;
+                if (NPCModSets.TryGetValue(npcId, out var value))
+                    value.ForEach(c => c.ApplyTo(npc));
             }
-
-            // Setup the factory for fast access to NPC lookup.
-            PackBuilderNPC.NPCModSets = factorySets.ToFrozenDictionary();
-        }
-
-        public override void Load()
-        {
-            // We need to cache the netID (and, subsequently, apply our changes
-            // based on that netID in the same method) for NPCs spawned using
-            // a netID (negative number).
-            IL_NPC.SetDefaultsFromNetId += SetDefaultsFromNetIdILEdit;
         }
     }
 }

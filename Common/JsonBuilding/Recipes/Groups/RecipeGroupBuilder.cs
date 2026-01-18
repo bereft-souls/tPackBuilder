@@ -2,10 +2,11 @@
 using System.Linq;
 using Terraria;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Recipes.Groups
 {
-    internal class RecipeGroupBuilder
+    internal class RecipeGroupBuilder : PackBuilderType
     {
         public List<string> Items = [];
 
@@ -15,7 +16,9 @@ namespace PackBuilder.Common.JsonBuilding.Recipes.Groups
 
         public string Item { set => Items.Add(value); }
 
-        public void Build()
+        public override string? LoadingMethod => nameof(ModSystem.AddRecipeGroups);
+
+        public override void Load(Mod mod)
         {
             int[] items = Items.Select(GetItem).ToArray();
             RecipeGroup.RegisterGroup(Name, new RecipeGroup(() => Language.GetOrRegister(LocalizationKey).Value, items));

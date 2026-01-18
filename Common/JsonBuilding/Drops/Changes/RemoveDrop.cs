@@ -6,7 +6,7 @@ using Terraria.GameContent.ItemDropRules;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
-internal sealed record RemoveDrop(
+public sealed record RemoveDrop(
     string Item
 ) : IDropChange
 {

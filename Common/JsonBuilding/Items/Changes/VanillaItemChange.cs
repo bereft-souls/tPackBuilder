@@ -3,7 +3,7 @@ using Terraria;
 
 namespace PackBuilder.Common.JsonBuilding.Items.Changes
 {
-    internal class VanillaItemChange : IItemChange
+    public class VanillaItemChange : IItemChange
     {
         public ValueModifier Damage { get; set; }
         public ValueModifier CritRate { get; set; }

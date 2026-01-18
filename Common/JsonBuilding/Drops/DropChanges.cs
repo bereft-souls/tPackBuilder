@@ -3,7 +3,7 @@ using PackBuilder.Common.JsonBuilding.Drops.Changes;
 
 namespace PackBuilder.Common.JsonBuilding.Drops;
 
-internal sealed class DropChanges
+public sealed class DropChanges
 {
     public List<IDropChange> Changes { get; } = [];
 

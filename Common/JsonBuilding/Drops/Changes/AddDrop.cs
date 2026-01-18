@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
-internal sealed record AddDrop(
+public sealed record AddDrop(
     string Item
 ) : IDropChange
 {

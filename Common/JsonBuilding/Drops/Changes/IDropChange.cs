@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
-internal interface IDropChange
+public interface IDropChange
 {
     void ApplyTo(IIterableLoot loot);
 }

@@ -32,7 +32,7 @@ namespace PackBuilder.Core.Systems
         {
             if (!LateTypesLoaded)
             {
-                var modLoader_Mods = typeof(ModLoader).GetProperty("Mods", BindingFlags.Public | BindingFlags.Static);
+                var modLoader_Mods = typeof(ModLoader).GetProperty("Mods", BindingFlags.Public | BindingFlags.Static)!;
 
                 // Remove our mod from ModLoader.Mods and re-add it.
                 // This effectively shifts it to the end of the list.
@@ -46,7 +46,7 @@ namespace PackBuilder.Core.Systems
                 // Re-set our mod as "loading."
                 // This allows us to load our types tagged with LateLoadAttribute even after mod
                 // loading has techinically "finished", which ensures all hooks from these types are run last.
-                var mod_Loading = typeof(Mod).GetField("loading", BindingFlags.Instance | BindingFlags.NonPublic);
+                var mod_Loading = typeof(Mod).GetField("loading", BindingFlags.Instance | BindingFlags.NonPublic)!;
                 mod_Loading.SetValue(Mod, true);
 
                 // Load all the fetched types.
@@ -57,7 +57,7 @@ namespace PackBuilder.Core.Systems
                     .Where(t => Attribute.GetCustomAttribute(t, typeof(LateLoadAttribute)) is not null) // LateLoad attribute
                     .OrderBy(type => type.FullName, StringComparer.InvariantCulture);
 
-                LoaderUtils.ForEachAndAggregateExceptions(loadableTypes, t => Mod.AddContent((ILoadable)Activator.CreateInstance(t, true)));
+                LoaderUtils.ForEachAndAggregateExceptions(loadableTypes, t => Mod.AddContent((ILoadable)Activator.CreateInstance(t, true)!));
 
                 // Make sure our "loading" is re-assigned properly.
                 mod_Loading.SetValue(Mod, false);

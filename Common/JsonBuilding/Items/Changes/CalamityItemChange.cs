@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Items.Changes
 {
-    internal class CalamityItemChange : IItemChange
+    public class CalamityItemChange : IItemChange
     {
         public ValueModifier MaxCharge { get; set; }
         public ValueModifier ChargePerUse { get; set; }

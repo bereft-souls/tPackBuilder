@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Drops.Changes;
 
-internal interface IIterableLoot
+public interface IIterableLoot
 {
     int Count { get; }
 

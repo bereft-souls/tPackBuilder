@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Recipes.Groups
 {
-    internal class RecipeGroupMod
+    internal class RecipeGroupMod : PackBuilderType
     {
         public List<string> Groups = [];
         public List<string> AddItems = [];
@@ -16,7 +17,9 @@ namespace PackBuilder.Common.JsonBuilding.Recipes.Groups
 
         public string Remove { set => RemoveItems.Add(value); }
 
-        public void Apply()
+        public override string? LoadingMethod => nameof(ModSystem.PostSetupRecipes);
+
+        public override void Load(Mod mod)
         {
             if (AddItems.Count == 0 && RemoveItems.Count == 0)
                 throw new NoGroupChangesException();

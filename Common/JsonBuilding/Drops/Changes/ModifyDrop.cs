@@ -14,7 +14,7 @@ internal readonly record struct ModifiedChance(
     float New
 );
 
-internal sealed record ModifyDrop(
+public sealed record ModifyDrop(
     string Item
 ) : IDropChange
 {

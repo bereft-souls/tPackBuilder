@@ -120,5 +120,14 @@ namespace PackBuilder.Core.Utils
 
         public static void SetDisabled(this Recipe recipe, bool disabled) => disabledProperty.SetValue(recipe, disabled);
         private static readonly PropertyInfo disabledProperty = typeof(Recipe).GetProperty("Disabled", BindingFlags.Public | BindingFlags.Instance)!;
+
+        // Easy MethodInfo retrieval
+        public static MethodInfo GetMethodInfo(Action action) => action.Method;
+        public static MethodInfo GetMethodInfo<T>(Action<T> action) => action.Method;
+        public static MethodInfo GetMethodInfo<T, U>(Action<T, U> action) => action.Method;
+        public static MethodInfo GetMethodInfo<TResult>(Func<TResult> fun) => fun.Method;
+        public static MethodInfo GetMethodInfo<T, TResult>(Func<T, TResult> fun) => fun.Method;
+        public static MethodInfo GetMethodInfo<T, U, TResult>(Func<T, U, TResult> fun) => fun.Method;
+        public static MethodInfo GetMethodInfo(Delegate del) => del.Method;
     }
 }

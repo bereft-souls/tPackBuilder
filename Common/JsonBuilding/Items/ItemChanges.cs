@@ -5,11 +5,12 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Items
 {
-    internal class ItemChanges
+    public class ItemChanges
     {
         public List<IItemChange> Changes = [];
 
         public VanillaItemChange Terraria { set => Changes.Add(value); }
+
         public CalamityItemChange CalamityMod
         {
             set

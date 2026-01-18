@@ -1,11 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Common.JsonBuilding.Recipes
 {
-    internal class RecipeMod
+    internal class RecipeMod : PackBuilderType
     {
         // Either All or Any.
         // If "All" is specified, ALL of the conditions will need to be met in order to activate the changes of this mod.
@@ -18,21 +19,24 @@ namespace PackBuilder.Common.JsonBuilding.Recipes
         // The change(s) that will be applied to each of the recipes where conditions are met.
         public required RecipeChanges Changes { get; set; }
 
-        /// <summary>
-        /// Tests conditions and applies this <see cref="RecipeMod"/> to every loaded <see cref="Recipe"/>.
-        /// </summary>
-        public void Apply(Mod sourceMod)
+        // Run in PostAddRecipes instead of PostSetupContent
+        public override string? LoadingMethod => nameof(ModSystem.PostAddRecipes);
+
+        public override void Load(Mod mod)
         {
-            var recipeLoader_CurrentMod = typeof(RecipeLoader).GetProperty("CurrentMod", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            if (Conditions.Conditions.Count == 0)
+                throw new NoConditionsException();
+
+            var recipeLoader_CurrentMod = typeof(RecipeLoader).GetProperty("CurrentMod", BindingFlags.Static | BindingFlags.NonPublic)!;
 
             try
             {
-                recipeLoader_CurrentMod.SetValue(null, sourceMod);
+                recipeLoader_CurrentMod.SetValue(null, mod);
 
                 foreach (var recipe in Main.recipe)
                 {
                     // Do not apply recipe mods to recipes added by the same mod pack.
-                    if (recipe.Mod == sourceMod)
+                    if (recipe.Mod == mod)
                         continue;
 
                     // 'applies' will be true in any of the following cases:
@@ -51,7 +55,7 @@ namespace PackBuilder.Common.JsonBuilding.Recipes
             }
             catch (Exception ex)
             {
-                ex.Data["mod"] = sourceMod.Name;
+                ex.Data["mod"] = mod.Name;
                 throw;
             }
             finally
@@ -74,16 +78,16 @@ namespace PackBuilder.Common.JsonBuilding.Recipes
 
     internal sealed class RecipeCriteriaConverter : JsonConverter
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value is RecipeCriteria criteria)
                 writer.WriteValue(Enum.GetName(typeof(RecipeCriteria), criteria));
         }
 
-        public override object ReadJson(
+        public override object? ReadJson(
             JsonReader reader,
             Type objectType,
-            object existingValue,
+            object? existingValue,
             JsonSerializer serializer
         )
         {
@@ -93,7 +97,7 @@ namespace PackBuilder.Common.JsonBuilding.Recipes
 
             foreach (var option in options)
             {
-                if (Enum.GetName(recipeCriteria, option).Equals(value, StringComparison.OrdinalIgnoreCase))
+                if (Enum.GetName(recipeCriteria, option)!.Equals(value, StringComparison.OrdinalIgnoreCase))
                     return option;
             }
 
