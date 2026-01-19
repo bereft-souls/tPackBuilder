@@ -123,10 +123,10 @@ public sealed class BuildManifest
 
     // Intentionally internal.
     internal Version ModLoaderVersion { get; set; } = BuildInfo.tMLVersion;
-    
+
     // Intentionally internal.
     internal string Description { get; set; } = string.Empty;
-    
+
     // Intentionally internal.
     internal string ModSource { get; set; } = string.Empty;
 

@@ -2,8 +2,10 @@ global using static PackBuilder.Core.Utils.ModUtils;
 using Mono.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using PackBuilder.Common.ModBuilding;
 using PackBuilder.Core.Utils;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Terraria.ModLoader;
 
@@ -14,8 +16,16 @@ namespace PackBuilder
         /// <summary>
         /// The file that is currently being de-serialized and loaded by tPackBuilder.
         /// </summary>
-        public static string? LoadingFile { get; set; } = null;
+        public static string? LoadingFile { get; internal set; } = null;
 
+        /// <summary>
+        /// The collection of all files retrieved and managed by tPackBuilder.
+        /// </summary>
+        public static Dictionary<Mod, Dictionary<string, PackBuilderType>> ModChanges { get; internal set; } = [];
+
+        /// <summary>
+        /// The settings that should be used when calling <see cref="JsonConvert.DeserializeObject{T}(string, JsonSerializerSettings?)"/> on tPB types.
+        /// </summary>
         public static JsonSerializerSettings JsonSettings
         {
             get => new()

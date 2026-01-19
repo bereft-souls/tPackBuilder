@@ -13,9 +13,9 @@ public sealed class RecipeBuilder : PackBuilderType
 
     public override string? LoadingMethod => nameof(ModSystem.AddRecipes);
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
-        var recipe = NewRecipe(mod);
+        var recipe = NewRecipe(Mod);
 
         Result.AddTo(recipe);
 
@@ -30,10 +30,4 @@ public sealed class RecipeBuilder : PackBuilderType
 
         recipe.Register();
     }
-
-    /// <summary>
-    /// Call this to manually register a <see cref="RecipeBuilder"/>.
-    /// </summary>
-    /// <param name="mod">Your mod instance</param>
-    public void Register(Mod mod) => Load(mod);
 }

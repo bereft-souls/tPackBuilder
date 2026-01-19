@@ -1,6 +1,5 @@
 ﻿using PackBuilder.Core.Systems;
 using System.Collections.Generic;
-using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.NPCs;
 
@@ -10,7 +9,7 @@ public sealed class NPCMod : PackBuilderType
 
     public List<INPCChange> Changes = [];
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
         if (NPCs.Count == 0)
             throw new NoNPCsException();
@@ -22,9 +21,4 @@ public sealed class NPCMod : PackBuilderType
             NPCModifier.RegisterChanges(npcType, Changes);
         }
     }
-
-    /// <summary>
-    /// Call this to manually register an <see cref="NPCMod"/>.
-    /// </summary>
-    public void Register() => Load(null!);
 }

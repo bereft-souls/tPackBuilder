@@ -1,6 +1,5 @@
 ﻿using PackBuilder.Core.Systems;
 using System.Collections.Generic;
-using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Items;
 
@@ -10,7 +9,7 @@ public sealed class ItemMod : PackBuilderType
 
     public List<IItemChange> Changes = [];
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
         if (Items.Count == 0)
             throw new NoItemsException();
@@ -22,9 +21,4 @@ public sealed class ItemMod : PackBuilderType
             ItemModifier.RegisterItemChanges(itemType, Changes);
         }
     }
-
-    /// <summary>
-    /// Call this to manually register an <see cref="ItemMod"/>.
-    /// </summary>
-    public void Register() => Load(null!);
 }

@@ -71,16 +71,34 @@ internal sealed class PackBuilderTypeLoader : ModSystem
     public override void SetupContent() { Iterate(nameof(SetupContent)); base.SetupContent(); }
 }
 
+/// <summary>
+/// Represents a type that can be auto-loaded and managed by tPackBuilder via json file reading.
+/// </summary>
 public abstract class PackBuilderType
 {
+    /// <summary>
+    /// The corresponding extensions of each tPB-controlled file type.
+    /// </summary>
     public static Dictionary<Type, string> Extensions { get; } = [];
+
+    /// <summary>
+    /// The <see cref="Terraria.ModLoader.Mod"/> that contains this content.
+    /// </summary>
+    [JsonIgnore]
+    public Mod Mod { get; private set; } = null!;
+
+    /// <summary>
+    /// The file path of this content.
+    /// </summary>
+    [JsonIgnore]
+    public string File { get; private set; } = null!;
 
     /// <summary>
     /// Usually called during <see cref="ModSystem.PostSetupContent"/>. Allows you to handle setup tasks for this <see cref="PackBuilderType"/> like registering changes.<br/>
     /// You can override when this is called by overriding <see cref="LoadingMethod"/>.
     /// </summary>
     /// <param name="mod">The <see cref="Mod"/> that contains this <see cref="PackBuilderType"/> object.</param>
-    public abstract void Load(Mod mod);
+    public abstract void Load();
 
     /// <summary>
     /// Changes the <see cref="ModSystem"/> method in which loading is called.<br/>
@@ -89,6 +107,7 @@ public abstract class PackBuilderType
     /// Use <see langword="nameof"/> to specify the method you want to target. You can override to <see langword="null"/> to disable default loading.<br/>
     /// You can ONLY specify methods that are called during mod setup.
     /// </summary>
+    [JsonIgnore]
     public virtual string? LoadingMethod => nameof(ModSystem.PostSetupContent);
 
     /// <summary>
@@ -97,12 +116,8 @@ public abstract class PackBuilderType
     /// <br/>
     /// Default is <c>this.GetType().Name.ToLower()</c>
     /// </summary>
+    [JsonIgnore]
     public virtual string Extension => this.GetType().Name.ToLower();
-
-    /// <summary>
-    /// Represents a tPackBuilder-targetted file entry from a mod. Contains the mod that owns the file, the file path, and the deserialized object.
-    /// </summary>
-    public sealed record class FileEntry<T>(Mod Mod, string File, T Value) where T : PackBuilderType;
 
     /// <summary>
     /// Finds and deserializes all tPackBuilder-mods of the specified type across all loaded mods.<br/>
@@ -110,9 +125,9 @@ public abstract class PackBuilderType
     /// Does <b>NOT</b> call <see cref="PackBuilderType.Load(Mod)"/> automatically.<br/>
     /// If you want loading logic to be called, use <see cref="LoadAll{T}"/> instead.
     /// </summary>
-    public static List<FileEntry<T>> FindAll<T>() where T : PackBuilderType
+    public static List<T> FindAll<T>() where T : PackBuilderType
     {
-        List<FileEntry<T>> result = [];
+        List<T> result = [];
         var extension = Extensions[typeof(T)];
 
         foreach (Mod mod in ModLoader.Mods)
@@ -128,7 +143,9 @@ public abstract class PackBuilderType
                 string rawJson = Encoding.UTF8.GetString(mod.GetFileBytes(file));
                 T packBuilderMod = JsonConvert.DeserializeObject<T>(rawJson, PackBuilder.JsonSettings)!;
 
-                result.Add(new(mod, file, packBuilderMod));
+                packBuilderMod.Mod = mod;
+                packBuilderMod.File = file;
+                result.Add(packBuilderMod);
 
                 PackBuilder.LoadingFile = null;
             }
@@ -147,7 +164,11 @@ public abstract class PackBuilderType
         foreach (var packBuilderMod in packBuilderMods)
         {
             PackBuilder.LoadingFile = packBuilderMod.File;
-            packBuilderMod.Value.Load(packBuilderMod.Mod);
+
+            packBuilderMod.Load();
+            PackBuilder.ModChanges.TryAdd(packBuilderMod.Mod, []);
+            PackBuilder.ModChanges[packBuilderMod.Mod].Add(packBuilderMod.File, packBuilderMod);
+
             PackBuilder.LoadingFile = null;
         }
     }

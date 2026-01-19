@@ -13,7 +13,7 @@ public sealed class RecipeGroupMod : PackBuilderType
 
     public override string? LoadingMethod => nameof(ModSystem.PostSetupRecipes);
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
         if (AddItems.Count == 0 && RemoveItems.Count == 0)
             throw new NoGroupChangesException();
@@ -35,9 +35,4 @@ public sealed class RecipeGroupMod : PackBuilderType
             }
         }
     }
-
-    /// <summary>
-    /// Call this to manually register a <see cref="RecipeGroupMod"/>.
-    /// </summary>
-    public void Register() => Load(null!);
 }

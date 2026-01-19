@@ -1,6 +1,5 @@
 ﻿using PackBuilder.Core.Systems;
 using System.Collections.Generic;
-using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Projectiles;
 
@@ -10,7 +9,7 @@ public sealed class ProjectileMod : PackBuilderType
 
     public List<IProjectileChange> Changes = [];
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
         if (Projectiles.Count == 0)
             throw new NoProjectilesException();
@@ -22,9 +21,4 @@ public sealed class ProjectileMod : PackBuilderType
             ProjectileModifier.RegisterChanges(projectileType, Changes);
         }
     }
-
-    /// <summary>
-    /// Call this to manually register a <see cref="ProjectileMod"/>.
-    /// </summary>
-    public void Register() => Load(null!);
 }

@@ -159,40 +159,40 @@ internal sealed class ModifyItemDropGuard : ItemDropGuard
                 return ItemDropGuardKind.Success;
 
             case RollKind.RollLessThanOnce:
-            {
-                if (!desiredItem || rng.NextFloat() < rollValue)
                 {
-                    return ItemDropGuardKind.Success;
-                }
+                    if (!desiredItem || rng.NextFloat() < rollValue)
+                    {
+                        return ItemDropGuardKind.Success;
+                    }
 
-                failedRoll = true;
-                return ItemDropGuardKind.Reroll;
-            }
+                    failedRoll = true;
+                    return ItemDropGuardKind.Reroll;
+                }
 
             case RollKind.RollMoreThanOnce:
-            {
-                if (desiredItem)
                 {
+                    if (desiredItem)
+                    {
+                        return ItemDropGuardKind.Success;
+                    }
+
+                    if (rollValue > 1f)
+                    {
+                        rollValue -= 1f;
+                        return ItemDropGuardKind.Reroll;
+                    }
+
+                    var remainingRoll = rollValue;
+                    rollValue = 0f;
+
+                    if (rng.NextFloat() < remainingRoll)
+                    {
+                        return ItemDropGuardKind.Reroll;
+                    }
+
+                    failedRoll = true;
                     return ItemDropGuardKind.Success;
                 }
-
-                if (rollValue > 1f)
-                {
-                    rollValue -= 1f;
-                    return ItemDropGuardKind.Reroll;
-                }
-
-                var remainingRoll = rollValue;
-                rollValue = 0f;
-
-                if (rng.NextFloat() < remainingRoll)
-                {
-                    return ItemDropGuardKind.Reroll;
-                }
-
-                failedRoll = true;
-                return ItemDropGuardKind.Success;
-            }
 
             default:
                 throw new ArgumentException();

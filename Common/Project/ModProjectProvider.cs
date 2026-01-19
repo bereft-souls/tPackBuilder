@@ -1,10 +1,10 @@
-﻿using System;
+﻿using PackBuilder.Common.Project.IO;
+using PackBuilder.Common.Project.ManifestFormats;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using PackBuilder.Common.Project.IO;
-using PackBuilder.Common.Project.ManifestFormats;
 using Terraria.ModLoader.Core;
 
 namespace PackBuilder.Common.Project;

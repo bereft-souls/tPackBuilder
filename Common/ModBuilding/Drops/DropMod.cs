@@ -1,13 +1,12 @@
 ﻿using PackBuilder.Core.Systems;
 using System.Collections.Generic;
-using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Drops;
 
 public sealed class DropMod : PackBuilderType
 {
     public List<string> NPCs { get; } = [];
-    
+
     public List<string> Items { get; } = [];
 
     public bool AllNPCs { get; set; } = false;
@@ -16,7 +15,7 @@ public sealed class DropMod : PackBuilderType
 
     public List<IDropChange> Changes { get; } = [];
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
         if (NPCs.Count == 0)
             throw new NoDropScopeException();
@@ -36,9 +35,4 @@ public sealed class DropMod : PackBuilderType
         if (AllNPCs)
             DropModifier.RegisterGlobalDropChanges(Changes);
     }
-
-    /// <summary>
-    /// Call this to manually register a <see cref="DropMod"/>.
-    /// </summary>
-    public void Register() => Load(null!);
 }

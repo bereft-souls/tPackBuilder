@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using System;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
@@ -39,7 +39,7 @@ internal class DraggablePanel : UIPanel
 
         Left.Pixels = Math.Clamp(Left.Pixels, 0f, parentDims.Right - Width.Pixels);
         Top.Pixels = Math.Clamp(Top.Pixels, 0f, parentDims.Bottom - Height.Pixels);
-            
+
         Recalculate();
     }
 

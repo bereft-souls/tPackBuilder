@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using PackBuilder.Common.ModBuilding.Drops;
+﻿using PackBuilder.Common.ModBuilding.Drops;
 using PackBuilder.Common.ModBuilding.Drops.Changes;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 

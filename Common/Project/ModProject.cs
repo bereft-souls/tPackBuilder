@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using PackBuilder.Common.Project.IO;
+﻿using PackBuilder.Common.Project.IO;
 using PackBuilder.Common.Project.ManifestFormats;
+using System;
+using System.Threading.Tasks;
 using Terraria.ModLoader.Core;
 
 namespace PackBuilder.Common.Project;
@@ -24,14 +24,14 @@ public readonly struct ModProjectView(ModProject project) : IEquatable<ModProjec
     public string InternalName => Project.InternalName;
 
     internal string Directory => Project.Directory;
-    
+
     private ModProject Project { get; } = project;
 
     public bool Equals(ModProjectView other)
     {
         return Project.Directory == other.Project.Directory;
     }
-    
+
     public int CompareTo(ModProjectView other)
     {
         return string.Compare(Project.Directory, other.Project.Directory, StringComparison.Ordinal);

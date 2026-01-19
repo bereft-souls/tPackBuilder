@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using PackBuilder.Common.Project;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using PackBuilder.Common.Project;
 using System.Linq;
-using Newtonsoft.Json;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;

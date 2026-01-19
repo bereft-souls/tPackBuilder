@@ -14,14 +14,9 @@ public sealed class RecipeGroupBuilder : PackBuilderType
 
     public override string? LoadingMethod => nameof(ModSystem.AddRecipeGroups);
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
         int[] items = Items.Select(GetItem).ToArray();
         RecipeGroup.RegisterGroup(Name, new RecipeGroup(() => Language.GetOrRegister(LocalizationKey).Value, items));
     }
-
-    /// <summary>
-    /// Call this to manuualy register a <see cref="RecipeGroupBuilder"/>.
-    /// </summary>
-    public void Register() => Load(null!);
 }

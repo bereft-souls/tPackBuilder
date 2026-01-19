@@ -24,7 +24,7 @@ public sealed class RecipeMod : PackBuilderType
     // Run in PostAddRecipes instead of PostSetupContent
     public override string? LoadingMethod => nameof(ModSystem.PostAddRecipes);
 
-    public override void Load(Mod mod)
+    public override void Load()
     {
         if (Conditions.Count == 0)
             throw new NoConditionsException();
@@ -33,12 +33,12 @@ public sealed class RecipeMod : PackBuilderType
 
         try
         {
-            recipeLoader_CurrentMod.SetValue(null, mod);
+            recipeLoader_CurrentMod.SetValue(null, Mod);
 
             foreach (var recipe in Main.recipe)
             {
                 // Do not apply recipe mods to recipes added by the same mod pack.
-                if (recipe.Mod == mod)
+                if (recipe.Mod == Mod)
                     continue;
 
                 // 'applies' will be true in any of the following cases:
@@ -63,7 +63,7 @@ public sealed class RecipeMod : PackBuilderType
         }
         catch (Exception ex)
         {
-            ex.Data["mod"] = mod.Name;
+            ex.Data["mod"] = Mod.Name;
             throw;
         }
         finally
@@ -71,12 +71,6 @@ public sealed class RecipeMod : PackBuilderType
             recipeLoader_CurrentMod.SetValue(null, null);
         }
     }
-
-    /// <summary>
-    /// Call this to manually register a <see cref="RecipeMod"/>.
-    /// </summary>
-    /// <param name="mod">Your mod instance</param>
-    public void Register(Mod mod) => Load(mod);
 }
 
 // Recipe Criteria: Either All or Any.
