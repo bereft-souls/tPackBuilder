@@ -40,7 +40,7 @@ namespace PackBuilder.Core.Systems
 
                 // Navigate to the first SetDefaults call.
                 // This method is passed a value of 0 to essentially only act as a field initializer.
-                var setDefaultsMethod = typeof(NPC).GetMethod("SetDefaults", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)!;
+                var setDefaultsMethod = typeof(NPC).GetMethod("SetDefaults", BindingFlags.Instance | BindingFlags.Public)!;
                 cursor.GotoNext(i => i.MatchCall(setDefaultsMethod));
 
                 // After the NPC is initialized, we want to immediately cache netID.

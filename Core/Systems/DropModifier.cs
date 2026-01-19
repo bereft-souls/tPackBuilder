@@ -40,7 +40,7 @@ public sealed class DropModifier : ModSystem
 
         public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
         {
-            if (PerNpcDropMods.TryGetValue(npc.netID, out var changes))
+            if (!PerNpcDropMods.TryGetValue(npc.netID, out var changes))
                 return;
 
             foreach (var change in changes)
@@ -54,8 +54,6 @@ public sealed class DropModifier : ModSystem
     {
         public override void ModifyItemLoot(Item item, ItemLoot itemLoot)
         {
-            base.ModifyItemLoot(item, itemLoot);
-
             if (!PerItemDropMods.TryGetValue(item.netID, out var changes))
                 return;
 
