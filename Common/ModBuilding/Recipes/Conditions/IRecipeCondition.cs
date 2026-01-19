@@ -1,9 +1,8 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Conditions
+namespace PackBuilder.Common.ModBuilding.Recipes.Conditions;
+
+internal interface IRecipeCondition
 {
-    internal interface IRecipeCondition
-    {
-        public bool AppliesTo(Recipe recipe);
-    }
+    public bool AppliesTo(Recipe recipe);
 }

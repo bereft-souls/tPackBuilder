@@ -1,17 +1,16 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Generation.Properties
+namespace PackBuilder.Common.ModBuilding.Recipes.Generation.Properties;
+
+internal class RecipeResult
 {
-    internal class RecipeResult
+    public required string Item;
+
+    public int Count = 1;
+
+    public void AddTo(Recipe recipe)
     {
-        public required string Item;
-
-        public int Count = 1;
-
-        public void AddTo(Recipe recipe)
-        {
-            recipe.createItem.SetDefaults(GetItem(Item), false);
-            recipe.createItem.stack = Count;
-        }
+        recipe.createItem.SetDefaults(GetItem(Item), false);
+        recipe.createItem.stack = Count;
     }
 }

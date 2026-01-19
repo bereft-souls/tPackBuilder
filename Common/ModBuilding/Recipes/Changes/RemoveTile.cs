@@ -1,15 +1,14 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Changes
-{
-    internal class RemoveTile : IRecipeChange
-    {
-        public required string Tile;
+namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-        public void ApplyTo(Recipe recipe)
-        {
-            int tile = GetTile(Tile);
-            recipe.RemoveTile(tile);
-        }
+internal class RemoveTile : IRecipeChange
+{
+    public required string Tile;
+
+    public void ApplyTo(Recipe recipe)
+    {
+        int tile = GetTile(Tile);
+        recipe.RemoveTile(tile);
     }
 }

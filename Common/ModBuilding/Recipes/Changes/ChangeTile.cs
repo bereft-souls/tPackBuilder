@@ -1,25 +1,24 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Changes
+namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
+
+internal class ChangeTile : IRecipeChange
 {
-    internal class ChangeTile : IRecipeChange
+    public string Tile = null;
+
+    public required string NewTile;
+
+    public void ApplyTo(Recipe recipe)
     {
-        public string Tile = null;
+        int oldTile = Tile == null ? -1 : GetTile(Tile);
+        int newTile = GetTile(NewTile);
 
-        public required string NewTile;
+        if (oldTile == -1)
+            recipe.requiredTile.Clear();
 
-        public void ApplyTo(Recipe recipe)
-        {
-            int oldTile = Tile == null ? -1 : GetTile(Tile);
-            int newTile = GetTile(NewTile);
+        else
+            recipe.RemoveTile(oldTile);
 
-            if (oldTile == -1)
-                recipe.requiredTile.Clear();
-
-            else
-                recipe.RemoveTile(oldTile);
-
-            recipe.AddTile(newTile);
-        }
+        recipe.AddTile(newTile);
     }
 }

@@ -7,7 +7,13 @@ namespace PackBuilder.Core.Systems
 {
     public class ItemModifier : ModSystem
     {
-        public static Dictionary<int, List<ItemChanges>> ItemModSets { get; } = [];
+        public static Dictionary<int, List<IItemChange>> ItemMods { get; } = [];
+
+        public static void RegisterItemChanges(int itemType, params IEnumerable<IItemChange> changes)
+        {
+            ItemMods.TryAdd(itemType, []);
+            ItemMods[itemType].AddRange(changes);
+        }
 
         [Autoload(false)]
         [LateLoad]
@@ -17,7 +23,7 @@ namespace PackBuilder.Core.Systems
 
             public static void ApplyChanges(Item item)
             {
-                if (ItemModSets.TryGetValue(item.type, out var value))
+                if (ItemMods.TryGetValue(item.type, out var value))
                     value.ForEach(c => c.ApplyTo(item));
             }
         }

@@ -8,12 +8,25 @@ namespace PackBuilder.Core.Systems;
 
 public sealed class DropModifier : ModSystem
 {
-    public static Dictionary<int, List<DropChanges>> PerNpcDropChanges { get; } = [];
+    public static Dictionary<int, List<IDropChange>> PerNpcDropMods { get; } = [];
 
-    public static Dictionary<int, List<DropChanges>> PerItemDropChanges { get; } = [];
+    public static Dictionary<int, List<IDropChange>> PerItemDropMods { get; } = [];
 
-    public static List<DropChanges> GlobalNpcDropChanges { get; } = [];
+    public static List<IDropChange> GlobalNpcDropMods { get; } = [];
 
+    public static void RegisterNPCDropChanges(int npcType, params IEnumerable<IDropChange> changes)
+    {
+        PerNpcDropMods.TryAdd(npcType, []);
+        PerNpcDropMods[npcType].AddRange(changes);
+    }
+
+    public static void RegisterItemDropChanges(int itemType, params IEnumerable<IDropChange> changes)
+    {
+        PerItemDropMods.TryAdd(itemType, []);
+        PerItemDropMods[itemType].AddRange(changes);
+    }
+
+    public static void RegisterGlobalDropChanges(params IEnumerable<IDropChange> changes) => GlobalNpcDropMods.AddRange(changes);
 
     [Autoload(false)]
     [LateLoad]
@@ -21,13 +34,13 @@ public sealed class DropModifier : ModSystem
     {
         public override void ModifyGlobalLoot(GlobalLoot globalLoot)
         {
-            foreach (var change in GlobalNpcDropChanges)
+            foreach (var change in GlobalNpcDropMods)
                 change.ApplyTo(new IterableGlobalLoot(globalLoot));
         }
 
         public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
         {
-            if (!PerNpcDropChanges.TryGetValue(npc.netID, out var changes))
+            if (!PerNpcDropMods.TryGetValue(npc.netID, out var changes))
                 return;
 
             foreach (var change in changes)
@@ -43,7 +56,7 @@ public sealed class DropModifier : ModSystem
         {
             base.ModifyItemLoot(item, itemLoot);
 
-            if (!PerItemDropChanges.TryGetValue(item.netID, out var changes))
+            if (!PerItemDropMods.TryGetValue(item.netID, out var changes))
                 return;
 
             foreach (var change in changes)

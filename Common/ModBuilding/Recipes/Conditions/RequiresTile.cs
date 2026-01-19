@@ -1,15 +1,14 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Conditions
-{
-    internal class RequiresTile : IRecipeCondition
-    {
-        public required string Tile;
+namespace PackBuilder.Common.ModBuilding.Recipes.Conditions;
 
-        public bool AppliesTo(Recipe recipe)
-        {
-            int tile = GetTile(Tile);
-            return recipe.HasTile(tile);
-        }
+internal class RequiresTile : IRecipeCondition
+{
+    public required string Tile;
+
+    public bool AppliesTo(Recipe recipe)
+    {
+        int tile = GetTile(Tile);
+        return recipe.HasTile(tile);
     }
 }

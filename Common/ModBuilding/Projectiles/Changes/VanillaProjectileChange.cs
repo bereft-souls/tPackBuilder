@@ -1,26 +1,25 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Projectiles.Changes
+namespace PackBuilder.Common.ModBuilding.Projectiles.Changes;
+
+internal class VanillaProjectileChange : IProjectileChange
 {
-    internal class VanillaProjectileChange : IProjectileChange
+    public ValueModifier Damage { get; set; }
+    public ValueModifier Piercing { get; set; }
+    public ValueModifier Scale { get; set; }
+    public ValueModifier HitCooldown { get; set; }
+
+    public void ApplyTo(Projectile projectile)
     {
-        public ValueModifier Damage { get; set; }
-        public ValueModifier Piercing { get; set; }
-        public ValueModifier Scale { get; set; }
-        public ValueModifier HitCooldown { get; set; }
+        this.Damage.ApplyTo(ref projectile.damage);
+        this.Piercing.ApplyTo(ref projectile.penetrate);
+        projectile.maxPenetrate = projectile.penetrate;
+        this.Scale.ApplyTo(ref projectile.scale);
 
-        public void ApplyTo(Projectile projectile)
-        {
-            this.Damage.ApplyTo(ref projectile.damage);
-            this.Piercing.ApplyTo(ref projectile.penetrate);
-            projectile.maxPenetrate = projectile.penetrate;
-            this.Scale.ApplyTo(ref projectile.scale);
+        if (projectile.usesLocalNPCImmunity)
+            this.HitCooldown.ApplyTo(ref projectile.localNPCHitCooldown);
 
-            if (projectile.usesLocalNPCImmunity)
-                this.HitCooldown.ApplyTo(ref projectile.localNPCHitCooldown);
-
-            else if (projectile.usesIDStaticNPCImmunity)
-                this.HitCooldown.ApplyTo(ref projectile.idStaticNPCHitCooldown);
-        }
+        else if (projectile.usesIDStaticNPCImmunity)
+            this.HitCooldown.ApplyTo(ref projectile.idStaticNPCHitCooldown);
     }
 }

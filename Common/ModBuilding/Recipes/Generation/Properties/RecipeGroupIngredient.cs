@@ -1,13 +1,12 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Generation.Properties
+namespace PackBuilder.Common.ModBuilding.Recipes.Generation.Properties;
+
+internal class RecipeGroupIngredient
 {
-    internal class RecipeGroupIngredient
-    {
-        public required string Group;
+    public required string Group;
 
-        public int Count = 1;
+    public int Count = 1;
 
-        public void AddTo(Recipe recipe) => recipe.AddRecipeGroup(GetRecipeGroup(Group), Count);
-    }
+    public void AddTo(Recipe recipe) => recipe.AddRecipeGroup(GetRecipeGroup(Group), Count);
 }

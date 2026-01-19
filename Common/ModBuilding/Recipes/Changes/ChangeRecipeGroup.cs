@@ -1,28 +1,27 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Changes
+namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
+
+internal class ChangeRecipeGroup : IRecipeChange
 {
-    internal class ChangeRecipeGroup : IRecipeChange
+    public required string Group;
+
+    public string NewGroup = null;
+
+    public int NewCount = 1;
+
+    public void ApplyTo(Recipe recipe)
     {
-        public required string Group;
+        int id = GetRecipeGroup(Group);
+        RecipeGroup group = RecipeGroup.recipeGroups[id];
+        int newId = id;
 
-        public string NewGroup = null;
+        if (NewGroup is not null)
+            newId = GetRecipeGroup(NewGroup);
 
-        public int NewCount = 1;
+        recipe.RemoveRecipeGroup(id);
+        recipe.RemoveIngredient(group.IconicItemId);
 
-        public void ApplyTo(Recipe recipe)
-        {
-            int id = GetRecipeGroup(Group);
-            RecipeGroup group = RecipeGroup.recipeGroups[id];
-            int newId = id;
-
-            if (NewGroup is not null)
-                newId = GetRecipeGroup(NewGroup);
-
-            recipe.RemoveRecipeGroup(id);
-            recipe.RemoveIngredient(group.IconicItemId);
-
-            recipe.AddRecipeGroup(newId, NewCount);
-        }
+        recipe.AddRecipeGroup(newId, NewCount);
     }
 }

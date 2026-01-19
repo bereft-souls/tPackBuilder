@@ -2,40 +2,39 @@
 using System.Collections.Generic;
 using Terraria.ModLoader;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Generation
+namespace PackBuilder.Common.ModBuilding.Recipes.Generation;
+
+internal class RecipeBuilder : PackBuilderType
 {
-    internal class RecipeBuilder : PackBuilderType
+    public List<RecipeIngredient> Ingredients = [];
+    public List<RecipeGroupIngredient> Groups = [];
+    public List<string> Tiles = [];
+
+    public required RecipeResult Result { get; set; }
+
+    public RecipeIngredient Ingredient { set => Ingredients.Add(value); }
+
+    public string Tile { set => Tiles.Add(value); }
+
+    public RecipeGroupIngredient GroupIngredient { set => Groups.Add(value); }
+
+    public override string? LoadingMethod => nameof(ModSystem.AddRecipes);
+
+    public override void Load(Mod mod)
     {
-        public List<RecipeIngredient> Ingredients = [];
-        public List<RecipeGroupIngredient> Groups = [];
-        public List<string> Tiles = [];
+        var recipe = NewRecipe(mod);
 
-        public required RecipeResult Result { get; set; }
+        Result.AddTo(recipe);
 
-        public RecipeIngredient Ingredient { set => Ingredients.Add(value); }
+        foreach (var ingredient in Ingredients)
+            ingredient.AddTo(recipe);
 
-        public string Tile { set => Tiles.Add(value); }
+        foreach (var group in Groups)
+            group.AddTo(recipe);
 
-        public RecipeGroupIngredient GroupIngredient { set => Groups.Add(value); }
+        foreach (var tile in Tiles)
+            recipe.AddTile(GetTile(tile));
 
-        public override string? LoadingMethod => nameof(ModSystem.AddRecipes);
-
-        public override void Load(Mod mod)
-        {
-            var recipe = NewRecipe(mod);
-
-            Result.AddTo(recipe);
-
-            foreach (var ingredient in Ingredients)
-                ingredient.AddTo(recipe);
-
-            foreach (var group in Groups)
-                group.AddTo(recipe);
-
-            foreach (var tile in Tiles)
-                recipe.AddTile(GetTile(tile));
-
-            recipe.Register();
-        }
+        recipe.Register();
     }
 }

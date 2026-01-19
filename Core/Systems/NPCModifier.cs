@@ -11,7 +11,16 @@ namespace PackBuilder.Core.Systems
 {
     internal class NPCModifier : ModSystem
     {
-        public static Dictionary<int, List<NPCChanges>> NPCModSets { get; } = [];
+        public static Dictionary<int, List<INPCChange>> NPCMods { get; } = [];
+
+        /// <summary>
+        /// Registers changes for a given NPC type.
+        /// </summary>
+        public static void RegisterChanges(int npcType, params IEnumerable<INPCChange> changes)
+        {
+            NPCMods.TryAdd(npcType, []);
+            NPCMods[npcType].AddRange(changes);
+        }
 
         public override void Load()
         {
@@ -96,7 +105,7 @@ namespace PackBuilder.Core.Systems
 
             public static void ApplyChanges(NPC npc, int npcId)
             {
-                if (NPCModSets.TryGetValue(npcId, out var value))
+                if (NPCMods.TryGetValue(npcId, out var value))
                     value.ForEach(c => c.ApplyTo(npc));
             }
         }

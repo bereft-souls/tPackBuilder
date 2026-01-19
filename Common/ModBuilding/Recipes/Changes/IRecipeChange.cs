@@ -1,9 +1,8 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Changes
+namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
+
+internal interface IRecipeChange
 {
-    internal interface IRecipeChange
-    {
-        public abstract void ApplyTo(Recipe recipe);
-    }
+    public abstract void ApplyTo(Recipe recipe);
 }

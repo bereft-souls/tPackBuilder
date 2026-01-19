@@ -1,21 +1,20 @@
 ﻿using Terraria;
 
-namespace PackBuilder.Common.ModBuilding.Recipes.Conditions
+namespace PackBuilder.Common.ModBuilding.Recipes.Conditions;
+
+internal class CreatesResult : IRecipeCondition
 {
-    internal class CreatesResult : IRecipeCondition
+    public required string Item;
+
+    public int Count = -1;
+
+    public bool AppliesTo(Recipe recipe)
     {
-        public required string Item;
+        int item = GetItem(Item);
 
-        public int Count = -1;
+        if (Count == -1)
+            return recipe.HasResult(item);
 
-        public bool AppliesTo(Recipe recipe)
-        {
-            int item = GetItem(Item);
-
-            if (Count == -1)
-                return recipe.HasResult(item);
-
-            return recipe.TryGetResult(item, out var ingredient) && ingredient.stack == Count;
-        }
+        return recipe.TryGetResult(item, out var ingredient) && ingredient.stack == Count;
     }
 }
