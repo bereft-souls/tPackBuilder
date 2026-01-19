@@ -19,4 +19,9 @@ public sealed class RecipeGroupBuilder : PackBuilderType
         int[] items = Items.Select(GetItem).ToArray();
         RecipeGroup.RegisterGroup(Name, new RecipeGroup(() => Language.GetOrRegister(LocalizationKey).Value, items));
     }
+
+    /// <summary>
+    /// Call this to manuualy register a <see cref="RecipeGroupBuilder"/>.
+    /// </summary>
+    public void Register() => Load(null!);
 }

@@ -35,4 +35,9 @@ public sealed class RecipeGroupMod : PackBuilderType
             }
         }
     }
+
+    /// <summary>
+    /// Call this to manually register a <see cref="RecipeGroupMod"/>.
+    /// </summary>
+    public void Register() => Load(null!);
 }

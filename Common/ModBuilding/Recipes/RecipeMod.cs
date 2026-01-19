@@ -71,6 +71,12 @@ public sealed class RecipeMod : PackBuilderType
             recipeLoader_CurrentMod.SetValue(null, null);
         }
     }
+
+    /// <summary>
+    /// Call this to manually register a <see cref="RecipeMod"/>.
+    /// </summary>
+    /// <param name="mod">Your mod instance</param>
+    public void Register(Mod mod) => Load(mod);
 }
 
 // Recipe Criteria: Either All or Any.

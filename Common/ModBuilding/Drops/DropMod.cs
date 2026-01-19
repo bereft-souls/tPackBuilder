@@ -36,4 +36,9 @@ public sealed class DropMod : PackBuilderType
         if (AllNPCs)
             DropModifier.RegisterGlobalDropChanges(Changes);
     }
+
+    /// <summary>
+    /// Call this to manually register a <see cref="DropMod"/>.
+    /// </summary>
+    public void Register() => Load(null!);
 }

@@ -22,4 +22,9 @@ public sealed class ProjectileMod : PackBuilderType
             ProjectileModifier.RegisterChanges(projectileType, Changes);
         }
     }
+
+    /// <summary>
+    /// Call this to manually register a <see cref="ProjectileMod"/>.
+    /// </summary>
+    public void Register() => Load(null!);
 }

@@ -22,4 +22,9 @@ public sealed class NPCMod : PackBuilderType
             NPCModifier.RegisterChanges(npcType, Changes);
         }
     }
+
+    /// <summary>
+    /// Call this to manually register an <see cref="NPCMod"/>.
+    /// </summary>
+    public void Register() => Load(null!);
 }

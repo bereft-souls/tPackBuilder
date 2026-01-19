@@ -30,4 +30,10 @@ public sealed class RecipeBuilder : PackBuilderType
 
         recipe.Register();
     }
+
+    /// <summary>
+    /// Call this to manually register a <see cref="RecipeBuilder"/>.
+    /// </summary>
+    /// <param name="mod">Your mod instance</param>
+    public void Register(Mod mod) => Load(mod);
 }
