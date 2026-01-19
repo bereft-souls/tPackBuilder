@@ -76,7 +76,6 @@ public sealed class RecipeMod : PackBuilderType
 // Recipe Criteria: Either All or Any.
 // If "All" is specified, ALL of the conditions will need to be met in order to activate the changes of this mod.
 // If "Any" is specified, ANY of the conditions being met will activate the changes of this mod.
-
 [JsonConverter(typeof(RecipeCriteriaConverter))]
 public enum RecipeCriteria
 {

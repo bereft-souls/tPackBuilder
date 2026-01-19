@@ -2,6 +2,7 @@ global using static PackBuilder.Core.Utils.ModUtils;
 using Mono.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using PackBuilder.Core.Utils;
 using System;
 using System.Reflection;
 using Terraria.ModLoader;
@@ -20,6 +21,9 @@ namespace PackBuilder
             get => new()
             {
                 MissingMemberHandling = MissingMemberHandling.Error,
+                SerializationBinder = new JsonTypeResolverFix(),
+                TypeNameHandling = TypeNameHandling.Auto,
+
                 Error = (object? sender, ErrorEventArgs ex) =>
                 {
                     // We change the error that is currently being thrown in order to have
