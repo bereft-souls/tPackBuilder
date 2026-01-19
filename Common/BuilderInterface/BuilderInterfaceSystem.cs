@@ -14,12 +14,11 @@ internal sealed class NewModdersShouldUseDaybreak : ModPlayer
 {
     public override void ProcessTriggers(TriggersSet triggersSet)
     {
-        base.ProcessTriggers(triggersSet);
+        if (!ModContent.GetInstance<ClientConfig>().DeveloperMode && BuilderInterfaceSystem.Interface.CurrentState is null)
+            return;
 
         if (!BuilderInterfaceSystem.OpenKeybind?.JustPressed ?? true)
-        {
             return;
-        }
 
         BuilderInterfaceSystem.ToggleInterface();
     }
