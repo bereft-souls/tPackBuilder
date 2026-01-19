@@ -55,7 +55,7 @@ public sealed class RecipeMod : PackBuilderType
 
                 // Apply this recipe mod's changes.
                 if (Changes.Count == 0)
-                    throw new MissingFieldException("Must specify 1 or more changes for a recipe modification!", nameof(Changes));
+                    throw new NoChangesException();
 
                 foreach (var change in Changes)
                     change.ApplyTo(recipe);

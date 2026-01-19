@@ -90,6 +90,11 @@ namespace PackBuilder
         HideStackTraceException("Must specify 1 or more conditions for a recipe modification!")
     { }
 
+    // When a recipe mod has no changes.
+    public class NoChangesException() :
+        HideStackTraceException("Must specify 1 or more changes for a recipe modification!")
+    { }
+
     // When a recipe builder has no result.
     public class NoResultException() :
         HideStackTraceException("Must specify a result for a recipe building!")
