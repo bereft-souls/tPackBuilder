@@ -2,9 +2,9 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class ChangeResult : IRecipeChange
+public sealed record ChangeResult : IRecipeChange
 {
-    public string Item = null;
+    public string Item = null!;
 
     public int Count = -1;
 

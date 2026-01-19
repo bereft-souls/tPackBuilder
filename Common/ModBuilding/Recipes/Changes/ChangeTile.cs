@@ -2,9 +2,9 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class ChangeTile : IRecipeChange
+public sealed record ChangeTile : IRecipeChange
 {
-    public string Tile = null;
+    public string Tile = null!;
 
     public required string NewTile;
 

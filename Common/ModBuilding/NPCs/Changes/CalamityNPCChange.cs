@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.NPCs.Changes;
 
-internal class CalamityNPCChange : INPCChange
+public sealed record CalamityNPCChange : INPCChange
 {
     public ValueModifier DamageReduction { get; set; }
 

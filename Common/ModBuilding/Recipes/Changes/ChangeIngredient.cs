@@ -2,11 +2,11 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class ChangeIngredient : IRecipeChange
+public sealed record ChangeIngredient : IRecipeChange
 {
     public required string Item;
 
-    public string NewItem = null;
+    public string NewItem = null!;
 
     public int NewCount = -1;
 

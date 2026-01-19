@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Items.Changes;
 
-public class CalamityItemChange : IItemChange
+public sealed record CalamityItemChange : IItemChange
 {
     public ValueModifier MaxCharge { get; set; }
     public ValueModifier ChargePerUse { get; set; }

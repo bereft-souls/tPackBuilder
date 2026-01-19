@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Items.Changes;
 
-public class VanillaItemChange : IItemChange
+public sealed record VanillaItemChange : IItemChange
 {
     public ValueModifier Damage { get; set; }
     public ValueModifier CritRate { get; set; }

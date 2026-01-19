@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.NPCs.Changes;
 
-internal class VanillaNpcChange : INPCChange
+public sealed record class VanillaNpcChange : INPCChange
 {
     public ValueModifier Damage { get; set; }
     public ValueModifier Defense { get; set; }

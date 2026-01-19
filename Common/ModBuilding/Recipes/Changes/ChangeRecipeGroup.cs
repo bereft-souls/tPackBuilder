@@ -2,11 +2,11 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class ChangeRecipeGroup : IRecipeChange
+public sealed record ChangeRecipeGroup : IRecipeChange
 {
     public required string Group;
 
-    public string NewGroup = null;
+    public string NewGroup = null!;
 
     public int NewCount = 1;
 

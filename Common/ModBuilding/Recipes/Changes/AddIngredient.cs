@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class AddIngredient : IRecipeChange
+public sealed record AddIngredient : IRecipeChange
 {
     public required string Item;
 

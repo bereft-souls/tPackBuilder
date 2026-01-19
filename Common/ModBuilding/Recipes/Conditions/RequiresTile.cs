@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Conditions;
 
-internal class RequiresTile : IRecipeCondition
+public sealed record RequiresTile : IRecipeCondition
 {
     public required string Tile;
 

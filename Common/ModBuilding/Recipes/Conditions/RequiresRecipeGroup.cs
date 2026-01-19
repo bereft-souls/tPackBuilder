@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Conditions;
 
-internal class RequiresRecipeGroup : IRecipeCondition
+public sealed record RequiresRecipeGroup : IRecipeCondition
 {
     public required string Group;
 

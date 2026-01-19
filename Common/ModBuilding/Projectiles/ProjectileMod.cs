@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Projectiles;
 
-internal class ProjectileMod : PackBuilderType
+public sealed class ProjectileMod : PackBuilderType
 {
     public List<string> Projectiles = [];
 

@@ -5,17 +5,11 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Groups;
 
-internal class RecipeGroupMod : PackBuilderType
+public sealed class RecipeGroupMod : PackBuilderType
 {
     public List<string> Groups = [];
     public List<string> AddItems = [];
     public List<string> RemoveItems = [];
-
-    public required string Group { set => Groups.Add(value); }
-
-    public string Add { set => AddItems.Add(value); }
-
-    public string Remove { set => RemoveItems.Add(value); }
 
     public override string? LoadingMethod => nameof(ModSystem.PostSetupRecipes);
 

@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Conditions;
 
-internal class RequiresIngredient : IRecipeCondition
+public sealed record RequiresIngredient : IRecipeCondition
 {
     public required string Item;
 

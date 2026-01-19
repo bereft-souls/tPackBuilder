@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Items;
 
-public class ItemMod : PackBuilderType
+public sealed class ItemMod : PackBuilderType
 {
     public List<string> Items = [];
 

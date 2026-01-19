@@ -6,15 +6,11 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Groups;
 
-internal class RecipeGroupBuilder : PackBuilderType
+public sealed class RecipeGroupBuilder : PackBuilderType
 {
-    public List<string> Items = [];
-
     public required string Name { get; set; }
-
     public required string LocalizationKey { get; set; }
-
-    public string Item { set => Items.Add(value); }
+    public List<string> Items = [];
 
     public override string? LoadingMethod => nameof(ModSystem.AddRecipeGroups);
 

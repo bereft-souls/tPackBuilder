@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class AddRecipeGroup : IRecipeChange
+public sealed record AddRecipeGroup : IRecipeChange
 {
     public required string Group;
 

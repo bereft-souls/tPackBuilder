@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Generation.Properties;
 
-internal class RecipeGroupIngredient
+public sealed record RecipeGroupIngredient
 {
     public required string Group;
 

@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class RemoveTile : IRecipeChange
+public sealed record RemoveTile : IRecipeChange
 {
     public required string Tile;
 

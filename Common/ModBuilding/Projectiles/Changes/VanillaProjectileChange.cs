@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Projectiles.Changes;
 
-internal class VanillaProjectileChange : IProjectileChange
+public sealed record VanillaProjectileChange : IProjectileChange
 {
     public ValueModifier Damage { get; set; }
     public ValueModifier Piercing { get; set; }

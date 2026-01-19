@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Common.ModBuilding.NPCs;
 
-internal class NPCMod : PackBuilderType
+public sealed class NPCMod : PackBuilderType
 {
     public List<string> NPCs = [];
 

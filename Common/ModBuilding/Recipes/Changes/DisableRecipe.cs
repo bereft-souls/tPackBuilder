@@ -2,7 +2,7 @@
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Changes;
 
-internal class DisableRecipe : IRecipeChange
+public sealed record DisableRecipe : IRecipeChange
 {
     public required bool Disabled;
 
