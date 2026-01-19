@@ -97,7 +97,6 @@ public abstract class PackBuilderType
     /// Usually called during <see cref="ModSystem.PostSetupContent"/>. Allows you to handle setup tasks for this <see cref="PackBuilderType"/> like registering changes.<br/>
     /// You can override when this is called by overriding <see cref="LoadingMethod"/>.
     /// </summary>
-    /// <param name="mod">The <see cref="Mod"/> that contains this <see cref="PackBuilderType"/> object.</param>
     public abstract void Load();
 
     /// <summary>
