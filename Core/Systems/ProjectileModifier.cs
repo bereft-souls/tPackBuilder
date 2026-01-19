@@ -26,8 +26,11 @@ namespace PackBuilder.Core.Systems
 
             public static void ApplyChanges(Projectile projectile)
             {
-                if (ProjectileMods.TryGetValue(projectile.type, out var value))
-                    value.ForEach(c => c.ApplyTo(projectile));
+                if (!ProjectileMods.TryGetValue(projectile.type, out var changes))
+                    return;
+
+                foreach (var change in changes)
+                    change.ApplyTo(projectile);
             }
         }
     }

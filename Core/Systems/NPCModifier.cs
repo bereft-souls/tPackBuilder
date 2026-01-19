@@ -105,8 +105,11 @@ namespace PackBuilder.Core.Systems
 
             public static void ApplyChanges(NPC npc, int npcId)
             {
-                if (NPCMods.TryGetValue(npcId, out var value))
-                    value.ForEach(c => c.ApplyTo(npc));
+                if (!NPCMods.TryGetValue(npcId, out var changes))
+                    return;
+
+                foreach (var change in changes)
+                    change.ApplyTo(npc);
             }
         }
     }

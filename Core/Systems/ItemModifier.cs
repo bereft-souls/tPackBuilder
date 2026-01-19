@@ -23,8 +23,11 @@ namespace PackBuilder.Core.Systems
 
             public static void ApplyChanges(Item item)
             {
-                if (ItemMods.TryGetValue(item.type, out var value))
-                    value.ForEach(c => c.ApplyTo(item));
+                if (!ItemMods.TryGetValue(item.type, out var changes))
+                    return;
+
+                foreach (var change in changes)
+                    change.ApplyTo(item);
             }
         }
     }
