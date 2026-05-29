@@ -1,13 +1,15 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using PackBuilder.Common.Project;
-using System;
-using System.Collections.Generic;
+using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
@@ -15,6 +17,22 @@ namespace PackBuilder.Common.BuilderInterface;
 
 internal sealed class ModNameDropDown : UIPanel
 {
+    private Color color;
+
+    private Vector2 textSize;
+
+    public ModNameDropDown(ModProjectView? project)
+    {
+        Text = Language.GetText("Mods.PackBuilder.UI.SelectMod");
+        color = AbsentColor;
+
+        _backgroundTexture = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/EmptyPanel", AssetRequestMode.ImmediateLoad);
+        _borderTexture = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/SmallPanelOutline", AssetRequestMode.ImmediateLoad);
+
+        SelectedProject = project;
+        OverflowHidden = true;
+    }
+
     private static Color AbsentColor => Color.Gray;
 
     private static Color PresentColor => Color.White;
@@ -37,8 +55,12 @@ internal sealed class ModNameDropDown : UIPanel
                 Text = Language.GetText("Mods.PackBuilder.UI.SelectMod");
                 color = AbsentColor;
             }
+
+            OnProjectSelected?.Invoke(value);
         }
     }
+
+    private float Scale => 0.8f;
 
     public float TextHAlign { get; set; } = 0f;
 
@@ -53,7 +75,10 @@ internal sealed class ModNameDropDown : UIPanel
             var font = FontAssets.MouseText.Value;
             textSize = ChatManager.GetStringSize(font, value.ToString(), Vector2.One);
             textSize.Y = 16f;
+            textSize *= Scale;
+            textSize = textSize.Floor();
 
+            MaxWidth.Set(textSize.X + PaddingLeft + PaddingRight, 0f);
             /*
             MinWidth.Set(textSize.X + PaddingLeft + PaddingRight, 0f);
             MinHeight.Set(textSize.Y + PaddingTop + PaddingBottom, 0f);
@@ -61,20 +86,19 @@ internal sealed class ModNameDropDown : UIPanel
         }
     }
 
-    private Vector2 textSize;
-    private Color color;
-
-    public ModNameDropDown(ModProjectView? project)
-    {
-        Text = Language.GetText("Mods.PackBuilder.UI.SelectMod");
-        color = AbsentColor;
-
-        SelectedProject = project;
-        OverflowHidden = true;
-    }
+    public event Action<ModProjectView?>? OnProjectSelected;
 
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
+        if (IsMouseHovering)
+        {
+            _borderTexture = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/SmallPanelOutlineHighlight", AssetRequestMode.ImmediateLoad);
+        }
+        else
+        {
+            _borderTexture = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/SmallPanelOutline", AssetRequestMode.ImmediateLoad);
+        }
+
         base.DrawSelf(spriteBatch);
 
         DrawText(spriteBatch);
@@ -84,11 +108,11 @@ internal sealed class ModNameDropDown : UIPanel
     {
         var innerDims = GetInnerDimensions();
         var pos = innerDims.Position();
-        pos.Y -= 2f;
+        pos.Y += 2f;
         pos.X += (innerDims.Width - textSize.X) * TextHAlign;
 
         var text = Text.ToString();
-        Utils.DrawBorderString(sb, text, pos, color);
+        Utils.DrawBorderString(sb, text, pos, color, scale: Scale, anchory: 0.3f);
     }
 }
 
@@ -97,12 +121,8 @@ internal sealed class ModNameSelectionGrid : UIPanel
     private const int default_step_index = -1;
 
     private readonly List<GroupOptionButton<int>> buttonsBySorting = [];
-    private int currentSelected = default_step_index;
     private readonly List<ModProjectView> projects;
-
-    public event Action<ModProjectView?>? OnClickingOption;
-
-    public UIPanel? Panel { get; private set; }
+    private int currentSelected = default_step_index;
 
     public ModNameSelectionGrid(List<ModProjectView> projects, ModProjectView? selectedProject)
     {
@@ -119,6 +139,10 @@ internal sealed class ModNameSelectionGrid : UIPanel
         SetPadding(0f);
         BuildGrid();
     }
+
+    public UIPanel? Panel { get; private set; }
+
+    public event Action<ModProjectView?>? OnClickingOption;
 
     private void BuildGrid()
     {

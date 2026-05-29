@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria.ModLoader;
 
 namespace PackBuilder.Common.Project;
@@ -131,4 +132,34 @@ public sealed class BuildManifest
     internal string ModSource { get; set; } = string.Empty;
 
     private static readonly Version default_version = new(1, 0, 0, 0);
+
+    public BuildManifest Clone()
+    {
+        var manifest = new BuildManifest();
+        {
+            manifest.AssemblyReferences.AddRange(AssemblyReferences);
+            manifest.StrongModReferences.AddRange(StrongModReferences);
+            manifest.WeakModReferences.AddRange(WeakModReferences);
+            manifest.ModsToSortAfter.AddRange(ModsToSortAfter);
+            manifest.ModsToSortBefore.AddRange(ModsToSortBefore);
+            manifest.IgnoredBuildPaths.AddRange(IgnoredBuildPaths);
+            manifest.Author = Author;
+            manifest.Version = Version;
+            manifest.DisplayName = DisplayName;
+            manifest.HomepageUrl = HomepageUrl;
+            manifest.Side = Side;
+            manifest.PlayableOnPreview = PlayableOnPreview;
+            manifest.TranslationMod = TranslationMod;
+            manifest.NoCompile = NoCompile;
+            manifest.HideCode = HideCode;
+            manifest.HideResources = HideResources;
+            manifest.IncludeSource = IncludeSource;
+            manifest.EacPath = EacPath;
+            manifest.ModLoaderVersion = ModLoaderVersion;
+            manifest.Description = Description;
+            manifest.ModSource = ModSource;
+        }
+
+        return manifest;
+    }
 }

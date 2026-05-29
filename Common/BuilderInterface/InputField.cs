@@ -1,0 +1,364 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using ReLogic.Graphics;
+using Terraria;
+using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.UI;
+using Terraria.UI.Chat;
+
+namespace PackBuilder.Common.BuilderInterface;
+
+/// <summary>
+///     An interface panel accepting complex text input.
+/// </summary>
+public class InputField : UIPanel
+{
+    internal bool currentlyWriting;
+
+    private int cursorPosition;
+
+    // The text from before writing started.
+    private string? lastText;
+    private string? oldText;
+
+    public bool PretendEnterWasPressed { get; set; }
+
+    /// <summary>
+    ///     Initializes this input field with some default styling.
+    /// </summary>
+    public InputField(Func<string> hint)
+    {
+        Hint = hint;
+
+        _backgroundTexture = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/EmptyPanel", AssetRequestMode.ImmediateLoad);
+        _borderTexture = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/SmallPanelOutline", AssetRequestMode.ImmediateLoad);
+
+        Width.Set(0f, 1f);
+        Height.Set(30f, 0f);
+
+        SetPadding(0f);
+
+        PaddingLeft = 6f;
+        PaddingRight = 6f;
+    }
+
+    /// <inheritdoc />
+    public InputField(string hint) : this(() => hint) { }
+
+    /// <inheritdoc />
+    public InputField(LocalizedText text) : this(() => text.Value) { }
+
+    /// <summary>
+    ///     The scale of the text in the field.
+    /// </summary>
+    public float TextScale { get; set; } = 1f;
+
+    /// <summary>
+    ///     The text within the field.
+    /// </summary>
+    public string Text { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     The hint to display when there is no text.
+    /// </summary>
+    public Func<string> Hint { get; }
+
+    /// <summary>
+    ///     The maximum number of characters allowed to be entered.
+    /// </summary>
+    public int MaxChars { get; set; } = 100;
+
+    /// <summary>
+    ///     Weither Terraria's TextSnippets will be used.
+    /// </summary>
+    public bool AllowChatTags { get; set; } = false;
+
+    /// <summary>
+    ///     Any characters which may not be entered into the field.
+    /// </summary>
+    public HashSet<char> BlacklistedChars { get; } = [];
+
+    /// <summary>
+    ///     If populated, only these characters will be allowed to be entered in
+    ///     the field.  Any characters that are also in
+    ///     <see cref="BlacklistedChars" /> will still be ignored.
+    /// </summary>
+    public HashSet<char> WhitelistedChars { get; } = [];
+
+    /// <summary>
+    ///     The horizontal alignment of text within the field, represented as a
+    ///     [0,1] float serving as a percentage.
+    /// </summary>
+    public float TextAlignX { get; set; }
+
+    /// <summary>
+    ///     Ran when typing is "accepted" via either clicking off or pressing Enter.
+    /// </summary>
+    public event Action<InputField>? OnEnter;
+
+    /// <summary>
+    ///     Ran when typing is "cancelled" via pressing Escape.
+    /// </summary>
+    public event Action<InputField>? OnEscape;
+
+    /// <summary>
+    ///     Ran every time the text is modified.
+    /// </summary>
+    public event Action<InputField, string, string>? OnTextChanged;
+
+    public event Action<InputField>? OnAttemptedBackspace;
+
+    /// <inheritdoc />
+    public override void LeftMouseDown(UIMouseEvent evt)
+    {
+        base.LeftMouseDown(evt);
+
+        if (evt.Target != this || !this.InnerDimensions.Contains(evt.MousePosition.ToPoint()))
+        {
+            currentlyWriting = false;
+        }
+    }
+
+    /// <inheritdoc />
+    public override void LeftClick(UIMouseEvent evt)
+    {
+        base.LeftClick(evt);
+
+        Main.ClosePlayerChat();
+
+        InputHelpers.SyncBlinkerStartTime();
+        currentlyWriting = true;
+        lastText = Text;
+
+        if (Text.Length <= 0)
+        {
+            InputHelpers.CursorPositon = 0;
+
+            return;
+        }
+
+        var dims = this.InnerDimensions;
+
+        var font = FontAssets.MouseText.Value;
+
+        var textSize =
+            AllowChatTags
+                ? ChatManager.GetStringSize(font, Text, Vector2.One)
+                : font.MeasureString(Text);
+
+        var origin = new Vector2(textSize.X * TextAlignX, textSize.Y * 0.5f);
+
+        cursorPosition = font.GetHoveredCharacter(
+            Text,
+            Main.MouseScreen,
+            CalculateTextPositon(font, Text, dims),
+            origin,
+            new Vector2(TextScale),
+            AllowChatTags
+        );
+
+        InputHelpers.CursorPositon = cursorPosition;
+    }
+
+    /// <inheritdoc />
+    public override void Update(GameTime gameTime)
+    {
+        base.Update(gameTime);
+
+        if (Text != oldText && oldText is not null)
+        {
+            OnTextChanged?.Invoke(this, oldText, Text);
+        }
+
+        oldText = Text;
+
+        var cap = MaxChars;
+        if (Text.Length > cap)
+        {
+            Text = Text[..cap];
+
+            cursorPosition = Math.Min(cursorPosition, cap);
+        }
+
+        var clickedOff = !Main.hasFocus || (Main.mouseLeft && !IsMouseHovering);
+        if (clickedOff && currentlyWriting)
+        {
+            OnEnter?.Invoke(this);
+            currentlyWriting = false;
+        }
+    }
+
+    private void HandleInput()
+    {
+        InputHelpers.WritingText = true;
+
+        var cancellationType = InputHelpers.GetInput(
+            Text,
+            out var newText,
+            out var attemptedBackspace,
+            false,
+            AllowChatTags,
+            BlacklistedChars,
+            WhitelistedChars
+        );
+        switch (cancellationType)
+        {
+            case InputCancellationType.Confirmed:
+                Text = newText;
+                OnEnter?.Invoke(this);
+                currentlyWriting = false;
+                break;
+
+            case InputCancellationType.Escaped:
+                Text = lastText ?? string.Empty;
+                OnEscape?.Invoke(this);
+                currentlyWriting = false;
+                break;
+
+            case InputCancellationType.None:
+            default:
+                Text = newText;
+                break;
+        }
+
+        if (attemptedBackspace)
+        {
+            OnAttemptedBackspace?.Invoke(this);
+        }
+    }
+
+    public void PressEnter()
+    {
+        PretendEnterWasPressed = true;
+        OnEnter?.Invoke(this);
+        currentlyWriting = false;
+        PretendEnterWasPressed = false;
+    }
+
+    /// <inheritdoc />
+    protected override void DrawSelf(SpriteBatch spriteBatch)
+    {
+        base.DrawSelf(spriteBatch);
+
+        spriteBatch.End();
+
+        var oldRasterizer = spriteBatch.GraphicsDevice.RasterizerState;
+        var oldScissor = spriteBatch.GraphicsDevice.ScissorRectangle;
+        spriteBatch.GraphicsDevice.ScissorRectangle = GetClippingRectangle(spriteBatch);
+
+        var dims = this.InnerDimensions;
+
+        var cursorMargin = 5f * TextScale;
+        dims.Width -= (int)cursorMargin;
+
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, OverflowHiddenRasterizerState, null, Main.UIScaleMatrix);
+        {
+            var hint = Hint();
+
+            // hack
+            if (hint == string.Empty)
+            {
+                hint = " ";
+            }
+
+            var text = Text == string.Empty ? hint : Text;
+
+            var font = FontAssets.MouseText.Value;
+            var position = CalculateTextPositon(font, text, dims);
+
+            var textSize =
+                AllowChatTags
+                    ? ChatManager.GetStringSize(font, text, Vector2.One)
+                    : font.MeasureString(text);
+
+            var origin = new Vector2(textSize.X * TextAlignX, textSize.Y * 0.5f);
+
+            if (Text == string.Empty)
+            {
+                ChatManager.DrawColorCodedStringWithShadow(
+                    spriteBatch,
+                    font,
+                    hint,
+                    position,
+                    Color.Gray,
+                    0f,
+                    origin,
+                    new Vector2(TextScale)
+                );
+            }
+
+            var cursorIndex = Math.Min(InputHelpers.CursorPositon, Text.Length);
+
+            spriteBatch.DrawInputStringWithShadow(
+                font,
+                Text,
+                position,
+                Color.White,
+                origin,
+                new Vector2(TextScale),
+                currentlyWriting,
+                cursorIndex,
+                AllowChatTags
+            );
+        }
+        spriteBatch.End();
+
+        spriteBatch.GraphicsDevice.ScissorRectangle = oldScissor;
+
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.None, oldRasterizer, null, Main.UIScaleMatrix);
+
+        if (currentlyWriting)
+        {
+            HandleInput();
+        }
+    }
+
+    private Vector2 CalculateTextPositon(DynamicSpriteFont font, string text, Rectangle dims)
+    {
+        var position = new Vector2(dims.X + dims.Width * TextAlignX + 2f, dims.Y + dims.Height * 0.5f + 4);
+
+        var textSize =
+            AllowChatTags
+                ? ChatManager.GetStringSize(font, text, Vector2.One)
+                : font.MeasureString(text);
+
+        var origin = new Vector2(textSize.X * TextAlignX, textSize.Y * 0.5f);
+
+        var cursorIndex = Math.Min(InputHelpers.CursorPositon, Text.Length);
+        if (cursorIndex < 0)
+        {
+            cursorIndex = 0;
+        }
+
+        if (currentlyWriting && textSize.X * TextScale >= dims.Width)
+        {
+            var cursorPosition =
+                AllowChatTags
+                    ? ChatManager.GetStringSize(font, text[..cursorIndex], Vector2.One).X
+                    : font.MeasureString(text[..cursorIndex]).X;
+
+            cursorPosition -= origin.X;
+
+            var offset = cursorPosition * TextScale;
+
+            // Each half of the text separated by the alignment
+            var width =
+                Math.Sign(offset) <= 0
+                    ? (dims.Width * TextAlignX)
+                    : (dims.Width * (1f - TextAlignX));
+
+            offset = Utils.Remap(Math.Abs(offset), width, textSize.X * TextScale, 0f, textSize.X * TextScale - width) * Math.Sign(offset);
+            {
+                position.X -= offset;
+            }
+        }
+
+        return position;
+    }
+}

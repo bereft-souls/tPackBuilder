@@ -59,7 +59,7 @@ namespace PackBuilder
     public class HideStackTraceException(string message) : Exception(message)
     {
         public override string ToString() =>
-            "Error encountered when building tPackBuilder changes!" + Environment.NewLine +
+            "Error encountered when building tPackBuilder ChangeList!" + Environment.NewLine +
             Environment.NewLine +
             Message + Environment.NewLine +
             $"[c/F5BC42:{PackBuilder.LoadingFile ?? ""}]";
@@ -77,7 +77,7 @@ namespace PackBuilder
 
     // When an item mod specifies no items.
     public class NoItemsException() :
-        HideStackTraceException("Must specify 1 or more items for an item modification!")
+        HideStackTraceException("Must specify 1 or more innerGrid for an item modification!")
     { }
 
     // When a projectile mod specifies no projectiles.
@@ -92,7 +92,7 @@ namespace PackBuilder
 
     // When a recipe mod has no changes.
     public class NoChangesException() :
-        HideStackTraceException("Must specify 1 or more changes for a recipe modification!")
+        HideStackTraceException("Must specify 1 or more ChangeList for a recipe modification!")
     { }
 
     // When a recipe builder has no result.
@@ -102,9 +102,9 @@ namespace PackBuilder
 
     // When a drop mod has no NPCs and is not global.
     public class NoDropScopeException()
-        : HideStackTraceException("Must specify an least one NPC or item or mark the changes as global for a drop modification!");
+        : HideStackTraceException("Must specify an least one NPC or item or mark the ChangeList as global for a drop modification!");
 
     // When a recipe group mod specifies no changes.
     public class NoGroupChangesException()
-        : HideStackTraceException("No changes to the recipe group were specified!");
+        : HideStackTraceException("No ChangeList to the recipe group were specified!");
 }

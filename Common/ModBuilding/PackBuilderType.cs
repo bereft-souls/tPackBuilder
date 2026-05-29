@@ -6,8 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Microsoft.Xna.Framework.Graphics;
+using PackBuilder.Common.BuilderInterface;
+using PackBuilder.Common.BuilderInterface.Windows;
+using ReLogic.Content;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
+using Terraria.UI;
 
 namespace PackBuilder.Common.ModBuilding;
 
@@ -25,8 +31,10 @@ internal sealed class PackBuilderTypeSetup : ModSystem
                 continue;
 
             var template = (Activator.CreateInstance(type) as PackBuilderType)!;
+            ContentInstance.Register(template);
 
             PackBuilderType.Extensions.Add(type, template.Extension);
+            PackBuilderType.ExtensionsToTypes.Add(template.Extension, template);
             string? loadingMethod = template.LoadingMethod;
 
             if (loadingMethod is null)
@@ -81,6 +89,8 @@ public abstract class PackBuilderType
     /// </summary>
     public static Dictionary<Type, string> Extensions { get; } = [];
 
+    public static Dictionary<string, PackBuilderType> ExtensionsToTypes { get; } = [];
+
     /// <summary>
     /// The <see cref="Terraria.ModLoader.Mod"/> that contains this content.
     /// </summary>
@@ -92,6 +102,10 @@ public abstract class PackBuilderType
     /// </summary>
     [JsonIgnore]
     public string File { get; private set; } = null!;
+
+    public abstract Asset<Texture2D> GetIcon();
+
+    public abstract AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state);
 
     /// <summary>
     /// Usually called during <see cref="ModSystem.PostSetupContent"/>. Allows you to handle setup tasks for this <see cref="PackBuilderType"/> like registering changes.<br/>

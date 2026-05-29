@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
@@ -15,10 +15,14 @@ internal sealed class NewModdersShouldUseDaybreak : ModPlayer
     public override void ProcessTriggers(TriggersSet triggersSet)
     {
         if (!ModContent.GetInstance<ClientConfig>().DeveloperMode && BuilderInterfaceSystem.Interface.CurrentState is null)
+        {
             return;
+        }
 
         if (!BuilderInterfaceSystem.OpenKeybind?.JustPressed ?? true)
+        {
             return;
+        }
 
         BuilderInterfaceSystem.ToggleInterface();
     }

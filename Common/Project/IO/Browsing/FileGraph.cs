@@ -15,6 +15,7 @@ public sealed class FileGraph : IDisposable
     public event Action<FileEntry>? FileAdded;
     public event Action<FileEntry>? FileRemoved;
     public event Action<FileEntry>? FileChanged;
+    public event Action<string, FileSystemEntry>? FileRenamed;
     public event Action<DirectoryEntry>? DirectoryAdded;
     public event Action<DirectoryEntry>? DirectoryRemoved;
 
@@ -42,6 +43,12 @@ public sealed class FileGraph : IDisposable
         watcher.Renamed += OnRenamed;
     }
 
+    public bool TryGetCompatibleExtension(string path, out string extension)
+    {
+        extension = GetComplicatedExtension(path, allowedExtensions);
+        return allowedExtensions.Count == 0 || allowedExtensions.Contains(extension);
+    }
+
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
         if (Directory.Exists(e.FullPath))
@@ -58,7 +65,13 @@ public sealed class FileGraph : IDisposable
         }
         else if (File.Exists(e.FullPath))
         {
-            var ext = GetComplicatedExtension(e.FullPath, allowedExtensions).ToLowerInvariant();
+            if (!TryGetCompatibleExtension(e.FullPath, out var ext))
+            {
+                return;
+            }
+
+            ext = ext.ToLowerInvariant();
+
             if (allowedExtensions.Count != 0 && !allowedExtensions.Contains(ext))
             {
                 return;
@@ -106,11 +119,13 @@ public sealed class FileGraph : IDisposable
         var entry = FindFile(e.OldFullPath) as FileSystemEntry ?? FindDirectory(e.OldFullPath);
         if (entry is null)
         {
+            OnCreated(sender, new FileSystemEventArgs(e.ChangeType, Path.GetDirectoryName(e.FullPath) ?? "", Path.GetFileName(e.Name)));
             return;
         }
 
         entry.Name = Path.GetFileName(e.FullPath);
         entry.FullPath = e.FullPath;
+        FileRenamed?.Invoke(e.OldFullPath, entry);
     }
 
     private DirectoryEntry BuildRecursive(string path, DirectoryEntry? parent = null)
@@ -122,7 +137,12 @@ public sealed class FileGraph : IDisposable
 
         foreach (var file in Directory.GetFiles(path))
         {
-            var ext = GetComplicatedExtension(file, allowedExtensions).ToLowerInvariant();
+            if (!TryGetCompatibleExtension(file, out var ext))
+            {
+                continue;
+            }
+
+            ext = ext.ToLowerInvariant();
 
             // 0 means no whitelist, all are allowed.
             if (allowedExtensions.Count == 0 || allowedExtensions.Contains(ext))
