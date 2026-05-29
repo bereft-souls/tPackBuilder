@@ -513,7 +513,7 @@ internal sealed class ModControlPanelWindow(BuilderInterfaceState state) : Abstr
         var root = fileGraph.Root.FullPath;
         var relative = Path.GetRelativePath(root, directory.FullName);
         selectedDirectory = directory;
-        directoryDisplay?.Directory = relative == "." ? string.Empty : relative;
+        directoryDisplay?.Directory = relative == "." ? string.Empty : relative.Replace('\\', '/');
 
         // ..
         if (!PathsEqual(root, directory.FullName))
