@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
@@ -494,6 +495,42 @@ internal sealed class ModControlPanelWindow(BuilderInterfaceState state) : Abstr
         );
     }
 
+    private static readonly string[] unwanted_directories = ["Properties/", "Localization/"];
+
+    private static bool IsIgnored(string relativePath, List<string> ignoredPaths)
+    {
+        if (relativePath.StartsWith('.'))
+        {
+            return true;
+        }
+
+        if (relativePath.StartsWith("bin/") || relativePath.StartsWith("obj/"))
+        {
+            return true;
+        }
+
+        return ignoredPaths.Any(x => FitsMask(relativePath, x));
+
+        static bool FitsMask(string path, string mask)
+        {
+            var pattern =
+                '^' +
+                Regex.Escape(mask.Replace(".", "__DOT__")
+                                 .Replace("*", "__STAR__")
+                                 .Replace("?", "__QM__"))
+                     .Replace("__DOT__", "[.]")
+                     .Replace("__STAR__", ".*")
+                     .Replace("__QM__", ".")
+              + '$';
+            return new Regex(pattern, RegexOptions.IgnoreCase).IsMatch(path);
+        }
+    }
+
+    private static bool IsUnwanted(string relativePath)
+    {
+        return unwanted_directories.Any(relativePath.StartsWith);
+    }
+
     private void UpdateModifiersList(DirectoryInfo? directory)
     {
         if (modifiersList is null)
@@ -510,6 +547,10 @@ internal sealed class ModControlPanelWindow(BuilderInterfaceState state) : Abstr
             return;
         }
 
+        var hideIgnored = ModContent.GetInstance<ClientConfig>().HideIgnoredDirectories;
+        var hideUnwanted = ModContent.GetInstance<ClientConfig>().HideUnwantedDirectories;
+        var hideAny = hideIgnored || hideUnwanted;
+
         var root = fileGraph.Root.FullPath;
         var relative = Path.GetRelativePath(root, directory.FullName);
         selectedDirectory = directory;
@@ -524,6 +565,24 @@ internal sealed class ModControlPanelWindow(BuilderInterfaceState state) : Abstr
         // directories
         foreach (var entry in directory.EnumerateDirectories())
         {
+            if (hideAny)
+            {
+                var relPath = Path.GetRelativePath(root, entry.FullName).Replace('\\', '/');
+                if (!relPath.EndsWith('/'))
+                {
+                    relPath += '/';
+                }
+
+                if (hideIgnored && IsIgnored(relPath, modNameDropDown?.SelectedProject?.Project.Manifest.IgnoredBuildPaths ?? []))
+                {
+                    continue;
+                }
+                
+                if (hideUnwanted && IsUnwanted(relPath))
+                {
+                    continue;
+                }
+            }
             modifiersList.Add(new DirectoryElement(this, entry));
         }
 

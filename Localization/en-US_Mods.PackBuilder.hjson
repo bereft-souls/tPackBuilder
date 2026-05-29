@@ -6,6 +6,16 @@ Configs: {
 			Label: Developer Mode
 			Tooltip: ""
 		}
+
+		HideIgnoredDirectories: {
+			Label: Hide Ignored Directories
+			Tooltip: Hides directories that would be filtered by buildIgnore.
+		}
+
+		HideUnwantedDirectories: {
+			Label: Hide Unwanted Directories
+			Tooltip: Hides directories that tPackBuilder files generally wouldn't go in.
+		}
 	}
 }
 
