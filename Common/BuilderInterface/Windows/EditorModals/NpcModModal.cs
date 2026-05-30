@@ -61,31 +61,31 @@ internal sealed class NpcModModal : AbstractModal<NPCMod, NpcModModal.NpcModElem
         {
             var offset = 42f;
             
-            damageElement = new InputField(DefaultTextLol);
+            damageElement = new InputField(DefaultText);
             {
                 damageElement.Width.Set(90f, 0f);
                 damageElement.Height.Set(20f, 0f);
             }
             
-            defenseElement = new InputField(DefaultTextLol);
+            defenseElement = new InputField(DefaultText);
             {
                 defenseElement.Width.Set(90f, 0f);
                 defenseElement.Height.Set(20f, 0f);
             }
             
-            healthElement = new InputField(DefaultTextLol);
+            healthElement = new InputField(DefaultText);
             {
                 healthElement.Width.Set(90f, 0f);
                 healthElement.Height.Set(20f, 0f);
             }
             
-            knockbackScalingElement = new InputField(DefaultTextLol);
+            knockbackScalingElement = new InputField(DefaultText);
             {
                 knockbackScalingElement.Width.Set(90f, 0f);
                 knockbackScalingElement.Height.Set(20f, 0f);
             }
             
-            npcSlotsElement = new InputField(DefaultTextLol);
+            npcSlotsElement = new InputField(DefaultText);
             {
                 npcSlotsElement.Width.Set(90f, 0f);
                 npcSlotsElement.Height.Set(20f, 0f);
@@ -142,7 +142,7 @@ internal sealed class NpcModModal : AbstractModal<NPCMod, NpcModModal.NpcModElem
         {
             var offset = 42f;
             
-            damageReductionElement = new InputField(DefaultTextLol);
+            damageReductionElement = new InputField(DefaultText);
             {
                 damageReductionElement.Width.Set(90f, 0f);
                 damageReductionElement.Height.Set(20f, 0f);

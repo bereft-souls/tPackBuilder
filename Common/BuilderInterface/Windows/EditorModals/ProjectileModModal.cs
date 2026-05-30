@@ -60,25 +60,25 @@ internal sealed class ProjectileModModal : AbstractModal<ProjectileMod, Projecti
         {
             var offset = 42f;
             
-            damageElement = new InputField(DefaultTextLol);
+            damageElement = new InputField(DefaultText);
             {
                 damageElement.Width.Set(90f, 0f);
                 damageElement.Height.Set(20f, 0f);
             }
             
-            piercingElement = new InputField(DefaultTextLol);
+            piercingElement = new InputField(DefaultText);
             {
                 piercingElement.Width.Set(90f, 0f);
                 piercingElement.Height.Set(20f, 0f);
             }
             
-            scaleElement = new InputField(DefaultTextLol);
+            scaleElement = new InputField(DefaultText);
             {
                 scaleElement.Width.Set(90f, 0f);
                 scaleElement.Height.Set(20f, 0f);
             }
             
-            hitCooldownElement = new InputField(DefaultTextLol);
+            hitCooldownElement = new InputField(DefaultText);
             {
                 hitCooldownElement.Width.Set(90f, 0f);
                 hitCooldownElement.Height.Set(20f, 0f);

@@ -68,85 +68,85 @@ internal sealed class ItemModModal : AbstractModal<ItemMod, ItemModModal.ItemMod
 
         public VanillaItemChangeElement() : base("Vanilla")
         {
-            damageElement = new InputField(DefaultTextLol);
+            damageElement = new InputField(DefaultText);
             {
                 damageElement.Width.Set(90f, 0f);
                 damageElement.Height.Set(20f, 0f);
             }
 
-            critRateElement = new InputField(DefaultTextLol);
+            critRateElement = new InputField(DefaultText);
             {
                 critRateElement.Width.Set(90f, 0f);
                 critRateElement.Height.Set(20f, 0f);
             }
 
-            defenseElement = new InputField(DefaultTextLol);
+            defenseElement = new InputField(DefaultText);
             {
                 defenseElement.Width.Set(90f, 0f);
                 defenseElement.Height.Set(20f, 0f);
             }
 
-            hammerPowerElement = new InputField(DefaultTextLol);
+            hammerPowerElement = new InputField(DefaultText);
             {
                 hammerPowerElement.Width.Set(90f, 0f);
                 hammerPowerElement.Height.Set(20f, 0f);
             }
 
-            pickaxePowerElement = new InputField(DefaultTextLol);
+            pickaxePowerElement = new InputField(DefaultText);
             {
                 pickaxePowerElement.Width.Set(90f, 0f);
                 pickaxePowerElement.Height.Set(20f, 0f);
             }
 
-            axePowerElement = new InputField(DefaultTextLol);
+            axePowerElement = new InputField(DefaultText);
             {
                 axePowerElement.Width.Set(90f, 0f);
                 axePowerElement.Height.Set(20f, 0f);
             }
 
-            healingElement = new InputField(DefaultTextLol);
+            healingElement = new InputField(DefaultText);
             {
                 healingElement.Width.Set(90f, 0f);
                 healingElement.Height.Set(20f, 0f);
             }
 
-            manaRestorationElement = new InputField(DefaultTextLol);
+            manaRestorationElement = new InputField(DefaultText);
             {
                 manaRestorationElement.Width.Set(90f, 0f);
                 manaRestorationElement.Height.Set(20f, 0f);
             }
 
-            knockbackElement = new InputField(DefaultTextLol);
+            knockbackElement = new InputField(DefaultText);
             {
                 knockbackElement.Width.Set(90f, 0f);
                 knockbackElement.Height.Set(20f, 0f);
             }
 
-            lifeRegenElement = new InputField(DefaultTextLol);
+            lifeRegenElement = new InputField(DefaultText);
             {
                 lifeRegenElement.Width.Set(90f, 0f);
                 lifeRegenElement.Height.Set(20f, 0f);
             }
 
-            manaCostElement = new InputField(DefaultTextLol);
+            manaCostElement = new InputField(DefaultText);
             {
                 manaCostElement.Width.Set(90f, 0f);
                 manaCostElement.Height.Set(20f, 0f);
             }
 
-            shootSpeedElement = new InputField(DefaultTextLol);
+            shootSpeedElement = new InputField(DefaultText);
             {
                 shootSpeedElement.Width.Set(90f, 0f);
                 shootSpeedElement.Height.Set(20f, 0f);
             }
 
-            useTimeElement = new InputField(DefaultTextLol);
+            useTimeElement = new InputField(DefaultText);
             {
                 useTimeElement.Width.Set(90f, 0f);
                 useTimeElement.Height.Set(20f, 0f);
             }
 
-            useAnimationElement = new InputField(DefaultTextLol);
+            useAnimationElement = new InputField(DefaultText);
             {
                 useAnimationElement.Width.Set(90f, 0f);
                 useAnimationElement.Height.Set(20f, 0f);
@@ -246,19 +246,19 @@ internal sealed class ItemModModal : AbstractModal<ItemMod, ItemModModal.ItemMod
         {
             var offset = 42f;
 
-            maxChargeElement = new InputField(DefaultTextLol);
+            maxChargeElement = new InputField(DefaultText);
             {
                 maxChargeElement.Width.Set(90f, 0f);
                 maxChargeElement.Height.Set(20f, 0f);
             }
 
-            chargePerUseElement = new InputField(DefaultTextLol);
+            chargePerUseElement = new InputField(DefaultText);
             {
                 chargePerUseElement.Width.Set(90f, 0f);
                 chargePerUseElement.Height.Set(20f, 0f);
             }
 
-            chargePerAltUseElement = new InputField(DefaultTextLol);
+            chargePerAltUseElement = new InputField(DefaultText);
             {
                 chargePerAltUseElement.Width.Set(90f, 0f);
                 chargePerAltUseElement.Height.Set(20f, 0f);

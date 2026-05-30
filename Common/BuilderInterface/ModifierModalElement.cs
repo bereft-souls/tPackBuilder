@@ -13,7 +13,7 @@ public abstract class ModifierModalElement : UIElement
 
     public bool Static { get; protected set; }
 
-    public static string DefaultTextLol => "+0.0 lol";
+    public static string DefaultText => "+0.0";
 
     protected UIText MakeAndAppendLabel(UIElement anchor, string text)
     {
