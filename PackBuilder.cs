@@ -33,6 +33,7 @@ namespace PackBuilder
                 MissingMemberHandling = MissingMemberHandling.Error,
                 SerializationBinder = new JsonTypeResolverFix(),
                 TypeNameHandling = TypeNameHandling.Auto,
+                DefaultValueHandling = DefaultValueHandling.Ignore,
 
                 Error = (object? sender, ErrorEventArgs ex) =>
                 {
