@@ -1,14 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface;
 
-internal class DraggablePanel : UIPanel
+public class DraggablePanel : UIPanel
 {
     private Vector2? offset;
+
+    protected bool ClickThroughThisTime { get; set; }
 
     public override void Update(GameTime gameTime)
     {
@@ -26,19 +27,36 @@ internal class DraggablePanel : UIPanel
         }
 
         EnsurePanelIsVisible();
+
+        ClickThroughThisTime = false;
     }
 
     private void EnsurePanelIsVisible()
     {
         var parentDims = Parent.GetDimensions().ToRectangle();
         var selfDims = GetDimensions().ToRectangle();
-        if (selfDims.Intersects(parentDims))
+        if (parentDims.Contains(selfDims))
         {
             return;
         }
 
-        Left.Pixels = Math.Clamp(Left.Pixels, 0f, parentDims.Right - Width.Pixels);
-        Top.Pixels = Math.Clamp(Top.Pixels, 0f, parentDims.Bottom - Height.Pixels);
+        if (selfDims.Left < parentDims.Left)
+        {
+            Left.Pixels -= selfDims.Left - parentDims.Left;
+        }
+        else if (selfDims.Right > parentDims.Right)
+        {
+            Left.Pixels -= selfDims.Right - parentDims.Right;
+        }
+
+        if (selfDims.Top < parentDims.Top)
+        {
+            Top.Pixels -= selfDims.Top - parentDims.Top;
+        }
+        else if (selfDims.Bottom > parentDims.Bottom)
+        {
+            Top.Pixels -= selfDims.Bottom - parentDims.Bottom;
+        }
 
         Recalculate();
     }
@@ -47,7 +65,7 @@ internal class DraggablePanel : UIPanel
     {
         base.LeftMouseDown(evt);
 
-        if (evt.Target == this)
+        if (evt.Target == this || ClickThroughThisTime)
         {
             DragBegin(evt);
         }
@@ -57,7 +75,7 @@ internal class DraggablePanel : UIPanel
     {
         base.LeftMouseUp(evt);
 
-        if (evt.Target == this)
+        if (evt.Target == this || ClickThroughThisTime)
         {
             DragEnd(evt);
         }

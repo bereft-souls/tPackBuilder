@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using System;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -10,11 +10,7 @@ namespace PackBuilder.Common.BuilderInterface;
 
 internal sealed class ResizablePanelButton : UIElement
 {
-    public static int VisibleWidth => 28;
-
-    public static int VisibleHeight => 28;
-
-    private static readonly Asset<Texture2D> asset = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/DraggablePanelCorner");
+    private static readonly Asset<Texture2D> asset = ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/DraggablePanelCorner", AssetRequestMode.ImmediateLoad);
 
     private Vector2? mouseRelativeToTopLeftOfParent;
 
@@ -25,6 +21,10 @@ internal sealed class ResizablePanelButton : UIElement
         Left.Set(-VisibleWidth, 1f);
         Top.Set(-VisibleHeight, 1f);
     }
+
+    public static int VisibleWidth => 28;
+
+    public static int VisibleHeight => 28;
 
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {

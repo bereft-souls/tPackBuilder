@@ -25,7 +25,7 @@ public readonly struct ModProjectView(ModProject project) : IEquatable<ModProjec
 
     internal string Directory => Project.Directory;
 
-    private ModProject Project { get; } = project;
+    internal ModProject Project { get; } = project;
 
     public bool Equals(ModProjectView other)
     {
@@ -58,11 +58,13 @@ public sealed class ModProject(
 {
     public bool Disposed { get; private set; }
 
+    internal IModSource Source => source;
+
     public BuildManifest Manifest => manifest;
 
-    public string InternalName => source.GetDirectory().Name;
+    public string InternalName => Source.GetDirectory().Name;
 
-    public string Directory => source.GetDirectory().FullName;
+    public string Directory => Source.GetDirectory().FullName;
 
     // TODO: Logging and what-not?
     public async Task<bool> Build()
@@ -74,7 +76,7 @@ public sealed class ModProject(
 
         // make sure manifest is written
         // TODO: Store manifest format on ModProject object when we abstract it.
-        WellKnownBuildManifestFormats.BuildTxt.Serialize(manifest, source);
+        WellKnownBuildManifestFormats.BuildTxt.Serialize(manifest, Source);
 
         try
         {
@@ -82,7 +84,7 @@ public sealed class ModProject(
                 () =>
                 {
                     var compile = new ModCompile(new ModCompile.ConsoleBuildStatus());
-                    compile.Build(source.GetDirectory().FullName);
+                    compile.Build(Source.GetDirectory().FullName);
                 }
             );
             return true;
@@ -100,7 +102,7 @@ public sealed class ModProject(
     {
         try
         {
-            source.GetDirectory().Delete(recursive: true);
+            Source.GetDirectory().Delete(recursive: true);
         }
         catch
         {
@@ -108,7 +110,7 @@ public sealed class ModProject(
         }
 
         Dispose();
-        return source.GetDirectory().Exists;
+        return Source.GetDirectory().Exists;
     }
 
     public void Dispose()

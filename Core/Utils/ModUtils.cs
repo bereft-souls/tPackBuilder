@@ -111,6 +111,35 @@ public static partial class ModUtils
 
         return id;
     }
+    
+    public static bool FuzzyMatch(string? text, string? query)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(query))
+        {
+            return true;
+        }
+
+        var queryIdx = 0;
+        for (var i = 0; i < text.Length; i++)
+        {
+            if (char.ToLowerInvariant(text[i]) == char.ToLowerInvariant(query[queryIdx]))
+            {
+                queryIdx++;
+
+                if (queryIdx == query.Length)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Creates a recipe from the specified mod.

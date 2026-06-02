@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Publicize Include="tModLoader" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false" />
+        <Publicize Include="tModLoader;FNA;ReLogic" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false" />
     </ItemGroup>
 
 </Project>

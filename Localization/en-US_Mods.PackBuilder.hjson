@@ -6,6 +6,16 @@ Configs: {
 			Label: Developer Mode
 			Tooltip: ""
 		}
+
+		HideIgnoredDirectories: {
+			Label: Hide Ignored Directories
+			Tooltip: Hides directories that would be filtered by buildIgnore.
+		}
+
+		HideUnwantedDirectories: {
+			Label: Hide Unwanted Directories
+			Tooltip: Hides directories that tPackBuilder files generally wouldn't go in.
+		}
 	}
 }
 
@@ -14,7 +24,33 @@ Keybinds.OpenBuilderInterface.DisplayName: Open Builder Interface
 Stupid: "{0}"
 
 UI: {
+	Build: Build
 	Edit: Edit
 	Open: Open
+	OpenExternal: Open in File Explorer
+	Add: Add
+	Save: Save
+	Close: Close
+	Delete: Delete
+	Rename: Rename
+	AuthorBy: by: {0}
 	SelectMod: Select a mod...
+
+	BuildProperties: {
+		$parentVal: Build Properties
+		DisplayName: Mod Name
+		Author: Authors
+		Version: Version
+		HomepageUrl: Homepage
+		StrongModReferences: Mod References
+		WeakModReferences: Weak References
+		ModsToSortBefore: Sort Before
+		ModsToSortAfter: Sort After
+		AssemblyReferences: Library References
+	}
+
+	EditDescription: Edit Desc.
+	ElementNamePrompt: Name...
+	RootDirectory: <root>
+	ReturnDirectory: .. [c/9c9c9c:(up a level)]
 }

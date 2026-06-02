@@ -9,4 +9,10 @@ internal sealed class ClientConfig : ModConfig
 
     [DefaultValue(false)]
     public bool DeveloperMode { get; set; } = false;
+
+    [DefaultValue(true)]
+    public bool HideIgnoredDirectories { get; set; } = true;
+    
+    [DefaultValue(true)]
+    public bool HideUnwantedDirectories { get; set; } = true;
 }
