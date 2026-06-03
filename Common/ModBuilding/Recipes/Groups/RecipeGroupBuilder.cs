@@ -9,7 +9,7 @@ using PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.UI;
+using Terraria.ID;
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Groups;
 
@@ -35,7 +35,7 @@ public sealed class RecipeGroupBuilder : PackBuilderType
 
     public override void Load()
     {
-        int[] items = Items.Select(GetItem).ToArray();
+        int[] items = Items.Select(item => GetItem(item, Mod)).Where(itemType => itemType != ItemID.None).ToArray();
         RecipeGroup.RegisterGroup(Name, new RecipeGroup(() => Language.GetOrRegister(LocalizationKey).Value, items));
     }
 }

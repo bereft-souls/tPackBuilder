@@ -57,13 +57,13 @@ namespace PackBuilder
     // Hides stack trace for exceptions of this type.
     // Experienced developers will know what the issue is without the trace just by reading (if they even need these systems).
     // Hopefully the absense of a wall of text will make this more approachable by those unfamiliar with debugging.
-    public class HideStackTraceException(string message) : Exception(message)
+    public class HideStackTraceException(string message) : Exception(message, new Exception(message))
     {
         public override string ToString() =>
             "Error encountered when building tPackBuilder ChangeList!" + Environment.NewLine +
             Environment.NewLine +
             Message + Environment.NewLine +
-            $"[c/F5BC42:{PackBuilder.LoadingFile ?? ""}]";
+            $"[c/F5BC42:{PackBuilder.LoadingFile ?? "<Added From Code>"}]";
     }
 
     // When the json deserializer throws an error.

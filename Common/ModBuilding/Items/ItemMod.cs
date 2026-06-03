@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using PackBuilder.Core.Systems;
-using ReLogic.Content;
-using System.Collections.Generic;
 using PackBuilder.Common.BuilderInterface;
 using PackBuilder.Common.BuilderInterface.Windows;
 using PackBuilder.Common.BuilderInterface.Windows.EditorModals;
+using PackBuilder.Core.Systems;
+using ReLogic.Content;
+using System.Collections.Generic;
+using System.Linq;
+using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.UI;
 
 namespace PackBuilder.Common.ModBuilding.Items;
 
@@ -31,11 +32,10 @@ public sealed class ItemMod : PackBuilderType
         if (Items.Count == 0)
             throw new NoItemsException();
 
-        // Get the item mod ready for factory initialization.
-        foreach (string item in Items)
+        foreach (int itemType in Items.Select(item => GetItem(item, Mod)))
         {
-            int itemType = GetItem(item);
-            ItemModifier.RegisterItemChanges(itemType, Changes);
+            if (itemType != ItemID.None)
+                ItemModifier.RegisterItemChanges(itemType, Changes);
         }
     }
 }

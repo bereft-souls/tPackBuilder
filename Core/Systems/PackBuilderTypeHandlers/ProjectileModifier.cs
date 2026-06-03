@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
-    internal class ProjectileModifier : ModSystem
+    public sealed class ProjectileModifier : ModSystem
     {
         public static Dictionary<int, List<IProjectileChange>> ProjectileMods { get; } = [];
 

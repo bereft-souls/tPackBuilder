@@ -7,7 +7,7 @@ using PackBuilder.Common.BuilderInterface.Windows;
 using PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 using Terraria;
 using Terraria.ModLoader;
-using Terraria.UI;
+using Terraria.ID;
 
 namespace PackBuilder.Common.ModBuilding.Recipes.Groups;
 
@@ -38,16 +38,22 @@ public sealed class RecipeGroupMod : PackBuilderType
         {
             var recipeGroup = RecipeGroup.recipeGroups[groupId];
 
-            foreach (var item in AddItems.Select(GetItem))
+            foreach (int itemType in AddItems.Select(item => GetItem(item, Mod)))
             {
-                recipeGroup.ValidItems.Add(item);
-                recipeGroup.ValidItemsLookup?[item] = true;
+                if (itemType == ItemID.None)
+                    continue;
+
+                recipeGroup.ValidItems.Add(itemType);
+                recipeGroup.ValidItemsLookup?[itemType] = true;
             }
 
-            foreach (var item in RemoveItems.Select(GetItem))
+            foreach (int itemType in RemoveItems.Select(item => GetItem(item, Mod)))
             {
-                recipeGroup.ValidItems.Remove(item);
-                recipeGroup.ValidItemsLookup?[item] = false;
+                if (itemType == ItemID.None)
+                    continue;
+
+                recipeGroup.ValidItems.Remove(itemType);
+                recipeGroup.ValidItemsLookup?[itemType] = false;
             }
         }
     }

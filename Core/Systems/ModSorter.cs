@@ -17,7 +17,7 @@ namespace PackBuilder.Core.Systems
     public class LateLoadAttribute : Attribute
     { }
 
-    internal class ModSorter : ModSystem
+    internal sealed class ModSorter : ModSystem
     {
         public static bool LateTypesLoaded = false;
 

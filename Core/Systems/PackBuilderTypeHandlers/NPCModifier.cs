@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
-    internal class NPCModifier : ModSystem
+    public sealed class NPCModifier : ModSystem
     {
         public static Dictionary<int, List<INPCChange>> NPCMods { get; } = [];
 

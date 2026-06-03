@@ -6,7 +6,8 @@ using PackBuilder.Common.BuilderInterface;
 using PackBuilder.Common.BuilderInterface.Windows;
 using PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 using Terraria.ModLoader;
-using Terraria.UI;
+using System.Linq;
+using Terraria.ID;
 
 namespace PackBuilder.Common.ModBuilding.Projectiles;
 
@@ -31,11 +32,10 @@ public sealed class ProjectileMod : PackBuilderType
         if (Projectiles.Count == 0)
             throw new NoProjectilesException();
 
-        // Get the projectile mod ready for factory initialization.
-        foreach (string projectile in Projectiles)
+        foreach (int projectileType in Projectiles.Select(projectile => GetProjectile(projectile, Mod)))
         {
-            int projectileType = GetProjectile(projectile);
-            ProjectileModifier.RegisterChanges(projectileType, Changes);
+            if (projectileType != ProjectileID.None)
+                ProjectileModifier.RegisterChanges(projectileType, Changes);
         }
     }
 }

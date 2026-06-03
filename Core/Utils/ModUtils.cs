@@ -1,13 +1,50 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Core;
 
 namespace PackBuilder.Core.Utils;
 
 public static partial class ModUtils
 {
+    private static readonly Dictionary<Mod, BuildProperties> modProperties = [];
+    extension(Mod mod)
+    {
+        public BuildProperties? buildProperties
+        {
+            get => modProperties.TryGetValue(mod, out var result) ? result : null;
+            set
+            {
+                if (value is null)
+                    modProperties.Remove(mod);
+
+                else
+                    modProperties[mod] = value;
+            }
+        }
+    }
+
+    private static readonly Dictionary<BuildProperties, BuildProperties.ModReference[]> tPBSoftReferences = [];
+    extension(BuildProperties properties)
+    {
+        public BuildProperties.ModReference[]? packBuilderSoftRefs
+        {
+            get => tPBSoftReferences.TryGetValue(properties, out var result) ? result : null;
+            set
+            {
+                if (value is null)
+                    tPBSoftReferences.Remove(properties);
+
+                else
+                    tPBSoftReferences[properties] = value;
+            }
+        }
+    }
+
     /// <summary>
     /// Splits a path to a given mod content file entry into its respective mod name and content name.
     /// </summary>
@@ -19,9 +56,26 @@ public static partial class ModUtils
     }
 
     /// <summary>
+    /// Checks whether the supplied mod is both unloaded and listed as a "soft mod" in the registering mod.
+    /// </summary>
+    public static bool SoftReferenceUnloaded(this Mod? registeringMod, string softMod)
+    {
+        if (registeringMod is null)
+            return false;
+
+        registeringMod.buildProperties ??= BuildProperties.ReadModFile(registeringMod.File);
+        var properties = registeringMod.buildProperties;
+
+        if (properties is null)
+            return false;
+
+        return properties.packBuilderSoftRefs?.Any(r => r.mod == softMod) ?? false && !ModLoader.IsEnabled(softMod);
+    }
+
+    /// <summary>
     /// Gets the ID for an npc based on its content path, accounting for both vanilla and modded entries.
     /// </summary>
-    public static int GetNPC(string npc)
+    public static int GetNPC(string npc, Mod? registeringMod = null)
     {
         SplitModContent(npc, out var mod, out var name);
 
@@ -29,6 +83,9 @@ public static partial class ModUtils
         {
             if (mod == "Terraria")
                 return (short)(typeof(NPCID).GetField(name)?.GetRawConstantValue() ?? throw new Exception());
+
+            if (registeringMod.SoftReferenceUnloaded(mod))
+                return NPCID.None;
 
             return ModContent.Find<ModNPC>(mod, name).Type;
         }
@@ -41,7 +98,7 @@ public static partial class ModUtils
     /// <summary>
     /// Gets the ID for an item based on its content path, accounting for both vanilla and modded entries.
     /// </summary>
-    public static int GetItem(string item)
+    public static int GetItem(string item, Mod? registeringMod = null)
     {
         SplitModContent(item, out var mod, out var name);
 
@@ -49,6 +106,9 @@ public static partial class ModUtils
         {
             if (mod == "Terraria")
                 return (short)(typeof(ItemID).GetField(name)?.GetRawConstantValue() ?? throw new Exception());
+
+            if (registeringMod.SoftReferenceUnloaded(mod))
+                return ItemID.None;
 
             return ModContent.Find<ModItem>(mod, name).Type;
         }
@@ -64,7 +124,7 @@ public static partial class ModUtils
     /// <param name="projectile"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public static int GetProjectile(string projectile)
+    public static int GetProjectile(string projectile, Mod? registeringMod = null)
     {
         SplitModContent(projectile, out var mod, out var name);
 
@@ -72,6 +132,9 @@ public static partial class ModUtils
         {
             if (mod == "Terraria")
                 return (short)(typeof(ProjectileID).GetField(name)?.GetRawConstantValue() ?? throw new Exception());
+
+            if (registeringMod.SoftReferenceUnloaded(mod))
+                return ProjectileID.None;
 
             return ModContent.Find<ModProjectile>(mod, name).Type;
         }
@@ -84,7 +147,7 @@ public static partial class ModUtils
     /// <summary>
     /// Gets the ID for a tile based on its content path, accounting for both vanilla and modded entries.
     /// </summary>
-    public static int GetTile(string tile)
+    public static int GetTile(string tile, Mod? registeringMod = null)
     {
         SplitModContent(tile, out var mod, out var name);
 
@@ -92,6 +155,9 @@ public static partial class ModUtils
         {
             if (mod == "Terraria")
                 return (ushort)(typeof(TileID).GetField(name)?.GetRawConstantValue() ?? throw new Exception());
+
+            if (registeringMod.SoftReferenceUnloaded(mod))
+                return -1;
 
             return ModContent.Find<ModTile>(mod, name).Type;
         }

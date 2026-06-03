@@ -6,7 +6,8 @@ using PackBuilder.Common.BuilderInterface;
 using PackBuilder.Common.BuilderInterface.Windows;
 using PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 using Terraria.ModLoader;
-using Terraria.UI;
+using System.Linq;
+using Terraria.ID;
 
 namespace PackBuilder.Common.ModBuilding.NPCs;
 
@@ -31,11 +32,10 @@ public sealed class NPCMod : PackBuilderType
         if (NPCs.Count == 0)
             throw new NoNPCsException();
 
-        // Get the NPC mod ready for factory initialization.
-        foreach (string npc in NPCs)
+        foreach (int npcType in NPCs.Select(npc => GetNPC(npc, Mod)))
         {
-            int npcType = GetNPC(npc);
-            NPCModifier.RegisterChanges(npcType, Changes);
+            if (npcType != NPCID.None)
+                NPCModifier.RegisterChanges(npcType, Changes);
         }
     }
 }

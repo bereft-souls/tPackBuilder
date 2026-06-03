@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace PackBuilder.Core.Systems
 {
-    public class ItemModifier : ModSystem
+    public sealed class ItemModifier : ModSystem
     {
         public static Dictionary<int, List<IItemChange>> ItemMods { get; } = [];
 

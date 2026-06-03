@@ -2,10 +2,12 @@
 using PackBuilder.Core.Systems;
 using ReLogic.Content;
 using System.Collections.Generic;
+using System.Linq;
 using PackBuilder.Common.BuilderInterface;
 using PackBuilder.Common.BuilderInterface.Windows;
 using PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 using Terraria.ModLoader;
+using Terraria.ID;
 
 namespace PackBuilder.Common.ModBuilding.Drops;
 
@@ -36,16 +38,16 @@ public sealed class DropMod : PackBuilderType
         if (NPCs.Count == 0 && Items.Count == 0 && !AllNPCs)
             throw new NoDropScopeException();
 
-        foreach (var scope in NPCs)
+        foreach (int npcType in NPCs.Select(scope => GetNPC(scope, Mod)))
         {
-            var npcType = GetNPC(scope);
-            DropModifier.RegisterNPCDropChanges(npcType, Changes);
+            if (npcType != NPCID.None)
+                DropModifier.RegisterNPCDropChanges(npcType, Changes);
         }
 
-        foreach (var scope in Items)
+        foreach (int itemType in Items.Select(scope => GetItem(scope, Mod)))
         {
-            var itemType = GetItem(scope);
-            DropModifier.RegisterItemDropChanges(itemType, Changes);
+            if (itemType != ItemID.None)
+                DropModifier.RegisterItemDropChanges(itemType, Changes);
         }
 
         if (AllNPCs)
