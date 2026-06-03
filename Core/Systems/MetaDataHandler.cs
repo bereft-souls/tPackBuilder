@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
@@ -10,10 +11,8 @@ namespace PackBuilder.Core.Systems
     {
         public override void Load()
         {
-            MonoModHooks.Add(
-                typeof(BuildProperties).GetMethod(nameof(BuildProperties.ReadModFile),
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static),
-                ReadPackBuilderMetadata);
+            var hook = typeof(BuildProperties).GetMethod(nameof(BuildProperties.ReadModFile), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, [typeof(TmodFile)]);
+            MonoModHooks.Add(hook, ReadPackBuilderMetadata);
         }
 
         // We use this to automatically read additonal metadata from an optional "packbuilder.txt" file
