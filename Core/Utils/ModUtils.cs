@@ -69,7 +69,7 @@ public static partial class ModUtils
         if (properties is null)
             return false;
 
-        return properties.packBuilderSoftRefs?.Any(r => r.mod == softMod) ?? false && !ModLoader.IsEnabled(softMod);
+        return (properties.packBuilderSoftRefs?.Any(r => r.mod == softMod) ?? false) && !ModLoader.IsEnabled(softMod);
     }
 
     /// <summary>
