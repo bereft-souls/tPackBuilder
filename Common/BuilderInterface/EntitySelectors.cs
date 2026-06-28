@@ -10,7 +10,7 @@ using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ObjectData;
+using Terraria.ModLoader.UI;
 using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface;
@@ -79,6 +79,20 @@ internal sealed class ItemTypeSelector : BaseSelector<ItemTypeSelector.ItemTypeE
     public sealed class ItemTypeEntry(int type) : GridEntry
     {
         public int ItemType { get; } = type;
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+
+            if (!IsMouseHovering)
+            {
+                return;
+            }
+
+            Main.HoverItem = ContentSamples.ItemsByType[ItemType];
+            Main.instance.MouseText("", 0, 0);
+            Main.mouseText = true;
+        }
 
         public override void DrawEntry(UIElement affectedElement)
         {
@@ -172,6 +186,22 @@ internal sealed class NpcTypeSelector : BaseSelector<NpcTypeSelector.NpcTypeEntr
         }
 
         public int NpcNetId { get; }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+
+            if (!IsMouseHovering)
+            {
+                return;
+            }
+
+            var id = NPCID.FromNetId(NpcNetId);
+            var mod = NPCLoader.GetNPC(id)?.Mod.Name ?? "Terraria";
+            var name = NPCID.Search.GetName(id);
+            var display = Lang.GetNPCName(NpcNetId);
+            UICommon.TooltipMouseText($"{display} ({mod}/{name})");
+        }
 
         public override void DrawEntry(UIElement affectedElement)
         {
@@ -286,6 +316,21 @@ internal sealed class ProjectileTypeSelector : BaseSelector<ProjectileTypeSelect
     {
         public int ProjectileType { get; } = type;
 
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+
+            if (!IsMouseHovering)
+            {
+                return;
+            }
+
+            var mod = ProjectileLoader.GetProjectile(ProjectileType)?.Mod.Name ?? "Terraria";
+            var name = ProjectileID.Search.GetName(ProjectileType);
+            var display = Lang.GetProjectileName(ProjectileType);
+            UICommon.TooltipMouseText($"{display} ({mod}/{name})");
+        }
+
         public override void DrawEntry(UIElement affectedElement)
         {
             base.DrawEntry(affectedElement);
@@ -356,6 +401,19 @@ internal sealed class RecipeGroupSelector : BaseSelector<RecipeGroupSelector.Rec
     public sealed class RecipeGroupEntry(string name) : GridEntry
     {
         public string Name { get; } = name;
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+
+            if (!IsMouseHovering)
+            {
+                return;
+            }
+
+            var recipeGroup = RecipeGroup.recipeGroups[RecipeGroup.recipeGroupIDs[Name]];
+            UICommon.TooltipMouseText($"{recipeGroup.GetText()} ({Name})");
+        }
 
         public override void DrawEntry(UIElement affectedElement)
         {
@@ -446,6 +504,21 @@ internal sealed class TileTypeSelector : BaseSelector<TileTypeSelector.TileTypeE
     public sealed class TileTypeEntry(int type) : GridEntry
     {
         public int TileType { get; } = type;
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+
+            if (!IsMouseHovering)
+            {
+                return;
+            }
+
+
+            var mod = TileLoader.GetTile(TileType)?.Mod.Name ?? "Terraria";
+            var name = TileID.Search.GetName(TileType);
+            UICommon.TooltipMouseText($"{mod}/{name}");
+        }
 
         public override void DrawEntry(UIElement affectedElement)
         {
