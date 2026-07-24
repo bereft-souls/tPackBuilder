@@ -1,6 +1,6 @@
 displayName = tPackBuilder
 author = Bereft Souls Team
-version = 2.0.0
+version = 2.0.1
 homepage = https://github.com/bereft-souls/tPackBuilder
 buildIgnore = Examples/*
 

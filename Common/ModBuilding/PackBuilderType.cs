@@ -86,16 +86,19 @@ public abstract class PackBuilderType
             // Adds the contents of each file to the list.
             foreach (var file in files)
             {
+                PackBuilder.LoadingMod = mod;
                 PackBuilder.LoadingFile = file;
 
                 string rawJson = Encoding.UTF8.GetString(mod.GetFileBytes(file));
-                T packBuilderMod = JsonConvert.DeserializeObject<T>(rawJson, PackBuilder.JsonSettings)!;
+                T packBuilderMod = JsonConvert.DeserializeObject<T>(rawJson, PackBuilder.JsonSettings) 
+                    ?? throw new JsonReadingException(new Exception("tPackBuilder file cannot be empty!"));
 
                 packBuilderMod.Mod = mod;
                 packBuilderMod.File = file;
                 result.Add(packBuilderMod);
 
                 PackBuilder.LoadingFile = null;
+                PackBuilder.LoadingMod = null;
             }
         }
 
@@ -111,6 +114,7 @@ public abstract class PackBuilderType
 
         foreach (var packBuilderMod in packBuilderMods)
         {
+            PackBuilder.LoadingMod = packBuilderMod.Mod;
             PackBuilder.LoadingFile = packBuilderMod.File;
 
             packBuilderMod.Load();
@@ -118,6 +122,7 @@ public abstract class PackBuilderType
             PackBuilder.ModChanges[packBuilderMod.Mod].Add(packBuilderMod.File, packBuilderMod);
 
             PackBuilder.LoadingFile = null;
+            PackBuilder.LoadingMod = null;
         }
     }
 }

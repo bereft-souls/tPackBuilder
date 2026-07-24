@@ -19,6 +19,11 @@ namespace PackBuilder
         public static string? LoadingFile { get; internal set; } = null;
 
         /// <summary>
+        /// The mod that contains the file that is currently being de-serialized and loaded by tPackBuilder.
+        /// </summary>
+        public static Mod? LoadingMod { get; internal set; } = null;
+
+        /// <summary>
         /// The collection of all files retrieved and managed by tPackBuilder.
         /// </summary>
         public static Dictionary<Mod, Dictionary<string, PackBuilderType>> ModChanges { get; internal set; } = [];
@@ -63,6 +68,7 @@ namespace PackBuilder
             "Error encountered when building tPackBuilder ChangeList!" + Environment.NewLine +
             Environment.NewLine +
             Message + Environment.NewLine +
+            $"[c/F5BC42:{PackBuilder.LoadingMod!.DisplayName} ({PackBuilder.LoadingMod.Name})]" + Environment.NewLine +
             $"[c/F5BC42:{PackBuilder.LoadingFile ?? "<Added From Code>"}]";
     }
 
