@@ -68,7 +68,7 @@ namespace PackBuilder
             "Error encountered when building tPackBuilder ChangeList!" + Environment.NewLine +
             Environment.NewLine +
             Message + Environment.NewLine +
-            $"[c/F5BC42:{PackBuilder.LoadingMod!.DisplayName} ({PackBuilder.LoadingMod.Name})]" + Environment.NewLine +
+            $"[c/F5BC42:{PackBuilder.LoadingMod!.DisplayName}] [c/99721F:({PackBuilder.LoadingMod.Name})]" + Environment.NewLine +
             $"[c/F5BC42:{PackBuilder.LoadingFile ?? "<Added From Code>"}]";
     }
 
