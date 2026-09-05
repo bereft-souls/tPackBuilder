@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 using PackBuilder.Common.ModBuilding.NPCs;
 using PackBuilder.Common.ModBuilding.NPCs.Changes;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class NpcModModal : AbstractModal<NPCMod, NpcModModal.NpcModElement>
+internal sealed class NpcModEditorWindow : AbstractEditorWindow<NPCMod, NpcModEditorWindow.NpcModElement>
 {
-    public sealed class NpcModElement : ModifierModalElement<NPCMod>
+    public sealed class NpcModElement : ModifierEditorElement<NPCMod>
     {
         private readonly SelectorNpcWrapper npcsList;
 
@@ -49,7 +50,7 @@ internal sealed class NpcModModal : AbstractModal<NPCMod, NpcModModal.NpcModElem
         }
     }
 
-    private sealed class VanillaNpcChangeElement : ModifierModalElement<VanillaNpcChange>, IVisitor<NPCMod>
+    private sealed class VanillaNpcChangeElement : ModifierEditorElement<VanillaNpcChange>, IVisitor<NPCMod>
     {
         private readonly InputField damageElement;
         private readonly InputField defenseElement;
@@ -134,7 +135,7 @@ internal sealed class NpcModModal : AbstractModal<NPCMod, NpcModModal.NpcModElem
         }
     }
 
-    private sealed class CalamityNpcChangeElement : ModifierModalElement<CalamityNPCChange>, IVisitor<NPCMod>
+    private sealed class CalamityNpcChangeElement : ModifierEditorElement<CalamityNPCChange>, IVisitor<NPCMod>
     {
         private readonly InputField damageReductionElement;
 
@@ -175,9 +176,9 @@ internal sealed class NpcModModal : AbstractModal<NPCMod, NpcModModal.NpcModElem
         }
     }
 
-    public NpcModModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public NpcModEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
 
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(NPCMod obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(NPCMod obj)
     {
         yield return CreateAndPopulate<NpcModElement, NPCMod>(obj);
 
@@ -195,7 +196,7 @@ internal sealed class NpcModModal : AbstractModal<NPCMod, NpcModModal.NpcModElem
         }
     }
 
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new VanillaNpcChangeElement();
         yield return new CalamityNpcChangeElement();

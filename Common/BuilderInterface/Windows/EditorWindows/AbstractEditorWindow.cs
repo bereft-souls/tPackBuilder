@@ -16,20 +16,20 @@ using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
+namespace PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 
 internal interface IVisitor<in T>
 {
     void Visit(T obj);
 }
 
-internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
+internal abstract class AbstractEditorWindow<TType, TFactory> : AbstractInterfaceWindow
     where TType : PackBuilderType, new()
-    where TFactory : ModifierModalElement<TType>
+    where TFactory : ModifierEditorElement<TType>
 {
-    public sealed class ModalDropDown : UIPanel
+    public sealed class EditorWindowDropDown : UIPanel
     {
-        public ModalDropDown(ModifierModalElement[] elements)
+        public EditorWindowDropDown(ModifierEditorElement[] elements)
         {
             VAlign = 1f;
 
@@ -43,9 +43,9 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
 
         public UIPanel? Panel { get; private set; }
 
-        public event Action<ModifierModalElement>? OnSelectOption;
+        public event Action<ModifierEditorElement>? OnSelectOption;
 
-        public void BuildList(ModifierModalElement[] elements)
+        public void BuildList(ModifierEditorElement[] elements)
         {
             Panel = new UIPanel();
             {
@@ -80,7 +80,7 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
 
             foreach (var element in elements)
             {
-                var button = new GroupOptionButton<ModifierModalElement>(element, Language.GetText("Mods.PackBuilder.Stupid").WithFormatArgs(element.Name), null, Color.White, null, 0.8f);
+                var button = new GroupOptionButton<ModifierEditorElement>(element, Language.GetText("Mods.PackBuilder.Stupid").WithFormatArgs(element.Name), null, Color.White, null, 0.8f);
                 {
                     button.Width.Set(0f, 1f);
                     button.Height.Set(24f, 0f);
@@ -94,7 +94,7 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
 
         private void SelectOption(UIMouseEvent evt, UIElement listeningElement)
         {
-            if (listeningElement is not GroupOptionButton<ModifierModalElement> option)
+            if (listeningElement is not GroupOptionButton<ModifierEditorElement> option)
             {
                 return;
             }
@@ -108,9 +108,9 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
 
     private readonly UIElement topBarContainer;
 
-    private ModalDropDown? currentDropdown;
+    private EditorWindowDropDown? currentDropdown;
 
-    public AbstractModal(BaseModifierElement element, BuilderInterfaceState state) : base(state)
+    public AbstractEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(state)
     {
         Element = element;
 
@@ -186,7 +186,7 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
         {
             addButton.HAlign = 1f;
             addButton.VAlign = 0f;
-            addButton.OnLeftClick += OpenModalDropDown;
+            addButton.OnLeftClick += OpenEditorWindowDropDown;
         }
         topBarContainer.Append(addButton);
 
@@ -369,9 +369,9 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
         return obj;
     }
 
-    protected abstract IEnumerable<ModifierModalElement> DeriveModifiers(TType obj);
+    protected abstract IEnumerable<ModifierEditorElement> DeriveModifiers(TType obj);
 
-    protected abstract IEnumerable<ModifierModalElement> GetAvailableModifiers();
+    protected abstract IEnumerable<ModifierEditorElement> GetAvailableModifiers();
 
     protected virtual string Serialize(TType obj)
     {
@@ -475,26 +475,26 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
         }
     }
 
-    private void OpenModalDropDown(UIMouseEvent evt, UIElement listeningElement)
+    private void OpenEditorWindowDropDown(UIMouseEvent evt, UIElement listeningElement)
     {
-        var modalList = GetAvailableModifiers().ToArray();
+        var modifierList = GetAvailableModifiers().ToArray();
 
-        var dropDown = new ModalDropDown(modalList);
+        var dropDown = new EditorWindowDropDown(modifierList);
         dropDown.Left.Set(0, 0f);
         dropDown.Top.Set(0, 0f);
         dropDown.Width.Set(0, 1f);
         dropDown.Height.Set(0, 1f);
-        dropDown.OnLeftClick += CloseModalDropDown;
+        dropDown.OnLeftClick += CloseEditorWindowDropDown;
         dropDown.OnSelectOption += e =>
         {
             currentDropdown?.Parent.RemoveChild(currentDropdown);
-            AddModal(e);
+            AddEditor(e);
         };
         Append(dropDown);
         currentDropdown = dropDown;
     }
 
-    private void CloseModalDropDown(UIMouseEvent evt, UIElement listeningElement)
+    private void CloseEditorWindowDropDown(UIMouseEvent evt, UIElement listeningElement)
     {
         if (currentDropdown is not null)
         {
@@ -512,18 +512,18 @@ internal abstract class AbstractModal<TType, TFactory> : AbstractInterfaceWindow
         return text;
     }
 
-    public void AddModal(ModifierModalElement e)
+    public void AddEditor(ModifierEditorElement e)
     {
         ChangeList.Add(e);
     }
 
-    public void RemoveModal(ModifierModalElement e)
+    public void RemoveEditor(ModifierEditorElement e)
     {
         ChangeList.Add(e);
     }
 
     protected static TElement CreateAndPopulate<TElement, TArg>(TArg arg)
-        where TElement : ModifierModalElement<TArg>, new()
+        where TElement : ModifierEditorElement<TArg>, new()
     {
         var element = new TElement();
         {

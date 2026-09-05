@@ -24,7 +24,7 @@ public sealed class ProjectileMod : PackBuilderType
 
     public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
     {
-        return new ProjectileModModal(element, state);
+        return new ProjectileModEditorWindow(element, state);
     }
 
     public override void Load()

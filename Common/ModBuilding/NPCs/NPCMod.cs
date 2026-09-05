@@ -24,7 +24,7 @@ public sealed class NPCMod : PackBuilderType
 
     public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
     {
-        return new NpcModModal(element, state);
+        return new NpcModEditorWindow(element, state);
     }
 
     public override void Load()

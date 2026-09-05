@@ -30,7 +30,7 @@ public sealed class DropMod : PackBuilderType
 
     public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
     {
-        return new DropModModal(element, state);
+        return new DropModEditorWindow(element, state);
     }
 
     public override void Load()

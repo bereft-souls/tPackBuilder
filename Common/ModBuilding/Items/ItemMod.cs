@@ -24,7 +24,7 @@ public sealed class ItemMod : PackBuilderType
 
     public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
     {
-        return new ItemModModal(element, state);
+        return new ItemModEditorWindow(element, state);
     }
 
     public override void Load()

@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 using PackBuilder.Common.ModBuilding.Recipes.Generation;
 using PackBuilder.Common.ModBuilding.Recipes.Generation.Properties;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class RecipeBuilderModal : AbstractModal<RecipeBuilder, RecipeBuilderModal.RecipeBuilderElement>
+internal sealed class RecipeBuilderEditorWindow : AbstractEditorWindow<RecipeBuilder, RecipeBuilderEditorWindow.RecipeBuilderElement>
 {
-    public sealed class RecipeBuilderElement : ModifierModalElement<RecipeBuilder>
+    public sealed class RecipeBuilderElement : ModifierEditorElement<RecipeBuilder>
     {
         private readonly ItemTypeSelector itemInput;
         private readonly InputField amountInput;
@@ -56,7 +57,7 @@ internal sealed class RecipeBuilderModal : AbstractModal<RecipeBuilder, RecipeBu
         }
     }
 
-    private sealed class RecipeIngredientElement : ModifierModalElement<RecipeIngredient>, IVisitor<RecipeBuilder>
+    private sealed class RecipeIngredientElement : ModifierEditorElement<RecipeIngredient>, IVisitor<RecipeBuilder>
     {
         private readonly ItemTypeSelector itemInput;
         private readonly InputField amountInput;
@@ -108,7 +109,7 @@ internal sealed class RecipeBuilderModal : AbstractModal<RecipeBuilder, RecipeBu
         }
     }
 
-    private sealed class RecipeGroupIngredientElement : ModifierModalElement<RecipeGroupIngredient>, IVisitor<RecipeBuilder>
+    private sealed class RecipeGroupIngredientElement : ModifierEditorElement<RecipeGroupIngredient>, IVisitor<RecipeBuilder>
     {
         private readonly RecipeGroupSelector itemInput;
         private readonly InputField amountInput;
@@ -166,7 +167,7 @@ internal sealed class RecipeBuilderModal : AbstractModal<RecipeBuilder, RecipeBu
         }
     }
 
-    private sealed class TileElement : ModifierModalElement<string>, IVisitor<RecipeBuilder>
+    private sealed class TileElement : ModifierEditorElement<string>, IVisitor<RecipeBuilder>
     {
         private readonly TileTypeSelector tileInput;
 
@@ -200,9 +201,9 @@ internal sealed class RecipeBuilderModal : AbstractModal<RecipeBuilder, RecipeBu
         }
     }
     
-    public RecipeBuilderModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public RecipeBuilderEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
     
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(RecipeBuilder obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(RecipeBuilder obj)
     {
         yield return CreateAndPopulate<RecipeBuilderElement, RecipeBuilder>(obj);
         
@@ -222,7 +223,7 @@ internal sealed class RecipeBuilderModal : AbstractModal<RecipeBuilder, RecipeBu
         }
     }
     
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new RecipeIngredientElement();
         yield return new RecipeGroupIngredientElement();

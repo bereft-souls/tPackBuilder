@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 using PackBuilder.Common.ModBuilding.Projectiles;
 using PackBuilder.Common.ModBuilding.Projectiles.Changes;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class ProjectileModModal : AbstractModal<ProjectileMod, ProjectileModModal.ProjectileModElement>
+internal sealed class ProjectileModEditorWindow : AbstractEditorWindow<ProjectileMod, ProjectileModEditorWindow.ProjectileModElement>
 {
-    public sealed class ProjectileModElement : ModifierModalElement<ProjectileMod>
+    public sealed class ProjectileModElement : ModifierEditorElement<ProjectileMod>
     {
         private readonly SelectorProjectileWrapper projectilesList;
 
@@ -49,7 +50,7 @@ internal sealed class ProjectileModModal : AbstractModal<ProjectileMod, Projecti
         }
     }
 
-    private sealed class VanillaProjectileChangeElement : ModifierModalElement<VanillaProjectileChange>, IVisitor<ProjectileMod>
+    private sealed class VanillaProjectileChangeElement : ModifierEditorElement<VanillaProjectileChange>, IVisitor<ProjectileMod>
     {
         private readonly InputField damageElement;
         private readonly InputField piercingElement;
@@ -124,9 +125,9 @@ internal sealed class ProjectileModModal : AbstractModal<ProjectileMod, Projecti
         }
     }
 
-    public ProjectileModModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public ProjectileModEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
 
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(ProjectileMod obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(ProjectileMod obj)
     {
         yield return CreateAndPopulate<ProjectileModElement, ProjectileMod>(obj);
 
@@ -139,7 +140,7 @@ internal sealed class ProjectileModModal : AbstractModal<ProjectileMod, Projecti
         }
     }
 
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new VanillaProjectileChangeElement();
     }

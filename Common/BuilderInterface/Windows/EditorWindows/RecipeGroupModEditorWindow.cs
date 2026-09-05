@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 using PackBuilder.Common.ModBuilding.Recipes.Groups;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class RecipeGroupModModal : AbstractModal<RecipeGroupMod, RecipeGroupModModal.RecipeGroupModElement>
+internal sealed class RecipeGroupModEditorWindow : AbstractEditorWindow<RecipeGroupMod, RecipeGroupModEditorWindow.RecipeGroupModElement>
 {
-    public sealed class RecipeGroupModElement : ModifierModalElement<RecipeGroupMod>
+    public sealed class RecipeGroupModElement : ModifierEditorElement<RecipeGroupMod>
     {
         private readonly SelectorRecipeGroupWrapper recipeGroupSelector;
 
@@ -48,7 +49,7 @@ internal sealed class RecipeGroupModModal : AbstractModal<RecipeGroupMod, Recipe
         }
     }
 
-    private sealed class AddItemElement : ModifierModalElement<string>, IVisitor<RecipeGroupMod>
+    private sealed class AddItemElement : ModifierEditorElement<string>, IVisitor<RecipeGroupMod>
     {
         private readonly ItemTypeSelector itemInput;
 
@@ -82,7 +83,7 @@ internal sealed class RecipeGroupModModal : AbstractModal<RecipeGroupMod, Recipe
         }
     }
 
-    private sealed class RemoveItemElement : ModifierModalElement<string>, IVisitor<RecipeGroupMod>
+    private sealed class RemoveItemElement : ModifierEditorElement<string>, IVisitor<RecipeGroupMod>
     {
         private readonly ItemTypeSelector itemInput;
         
@@ -116,9 +117,9 @@ internal sealed class RecipeGroupModModal : AbstractModal<RecipeGroupMod, Recipe
         }
     }
 
-    public RecipeGroupModModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public RecipeGroupModEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
 
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(RecipeGroupMod obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(RecipeGroupMod obj)
     {
         yield return CreateAndPopulate<RecipeGroupModElement, RecipeGroupMod>(obj);
         
@@ -133,7 +134,7 @@ internal sealed class RecipeGroupModModal : AbstractModal<RecipeGroupMod, Recipe
         }
     }
 
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new AddItemElement();
         yield return new RemoveItemElement();

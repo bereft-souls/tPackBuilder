@@ -37,7 +37,7 @@ public sealed class RecipeMod : PackBuilderType
 
     public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
     {
-        return new RecipeModModal(element, state);
+        return new RecipeModEditorWindow(element, state);
     }
 
     public override void Load()

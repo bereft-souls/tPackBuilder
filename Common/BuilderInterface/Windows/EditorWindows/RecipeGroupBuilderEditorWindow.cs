@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 using PackBuilder.Common.ModBuilding.Recipes.Groups;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class RecipeGroupBuilderModal : AbstractModal<RecipeGroupBuilder, RecipeGroupBuilderModal.RecipeGroupBuilderElement>
+internal sealed class RecipeGroupBuilderEditorWindow : AbstractEditorWindow<RecipeGroupBuilder, RecipeGroupBuilderEditorWindow.RecipeGroupBuilderElement>
 {
-    public sealed class RecipeGroupBuilderElement : ModifierModalElement<RecipeGroupBuilder>
+    public sealed class RecipeGroupBuilderElement : ModifierEditorElement<RecipeGroupBuilder>
     {
         private readonly InputField nameInput;
         private readonly InputField localizationKeyInput;
@@ -53,7 +54,7 @@ internal sealed class RecipeGroupBuilderModal : AbstractModal<RecipeGroupBuilder
         }
     }
 
-    private sealed class AddItemElement : ModifierModalElement<string>, IVisitor<RecipeGroupBuilder>
+    private sealed class AddItemElement : ModifierEditorElement<string>, IVisitor<RecipeGroupBuilder>
     {
         private readonly ItemTypeSelector itemInput;
 
@@ -87,9 +88,9 @@ internal sealed class RecipeGroupBuilderModal : AbstractModal<RecipeGroupBuilder
         }
     }
     
-    public RecipeGroupBuilderModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public RecipeGroupBuilderEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
     
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(RecipeGroupBuilder obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(RecipeGroupBuilder obj)
     {
         yield return CreateAndPopulate<RecipeGroupBuilderElement, RecipeGroupBuilder>(obj);
         
@@ -99,7 +100,7 @@ internal sealed class RecipeGroupBuilderModal : AbstractModal<RecipeGroupBuilder
         }
     }
     
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new AddItemElement();
     }

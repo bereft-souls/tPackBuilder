@@ -1,13 +1,14 @@
-﻿using PackBuilder.Common.ModBuilding.Drops;
+﻿using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
+using PackBuilder.Common.ModBuilding.Drops;
 using PackBuilder.Common.ModBuilding.Drops.Changes;
 using System;
 using System.Collections.Generic;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class DropModModal : AbstractModal<DropMod, DropModModal.DropModElement>
+internal sealed class DropModEditorWindow : AbstractEditorWindow<DropMod, DropModEditorWindow.DropModElement>
 {
-    public sealed class DropModElement : ModifierModalElement<DropMod>
+    public sealed class DropModElement : ModifierEditorElement<DropMod>
     {
         private readonly SelectorNpcWrapper npcsList;
         private readonly SelectorItemWrapper itemsList;
@@ -83,7 +84,7 @@ internal sealed class DropModModal : AbstractModal<DropMod, DropModModal.DropMod
         }
     }
 
-    private sealed class AddDropElement : ModifierModalElement<AddDrop>, IVisitor<DropMod>
+    private sealed class AddDropElement : ModifierEditorElement<AddDrop>, IVisitor<DropMod>
     {
         private readonly ItemTypeSelector itemInput;
 
@@ -151,7 +152,7 @@ internal sealed class DropModModal : AbstractModal<DropMod, DropModModal.DropMod
         }
     }
 
-    private sealed class RemoveDropElement : ModifierModalElement<RemoveDrop>, IVisitor<DropMod>
+    private sealed class RemoveDropElement : ModifierEditorElement<RemoveDrop>, IVisitor<DropMod>
     {
         private readonly ItemTypeSelector itemInput;
 
@@ -185,7 +186,7 @@ internal sealed class DropModModal : AbstractModal<DropMod, DropModModal.DropMod
         }
     }
 
-    private sealed class ModifyDropElement : ModifierModalElement<ModifyDrop>, IVisitor<DropMod>
+    private sealed class ModifyDropElement : ModifierEditorElement<ModifyDrop>, IVisitor<DropMod>
     {
         private readonly ItemTypeSelector itemInput;
         private readonly InputField amountInput;
@@ -251,9 +252,9 @@ internal sealed class DropModModal : AbstractModal<DropMod, DropModModal.DropMod
         }
     }
 
-    public DropModModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public DropModEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
 
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(DropMod obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(DropMod obj)
     {
         yield return CreateAndPopulate<DropModElement, DropMod>(obj);
 
@@ -276,7 +277,7 @@ internal sealed class DropModModal : AbstractModal<DropMod, DropModModal.DropMod
         }
     }
 
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new AddDropElement();
         yield return new RemoveDropElement();

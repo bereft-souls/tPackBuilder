@@ -30,7 +30,7 @@ public sealed class RecipeGroupBuilder : PackBuilderType
 
     public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
     {
-        return new RecipeGroupBuilderModal(element, state);
+        return new RecipeGroupBuilderEditorWindow(element, state);
     }
 
     public override void Load()

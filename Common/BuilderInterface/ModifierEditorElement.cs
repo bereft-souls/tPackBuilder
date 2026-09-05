@@ -7,7 +7,7 @@ using Terraria.UI;
 
 namespace PackBuilder.Common.BuilderInterface;
 
-public abstract class ModifierModalElement : UIElement
+public abstract class ModifierEditorElement : UIElement
 {
     public string? Name { get; protected set; }
 
@@ -46,9 +46,9 @@ public abstract class ModifierModalElement : UIElement
     }
 }
 
-public abstract class ModifierModalElement<T> : ModifierModalElement
+public abstract class ModifierEditorElement<T> : ModifierEditorElement
 {
-    public ModifierModalElement(string name, bool @static = false)
+    public ModifierEditorElement(string name, bool @static = false)
     {
         Name = name;
         Static = @static;
@@ -152,7 +152,7 @@ public abstract class ModifierModalElement<T> : ModifierModalElement
             return false;
         }
 
-        if (elements[swapIndex] is ModifierModalElement { Static: true })
+        if (elements[swapIndex] is ModifierEditorElement { Static: true })
         {
             return false;
         }

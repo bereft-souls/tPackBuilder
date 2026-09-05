@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 using PackBuilder.Common.ModBuilding.Items;
 using PackBuilder.Common.ModBuilding.Items.Changes;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class ItemModModal : AbstractModal<ItemMod, ItemModModal.ItemModElement>
+internal sealed class ItemModEditorWindow : AbstractEditorWindow<ItemMod, ItemModEditorWindow.ItemModElement>
 {
-    public sealed class ItemModElement : ModifierModalElement<ItemMod>
+    public sealed class ItemModElement : ModifierEditorElement<ItemMod>
     {
         private readonly SelectorItemWrapper itemsList;
 
@@ -49,7 +50,7 @@ internal sealed class ItemModModal : AbstractModal<ItemMod, ItemModModal.ItemMod
         }
     }
 
-    private sealed class VanillaItemChangeElement : ModifierModalElement<VanillaItemChange>, IVisitor<ItemMod>
+    private sealed class VanillaItemChangeElement : ModifierEditorElement<VanillaItemChange>, IVisitor<ItemMod>
     {
         private readonly InputField damageElement;
         private readonly InputField critRateElement;
@@ -236,7 +237,7 @@ internal sealed class ItemModModal : AbstractModal<ItemMod, ItemModModal.ItemMod
         }
     }
 
-    private sealed class CalamityItemChangeElement : ModifierModalElement<CalamityItemChange>, IVisitor<ItemMod>
+    private sealed class CalamityItemChangeElement : ModifierEditorElement<CalamityItemChange>, IVisitor<ItemMod>
     {
         private readonly InputField maxChargeElement;
         private readonly InputField chargePerUseElement;
@@ -297,9 +298,9 @@ internal sealed class ItemModModal : AbstractModal<ItemMod, ItemModModal.ItemMod
         }
     }
 
-    public ItemModModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public ItemModEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
 
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(ItemMod obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(ItemMod obj)
     {
         yield return CreateAndPopulate<ItemModElement, ItemMod>(obj);
 
@@ -317,7 +318,7 @@ internal sealed class ItemModModal : AbstractModal<ItemMod, ItemModModal.ItemMod
         }
     }
 
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new VanillaItemChangeElement();
         yield return new CalamityItemChangeElement();

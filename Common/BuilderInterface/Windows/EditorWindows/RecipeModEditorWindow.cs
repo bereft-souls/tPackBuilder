@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
+using PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
 using PackBuilder.Common.ModBuilding.Recipes;
 using PackBuilder.Common.ModBuilding.Recipes.Changes;
 using PackBuilder.Common.ModBuilding.Recipes.Conditions;
 
 namespace PackBuilder.Common.BuilderInterface.Windows.EditorModals;
 
-internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.RecipeModElement>
+internal sealed class RecipeModEditorWindow : AbstractEditorWindow<RecipeMod, RecipeModEditorWindow.RecipeModElement>
 {
-    public sealed class RecipeModElement : ModifierModalElement<RecipeMod>
+    public sealed class RecipeModElement : ModifierEditorElement<RecipeMod>
     {
         private readonly RecipeCriteriaWrapper criteriaButton;
 
@@ -38,7 +39,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
     }
 
     // Conditions
-    private sealed class CreatesResultElement : ModifierModalElement<CreatesResult>, IVisitor<RecipeMod>
+    private sealed class CreatesResultElement : ModifierEditorElement<CreatesResult>, IVisitor<RecipeMod>
     {
         private readonly ItemTypeSelector itemInput;
         private readonly InputField amountInput; // optional
@@ -90,7 +91,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class RequiresIngredientElement : ModifierModalElement<RequiresIngredient>, IVisitor<RecipeMod>
+    private sealed class RequiresIngredientElement : ModifierEditorElement<RequiresIngredient>, IVisitor<RecipeMod>
     {
         private readonly ItemTypeSelector itemInput;
         private readonly InputField amountInput; // optional
@@ -142,7 +143,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class RequiresRecipeGroupElement : ModifierModalElement<RequiresRecipeGroup>, IVisitor<RecipeMod>
+    private sealed class RequiresRecipeGroupElement : ModifierEditorElement<RequiresRecipeGroup>, IVisitor<RecipeMod>
     {
         private readonly RecipeGroupSelector itemInput;
         private readonly InputField amountInput; // optional
@@ -194,7 +195,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class RequiresTileElement : ModifierModalElement<RequiresTile>, IVisitor<RecipeMod>
+    private sealed class RequiresTileElement : ModifierEditorElement<RequiresTile>, IVisitor<RecipeMod>
     {
         private readonly TileTypeSelector tileInput;
 
@@ -232,7 +233,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
     }
 
     // Changes
-    private sealed class AddIngredientElement : ModifierModalElement<AddIngredient>, IVisitor<RecipeMod>
+    private sealed class AddIngredientElement : ModifierEditorElement<AddIngredient>, IVisitor<RecipeMod>
     {
         private readonly ItemTypeSelector itemInput;
         private readonly InputField amountInput;
@@ -284,7 +285,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class AddRecipeGroupElement : ModifierModalElement<AddRecipeGroup>, IVisitor<RecipeMod>
+    private sealed class AddRecipeGroupElement : ModifierEditorElement<AddRecipeGroup>, IVisitor<RecipeMod>
     {
         private readonly RecipeGroupSelector itemInput;
         private readonly InputField amountInput;
@@ -336,7 +337,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class AddTileElement : ModifierModalElement<AddTile>, IVisitor<RecipeMod>
+    private sealed class AddTileElement : ModifierEditorElement<AddTile>, IVisitor<RecipeMod>
     {
         private readonly TileTypeSelector tileInput;
 
@@ -373,7 +374,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class ChangeIngredientElement : ModifierModalElement<ChangeIngredient>, IVisitor<RecipeMod>
+    private sealed class ChangeIngredientElement : ModifierEditorElement<ChangeIngredient>, IVisitor<RecipeMod>
     {
         private readonly ItemTypeSelector itemInput;
         private readonly ItemTypeSelector newItemInput; // optional
@@ -439,7 +440,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class ChangeRecipeGroupElement : ModifierModalElement<ChangeRecipeGroup>, IVisitor<RecipeMod>
+    private sealed class ChangeRecipeGroupElement : ModifierEditorElement<ChangeRecipeGroup>, IVisitor<RecipeMod>
     {
         private readonly RecipeGroupSelector itemInput;
         private readonly RecipeGroupSelector newItemInput; // optional
@@ -505,7 +506,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class ChangeResultElement : ModifierModalElement<ChangeResult>, IVisitor<RecipeMod>
+    private sealed class ChangeResultElement : ModifierEditorElement<ChangeResult>, IVisitor<RecipeMod>
     {
         private readonly ItemTypeSelector newItemInput; // optional
         private readonly InputField newAmountInput;     // optional
@@ -557,7 +558,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class ChangeTileElement : ModifierModalElement<ChangeTile>, IVisitor<RecipeMod>
+    private sealed class ChangeTileElement : ModifierEditorElement<ChangeTile>, IVisitor<RecipeMod>
     {
         private readonly TileTypeSelector tileInput; // optional
         private readonly TileTypeSelector newTileInput;
@@ -608,7 +609,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class DisableRecipeElement : ModifierModalElement<DisableRecipe>, IVisitor<RecipeMod>
+    private sealed class DisableRecipeElement : ModifierEditorElement<DisableRecipe>, IVisitor<RecipeMod>
     {
         private readonly BoolWrapper disabledButton;
 
@@ -643,7 +644,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class RemoveIngredientElement : ModifierModalElement<RemoveIngredient>, IVisitor<RecipeMod>
+    private sealed class RemoveIngredientElement : ModifierEditorElement<RemoveIngredient>, IVisitor<RecipeMod>
     {
         private readonly ItemTypeSelector itemInput;
 
@@ -680,7 +681,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class RemoveRecipeGroupElement : ModifierModalElement<RemoveRecipeGroup>, IVisitor<RecipeMod>
+    private sealed class RemoveRecipeGroupElement : ModifierEditorElement<RemoveRecipeGroup>, IVisitor<RecipeMod>
     {
         private readonly RecipeGroupSelector itemInput;
 
@@ -717,7 +718,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    private sealed class RemoveTileElement : ModifierModalElement<RemoveTile>, IVisitor<RecipeMod>
+    private sealed class RemoveTileElement : ModifierEditorElement<RemoveTile>, IVisitor<RecipeMod>
     {
         private readonly TileTypeSelector tileInput;
 
@@ -754,9 +755,9 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    public RecipeModModal(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
+    public RecipeModEditorWindow(BaseModifierElement element, BuilderInterfaceState state) : base(element, state) { }
 
-    protected override IEnumerable<ModifierModalElement> DeriveModifiers(RecipeMod obj)
+    protected override IEnumerable<ModifierEditorElement> DeriveModifiers(RecipeMod obj)
     {
         yield return CreateAndPopulate<RecipeModElement, RecipeMod>(obj);
 
@@ -842,7 +843,7 @@ internal sealed class RecipeModModal : AbstractModal<RecipeMod, RecipeModModal.R
         }
     }
 
-    protected override IEnumerable<ModifierModalElement> GetAvailableModifiers()
+    protected override IEnumerable<ModifierEditorElement> GetAvailableModifiers()
     {
         yield return new CreatesResultElement();
         yield return new RequiresIngredientElement();
