@@ -40,7 +40,7 @@ public abstract class PackBuilderType
 
     public abstract Asset<Texture2D> GetIcon();
 
-    public abstract AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state);
+    public abstract AbstractInterfaceWindow? CreateEditorWindow(BaseModifierElement element, BuilderInterfaceState state);
 
     /// <summary>
     /// Usually called during <see cref="ModSystem.PostSetupContent"/>. Allows you to handle setup tasks for this <see cref="PackBuilderType"/> like registering changes.<br/>

@@ -414,7 +414,7 @@ internal sealed class ModifierElement : BaseModifierElement
     private void OpenEditor(UIMouseEvent evt, UIElement listeningElement)
     {
         var dimensions = GetDimensions();
-        var modifierEditor = singletonInstance.CreateEditorModal(this, BuilderInterfaceSystem.State);
+        var modifierEditor = singletonInstance.CreateEditorWindow(this, BuilderInterfaceSystem.State);
         if (modifierEditor is null)
         {
             return;

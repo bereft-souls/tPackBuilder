@@ -26,7 +26,7 @@ public sealed class RecipeBuilder : PackBuilderType
         return ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/ModifierIcons/Recipes", AssetRequestMode.ImmediateLoad);
     }
 
-    public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
+    public override AbstractInterfaceWindow? CreateEditorWindow(BaseModifierElement element, BuilderInterfaceState state)
     {
         return new RecipeBuilderEditorWindow(element, state);
     }

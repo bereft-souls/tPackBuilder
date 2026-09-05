@@ -22,7 +22,7 @@ public sealed class NPCMod : PackBuilderType
         return ModContent.Request<Texture2D>("PackBuilder/Assets/Textures/UI/ModifierIcons/NPCs", AssetRequestMode.ImmediateLoad);
     }
 
-    public override AbstractInterfaceWindow? CreateEditorModal(BaseModifierElement element, BuilderInterfaceState state)
+    public override AbstractInterfaceWindow? CreateEditorWindow(BaseModifierElement element, BuilderInterfaceState state)
     {
         return new NpcModEditorWindow(element, state);
     }
