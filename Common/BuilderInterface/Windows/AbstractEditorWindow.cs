@@ -16,7 +16,7 @@ using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace PackBuilder.Common.BuilderInterface.Windows.EditorWindows;
+namespace PackBuilder.Common.BuilderInterface.Windows;
 
 internal interface IVisitor<in T>
 {

@@ -3,32 +3,31 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace PackBuilder.Core.Systems
+namespace PackBuilder.Core.Systems;
+
+public sealed class ItemModifier : ModSystem
 {
-    public sealed class ItemModifier : ModSystem
+    public static Dictionary<int, List<IItemChange>> ItemMods { get; } = [];
+
+    public static void RegisterItemChanges(int itemType, params IEnumerable<IItemChange> changes)
     {
-        public static Dictionary<int, List<IItemChange>> ItemMods { get; } = [];
+        ItemMods.TryAdd(itemType, []);
+        ItemMods[itemType].AddRange(changes);
+    }
 
-        public static void RegisterItemChanges(int itemType, params IEnumerable<IItemChange> changes)
+    [Autoload(false)]
+    [LateLoad]
+    internal class PackBuilderItem : GlobalItem
+    {
+        public override void SetDefaults(Item entity) => ApplyChanges(entity);
+
+        public static void ApplyChanges(Item item)
         {
-            ItemMods.TryAdd(itemType, []);
-            ItemMods[itemType].AddRange(changes);
-        }
+            if (!ItemMods.TryGetValue(item.type, out var changes))
+                return;
 
-        [Autoload(false)]
-        [LateLoad]
-        internal class PackBuilderItem : GlobalItem
-        {
-            public override void SetDefaults(Item entity) => ApplyChanges(entity);
-
-            public static void ApplyChanges(Item item)
-            {
-                if (!ItemMods.TryGetValue(item.type, out var changes))
-                    return;
-
-                foreach (var change in changes)
-                    change.ApplyTo(item);
-            }
+            foreach (var change in changes)
+                change.ApplyTo(item);
         }
     }
 }
