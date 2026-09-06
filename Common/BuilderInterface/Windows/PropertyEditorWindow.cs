@@ -687,6 +687,7 @@ internal sealed class PropertyEditorWindow(ModProjectView project, BuilderInterf
         "HomepageUrl",
         "StrongModReferences",
         "WeakModReferences",
+        "SoftModReferences",
         "ModsToSortBefore",
         "ModsToSortAfter",
         "AssemblyReferences",
@@ -812,6 +813,7 @@ internal sealed class PropertyEditorWindow(ModProjectView project, BuilderInterf
                 }
 
                 WellKnownBuildManifestFormats.BuildTxt.Serialize(Manifest, Project.Project.Source);
+                WellKnownBuildManifestFormats.PackBuilderTxt.Serialize(Manifest, Project.Project.Source);
             };
         }
         bottomSectionContainer.Add(saveButton);

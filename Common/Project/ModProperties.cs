@@ -35,4 +35,7 @@ public readonly struct ModProperties(BuildManifest manifest)
 
     /// <inheritdoc cref="BuildManifest.Side" />
     public ModSide Side => manifest.Side;
+
+    /// <inheritdoc cref="BuildManifest.SoftModReferences" />
+    public IEnumerable<ModReference> SoftModReferences => manifest.SoftModReferences;
 }

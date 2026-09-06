@@ -65,8 +65,16 @@ public static class ModProjectProvider
 
         // TODO: Un-hardcode manifest reading!!!
         var modSource = new DirectoryModSource(directory);
-        var manifest = WellKnownBuildManifestFormats.BuildTxt.Deserialize(modSource);
-        if (manifest is null)
+
+        var manifest = new BuildManifest();
+
+        if (!WellKnownBuildManifestFormats.BuildTxt.Deserialize(manifest, modSource))
+        {
+            project = null;
+            return false;
+        }
+
+        if (!WellKnownBuildManifestFormats.PackBuilderTxt.Deserialize(manifest, modSource))
         {
             project = null;
             return false;

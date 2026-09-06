@@ -11,6 +11,7 @@ namespace PackBuilder.Common.Project;
 /// </summary>
 public sealed class BuildManifest
 {
+    #region tModLoader
     /// <summary>
     ///     List of assembly references in <c>lib/</c>.
     ///     <br />
@@ -130,6 +131,16 @@ public sealed class BuildManifest
 
     // Intentionally internal.
     internal string ModSource { get; set; } = string.Empty;
+    #endregion
+
+    #region tPackBuilder
+    /// <summary>
+    ///     List of "softly"-referenced mod names.
+    ///     <br />
+    ///     Corresponds to <c>softReferences</c>.
+    /// </summary>
+    public List<ModReference> SoftModReferences { get; } = [];
+    #endregion
 
     private static readonly Version default_version = new(1, 0, 0, 0);
 
@@ -158,6 +169,8 @@ public sealed class BuildManifest
             manifest.ModLoaderVersion = ModLoaderVersion;
             manifest.Description = Description;
             manifest.ModSource = ModSource;
+
+            manifest.SoftModReferences.AddRange(SoftModReferences);
         }
 
         return manifest;

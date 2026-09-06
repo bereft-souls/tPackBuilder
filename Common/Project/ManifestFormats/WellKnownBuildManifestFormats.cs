@@ -6,4 +6,6 @@
 public static class WellKnownBuildManifestFormats
 {
     public static IBuildManifestFormat BuildTxt { get; } = new BuildTxtManifestFormat();
+
+    public static IBuildManifestFormat PackBuilderTxt { get; } = new PackBuilderManifestFormat();
 }

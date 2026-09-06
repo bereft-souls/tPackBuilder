@@ -77,6 +77,7 @@ public sealed class ModProject(
         // make sure manifest is written
         // TODO: Store manifest format on ModProject object when we abstract it.
         WellKnownBuildManifestFormats.BuildTxt.Serialize(manifest, Source);
+        WellKnownBuildManifestFormats.PackBuilderTxt.Serialize(manifest, Source);
 
         try
         {

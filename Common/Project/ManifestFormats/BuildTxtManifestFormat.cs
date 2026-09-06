@@ -82,7 +82,7 @@ internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
         }
     }
 
-    BuildManifest? IBuildManifestFormat.Deserialize(IModSource source)
+    bool IBuildManifestFormat.Deserialize(BuildManifest manifest, IModSource source)
     {
         var dir = source.GetDirectory();
         var buildTxtPath = Path.Combine(dir.FullName, "build.txt");
@@ -90,10 +90,9 @@ internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
 
         if (!File.Exists(buildTxtPath))
         {
-            return null;
+            return false;
         }
 
-        var manifest = new BuildManifest();
         if (File.Exists(descriptionPath))
         {
             manifest.Description = File.ReadAllText(descriptionPath);
@@ -224,7 +223,7 @@ internal sealed class BuildTxtManifestFormat : IBuildManifestFormat
         // TODO: Should we format description values or leave it as raw text to
         //       potentially let the user edit?
 
-        return manifest;
+        return true;
 
         static IEnumerable<string> ReadList(string value)
         {
