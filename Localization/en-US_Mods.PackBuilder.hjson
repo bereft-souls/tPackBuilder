@@ -44,6 +44,7 @@ UI: {
 		HomepageUrl: Homepage
 		StrongModReferences: Mod References
 		WeakModReferences: Weak References
+		SoftModReferences: Soft References
 		ModsToSortBefore: Sort Before
 		ModsToSortAfter: Sort After
 		AssemblyReferences: Library References
